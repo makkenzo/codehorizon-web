@@ -19,7 +19,7 @@ const Components = () => {
                 <h5 className="text-xs font-bold">Съешь еще этих французских булок, да выпей же чаю.</h5>
             </div>
             <div className="border p-4 grid grid-cols-3 gap-4 items-center">
-                <Button size="lg">
+                <Button size="lg" className="in-focus-within:bg-accent-80">
                     <RiProgress5Line className="size-[26px]" />
                     <span>Large button</span>
                 </Button>
