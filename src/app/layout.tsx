@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 import './globals.css';
 
-export async function generateMetadata({ params }: { params: { [key: string]: string } }): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
     const metadata = createMetadata('/');
 
     return {
