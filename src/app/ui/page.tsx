@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { FloatingLabelInput } from '@/components/ui/floating-input';
-import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RiProgress5Line } from 'react-icons/ri';
 
 const Components = () => {
@@ -88,6 +88,18 @@ const Components = () => {
                     endIcon={<RiProgress5Line className="size-[18px] text-muted" />}
                     errMsg="Error message here!"
                 />
+            </div>
+            <div className="border p-4 grid grid-cols-1 gap-4 items-center">
+                <Select>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Theme" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="light">Light</SelectItem>
+                        <SelectItem value="dark">Dark</SelectItem>
+                        <SelectItem value="system">System</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
         </div>
     );
