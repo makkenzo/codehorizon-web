@@ -68,9 +68,18 @@ const Components = () => {
                 </Button>
             </div>
             <div className="border p-4 grid grid-cols-1 gap-4 items-center">
-                <FloatingLabelInput label="Label" />
-                <FloatingLabelInput placeholder="Placeholder" />
-                <FloatingLabelInput label="Label" placeholder="Placeholder" />
+                <FloatingLabelInput label="Label" endIcon={<RiProgress5Line className="size-[18px] text-muted" />} />
+                <FloatingLabelInput
+                    value="Some text"
+                    readOnly
+                    endIcon={<RiProgress5Line className="size-[18px] text-muted" />}
+                />
+                <FloatingLabelInput
+                    label="Label"
+                    value="Some text"
+                    readOnly
+                    endIcon={<RiProgress5Line className="size-[18px] text-muted" />}
+                />
             </div>
         </div>
     );
