@@ -80,6 +80,14 @@ const Components = () => {
                     readOnly
                     endIcon={<RiProgress5Line className="size-[18px] text-muted" />}
                 />
+                <FloatingLabelInput
+                    label="Label"
+                    value="Some text"
+                    readOnly
+                    aria-invalid
+                    endIcon={<RiProgress5Line className="size-[18px] text-muted" />}
+                    errMsg="Error message here!"
+                />
             </div>
         </div>
     );

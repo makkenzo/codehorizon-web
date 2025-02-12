@@ -5,9 +5,18 @@ import * as React from 'react';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
-const FloatingInput = React.forwardRef<HTMLInputElement, InputProps & { endIcon?: React.ReactNode }>(
-    ({ className, endIcon, ...props }, ref) => {
-        return <Input placeholder=" " className={cn('peer', className)} ref={ref} endIcon={endIcon} {...props} />;
+const FloatingInput = React.forwardRef<HTMLInputElement, InputProps & { endIcon?: React.ReactNode; errMsg?: string }>(
+    ({ className, endIcon, errMsg, ...props }, ref) => {
+        return (
+            <Input
+                placeholder=" "
+                className={cn('peer', className)}
+                ref={ref}
+                endIcon={endIcon}
+                errMsg={errMsg}
+                {...props}
+            />
+        );
     }
 );
 FloatingInput.displayName = 'FloatingInput';
@@ -36,13 +45,13 @@ type FloatingLabelInputProps = InputProps & { label?: string };
 
 const FloatingLabelInput = React.forwardRef<
     React.ElementRef<typeof FloatingInput>,
-    React.PropsWithoutRef<FloatingLabelInputProps> & { endIcon?: React.ReactNode }
->(({ id, label, endIcon, ...props }, ref) => {
+    React.PropsWithoutRef<FloatingLabelInputProps> & { endIcon?: React.ReactNode; errMsg?: string }
+>(({ id, label, endIcon, errMsg, ...props }, ref) => {
     const hasPlaceholderAndLabel = Boolean(props.placeholder && label);
 
     return (
-        <div className="relative flex">
-            <FloatingInput ref={ref} id={id} endIcon={endIcon} {...props} />
+        <div className={cn('relative flex', errMsg && '-translate-y-2')}>
+            <FloatingInput ref={ref} id={id} endIcon={endIcon} errMsg={errMsg} {...props} />
             <FloatingLabel htmlFor={id} hasPlaceholderAndLabel={hasPlaceholderAndLabel}>
                 {label}
             </FloatingLabel>
