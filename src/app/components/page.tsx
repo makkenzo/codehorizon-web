@@ -1,4 +1,6 @@
 import { Button } from '@/components/ui/button';
+import { FloatingLabelInput } from '@/components/ui/floating-input';
+import { Input } from '@/components/ui/input';
 import { RiProgress5Line } from 'react-icons/ri';
 
 const Components = () => {
@@ -64,6 +66,11 @@ const Components = () => {
                 <Button size="icon-sm">
                     <RiProgress5Line className="size-[13px]" />
                 </Button>
+            </div>
+            <div className="border p-4 grid grid-cols-1 gap-4 items-center">
+                <FloatingLabelInput label="Label" />
+                <FloatingLabelInput placeholder="Placeholder" />
+                <FloatingLabelInput label="Label" placeholder="Placeholder" />
             </div>
         </div>
     );
