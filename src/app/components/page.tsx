@@ -19,7 +19,7 @@ const Components = () => {
                 <h5 className="text-xs font-bold">Съешь еще этих французских булок, да выпей же чаю.</h5>
             </div>
             <div className="border p-4 grid grid-cols-3 gap-4 items-center">
-                <Button size="lg" className="in-focus-within:bg-accent-80">
+                <Button size="lg">
                     <RiProgress5Line className="size-[26px]" />
                     <span>Large button</span>
                 </Button>
@@ -44,15 +44,25 @@ const Components = () => {
 
                 <Button size="lg" disabled>
                     <RiProgress5Line className="size-[26px]" />
-                    Disabled
+                    <span>Disabled</span>
                 </Button>
                 <Button size="md" disabled>
                     <RiProgress5Line className="size-[18px]" />
-                    Disabled
+                    <span>Disabled</span>
                 </Button>
                 <Button size="sm" disabled>
                     <RiProgress5Line />
-                    Disabled
+                    <span>Disabled</span>
+                </Button>
+
+                <Button size="icon-lg">
+                    <RiProgress5Line className="size-[22px]" />
+                </Button>
+                <Button size="icon">
+                    <RiProgress5Line className="size-[18px]" />
+                </Button>
+                <Button size="icon-sm">
+                    <RiProgress5Line className="size-[13px]" />
                 </Button>
             </div>
         </div>

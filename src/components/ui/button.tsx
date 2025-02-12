@@ -20,9 +20,12 @@ const buttonVariants = cva(
                 sm: 'h-[32px] rounded-sm px-3 has-[>svg]:px-4',
                 md: 'h-[41px] font-bold text-lg rounded-md px-4 has-[>svg]:px-[18px]',
                 lg: 'h-[50px] font-bold text-xl rounded-lg px-6 has-[>svg]:px-6',
-                icon: 'size-9',
+                'icon-sm': 'h-[32px] w-fit px-4 rounded-sm',
+                icon: 'h-[41px] w-fit px-5 rounded-md',
+                'icon-lg': 'h-[50px] w-fit px-6 rounded-lg',
             },
         },
+
         defaultVariants: {
             variant: 'default',
             size: 'default',
@@ -56,8 +59,6 @@ function Button({
                     <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-slate-600" />
                 ) : null}
                 {React.Children.map(children, (child) => {
-                    console.log(child);
-
                     if (React.isValidElement<React.ComponentProps<'span'>>(child) && child.type == 'span') {
                         return React.cloneElement(child, {
                             className: cn('translate-y-[0.5px]', child.props.className),
