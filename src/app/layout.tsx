@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react';
 import type { Metadata } from 'next';
 
 import { createMetadata } from '@/lib/metadata';
@@ -33,7 +34,9 @@ export default function RootLayout({
                 <meta property="og:image:height" content="<generated>" />
                 <meta name="apple-mobile-web-app-title" content="CodeHorizon" />
             </head>
-            <body className={`antialiased`}>{children}</body>
+            <body className={`antialiased`}>
+                {children} <Analytics />
+            </body>
         </html>
     );
 }
