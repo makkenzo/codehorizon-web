@@ -1,7 +1,8 @@
+import { RiProgress5Line } from 'react-icons/ri';
+
 import { Button } from '@/components/ui/button';
 import { FloatingLabelInput } from '@/components/ui/floating-input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RiProgress5Line } from 'react-icons/ri';
 
 const Components = () => {
     return (
@@ -106,4 +107,3 @@ const Components = () => {
 };
 
 export default Components;
-

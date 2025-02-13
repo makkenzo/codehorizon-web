@@ -1,5 +1,6 @@
-import { createMetadata } from '@/lib/metadata';
 import type { Metadata } from 'next';
+
+import { createMetadata } from '@/lib/metadata';
 
 import './globals.css';
 
@@ -25,6 +26,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
+            <head>
+                <meta name="apple-mobile-web-app-title" content="CodeHorizon" />
+            </head>
             <body className={`antialiased`}>{children}</body>
         </html>
     );

@@ -1,9 +1,0 @@
-services:
-    codehorizon-web:
-        container_name: codehorizon-web
-        build:
-            context: .
-            dockerfile: Dockerfile
-        restart: always
-        ports:
-            - 8361:3000

@@ -206,6 +206,7 @@
     --radius-xl: calc(var(--radius) + 8px);
 
     --text-lg: 1rem;
+    --shadow-sm: 0 0 8px 0 rgba(0, 0, 0, 0.06);
 }
 
 @layer base {

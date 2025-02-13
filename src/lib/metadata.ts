@@ -65,4 +65,3 @@ export const createMetadata = (path: string, pageSpecificData?: any): BaseMetada
             return baseMetadata;
     }
 };
-

@@ -1,19 +1,21 @@
-import { cn } from '@/lib/utils';
-import { Slot } from '@radix-ui/react-slot';
-import { type VariantProps, cva } from 'class-variance-authority';
 import * as React from 'react';
 
+import { Slot } from '@radix-ui/react-slot';
+import { type VariantProps, cva } from 'class-variance-authority';
+
+import { cn } from '@/lib/utils';
+
 const buttonVariants = cva(
-    "inline-flex hover:cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ease-in-out transition-color disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 ring-ring/10 dark:ring-ring/20 dark:outline-ring/40 outline-ring/50 focus-visible:bg-none active:bg-none aria-invalid:focus-visible:ring-0 active:bg-transparent active:border-1 flex justify-center active:text-border",
+    "inline-flex hover:cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ease-in-out transition-color disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 ring-ring/10 dark:ring-ring/20 dark:outline-ring/40 outline-ring/50 focus-visible:bg-none active:bg-none aria-invalid:focus-visible:ring-0 active:bg-transparent border-1 border-transparent flex justify-center active:border-border active:text-border",
     {
         variants: {
             variant: {
                 default: 'bg-primary text-primary-foreground hover:bg-accent-80',
                 destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-                outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+                outline: 'border border-border bg-background hover:bg-accent hover:text-accent-foreground',
                 secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
                 ghost: 'hover:bg-accent hover:text-accent-foreground',
-                link: 'text-primary underline-offset-4 hover:underline',
+                link: 'text-primary underline-offset-4 hover:underline active:border-transparent',
             },
             size: {
                 default: 'h-[41px] rounded-md px-4 has-[>svg]:px-2.5',
@@ -23,6 +25,7 @@ const buttonVariants = cva(
                 'icon-sm': 'h-[32px] w-fit px-4 rounded-sm',
                 icon: 'h-[41px] w-fit px-5 rounded-md',
                 'icon-lg': 'h-[50px] w-fit px-6 rounded-lg',
+                link: 'p-0',
             },
         },
 
@@ -73,4 +76,3 @@ function Button({
 }
 
 export { Button, buttonVariants };
-
