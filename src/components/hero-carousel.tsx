@@ -38,10 +38,10 @@ const HeroCarousel = ({}: HeroCarouselProps) => {
                 {[1, 2, 3].map((index) => (
                     <CarouselItem key={index}>
                         <div
-                            className="h-[424px] w-[1280px] bg-no-repeat p-6 grid grid-cols-3"
+                            className="h-[424px] w-[1208px] bg-no-repeat p-6 grid grid-cols-3"
                             style={{
                                 backgroundImage: 'url(/hero-carousel/1.svg)',
-                                backgroundSize: '1280px',
+                                backgroundSize: '1208px',
                                 backgroundPosition: 'center',
                             }}
                         >
@@ -81,7 +81,7 @@ const HeroCarousel = ({}: HeroCarouselProps) => {
             </CarouselContent>
             <CarouselPrevious />
             <CarouselNext />
-            <div className="flex gap-2 mt-4 justify-center items-center">
+            <div className="flex gap-2 mt-4 justify-center items-center h-2">
                 {[...Array(count)].map((_, i) => (
                     <button
                         key={i}
