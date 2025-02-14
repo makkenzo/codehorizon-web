@@ -70,7 +70,7 @@ const HeroCarousel = ({}: HeroCarouselProps) => {
                             <div className="justify-end items-end flex">
                                 <div className="flex items-center gap-4">
                                     <div className="flex flex-col text-white text-end">
-                                        <h2 className="font-semibold">Победитель "Photo 2017 Awwards"</h2>
+                                        <h2 className="font-semibold">Победитель &quot;Photo 2017 Awwards&quot;</h2>
                                         <p>В Klevr с 2006 года.</p>
                                     </div>
                                 </div>
