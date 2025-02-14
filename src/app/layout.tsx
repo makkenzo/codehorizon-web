@@ -1,4 +1,5 @@
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata } from 'next';
 
 import { createMetadata } from '@/lib/metadata';
@@ -35,7 +36,7 @@ export default function RootLayout({
                 <meta name="apple-mobile-web-app-title" content="CodeHorizon" />
             </head>
             <body className={`antialiased`}>
-                {children} <Analytics />
+                {children} <Analytics /> <SpeedInsights />
             </body>
         </html>
     );

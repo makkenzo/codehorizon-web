@@ -5,29 +5,36 @@ import Link from 'next/link';
 
 import Logo from '@/components/reusable/logo';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    NavigationMenu,
+    NavigationMenuContent,
+    NavigationMenuItem,
+    NavigationMenuLink,
+    NavigationMenuList,
+    NavigationMenuTrigger,
+} from '@/components/ui/navigation-menu';
 
 interface HeaderProps {}
 
 const Header = ({}: HeaderProps) => {
     return (
-        <div className="w-full bg-white shadow-sm">
+        <div className="w-full bg-white">
             <div className="mx-auto flex max-w-7xl items-center justify-between py-2">
                 <div className="flex items-center gap-4">
                     <Logo />
-                    <Select>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Каталог" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="light">Light</SelectItem>
-                            <SelectItem value="dark">Dark</SelectItem>
-                            <SelectItem value="system">System</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <NavigationMenu>
+                        <NavigationMenuList>
+                            <NavigationMenuItem>
+                                <NavigationMenuTrigger>Каталог</NavigationMenuTrigger>
+                                <NavigationMenuContent>
+                                    <NavigationMenuLink>Ссылочка</NavigationMenuLink>
+                                </NavigationMenuContent>
+                            </NavigationMenuItem>
+                        </NavigationMenuList>
+                    </NavigationMenu>
                 </div>
                 <div className="flex items-center gap-4">
-                    <Link href={'/'}>
+                    <Link href={'/'} className="translate-y-0.5">
                         <Button variant="link" size="link" className="text-foreground">
                             Стать ментором
                         </Button>
