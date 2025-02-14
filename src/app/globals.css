@@ -76,6 +76,8 @@
         --chart-4: 43 74% 66%;
         --chart-5: 27 87% 67%;
         --radius: 14px;
+
+        --white-90: 0 0% 97.65%;
     }
 
     .dark {
@@ -140,6 +142,8 @@
     --chart-4: hsl(43 74% 66%);
     --chart-5: hsl(27 87% 67%);
     --radius: 14px;
+
+    --white-90: hsl(0 0% 97.65%);
 }
 
 .dark {
@@ -179,6 +183,7 @@
     --color-popover-foreground: var(--popover-foreground);
     --color-primary: var(--primary);
     --color-primary-foreground: var(--primary-foreground);
+    --color-white-90: var(--white-90);
     --color-secondary: var(--secondary);
     --color-secondary-foreground: var(--secondary-foreground);
     --color-muted: var(--muted);

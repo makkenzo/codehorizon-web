@@ -1,5 +1,6 @@
 import { RiProgress5Line } from 'react-icons/ri';
 
+import GlobalSearch from '@/components/reusable/global-search';
 import { Button } from '@/components/ui/button';
 import { FloatingLabelInput } from '@/components/ui/floating-input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -89,6 +90,7 @@ const Components = () => {
                     endIcon={<RiProgress5Line className="size-[18px] text-muted" />}
                     errMsg="Error message here!"
                 />
+                <GlobalSearch />
             </div>
             <div className="border p-4 grid grid-cols-1 gap-4 items-center">
                 <Select>

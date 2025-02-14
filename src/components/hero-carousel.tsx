@@ -38,7 +38,7 @@ const HeroCarousel = ({}: HeroCarouselProps) => {
                 {[1, 2, 3].map((index) => (
                     <CarouselItem key={index}>
                         <div
-                            className="h-[424px] w-[1208px] bg-no-repeat p-6 grid grid-cols-3"
+                            className="h-[424px] w-[1208px] bg-no-repeat p-8 grid grid-cols-3"
                             style={{
                                 backgroundImage: 'url(/hero-carousel/1.svg)',
                                 backgroundSize: '1208px',
@@ -47,7 +47,7 @@ const HeroCarousel = ({}: HeroCarouselProps) => {
                         >
                             <div className="flex flex-col gap-12 p-8 justify-center">
                                 <div>
-                                    <h1 className="text-white text-[38px] font-bold leading-[52px]">
+                                    <h1 className="text-white text-[32px] font-bold leading-[52px]">
                                         Узнавайте что-то новое каждый день.
                                     </h1>
                                     <p className="text-white/90">Станьте экспертами и покоряйте мир.</p>
