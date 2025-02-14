@@ -78,6 +78,7 @@
         --radius: 14px;
 
         --white-90: 0 0% 97.65%;
+        --surface-dark: 0 0% 10.59%;
     }
 
     .dark {
@@ -144,6 +145,7 @@
     --radius: 14px;
 
     --white-90: hsl(0 0% 97.65%);
+    --surface-dark: hsl(0 0% 10.59%);
 }
 
 .dark {
@@ -205,6 +207,7 @@
     --color-chart-3: var(--chart-3);
     --color-chart-4: var(--chart-4);
     --color-chart-5: var(--chart-5);
+    --color-surface-dark: var(--surface-dark);
     --radius-sm: calc(var(--radius) - 2px);
     --radius-md: var(--radius);
     --radius-lg: calc(var(--radius) + 4px);
