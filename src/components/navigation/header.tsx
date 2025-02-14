@@ -18,8 +18,8 @@ interface HeaderProps {}
 
 const Header = ({}: HeaderProps) => {
     return (
-        <div className="w-full bg-white">
-            <div className="mx-auto flex max-w-7xl items-center justify-between py-2">
+        <div className="w-full bg-white ">
+            <div className="mx-auto flex max-w-7xl items-center justify-between py-2 xl:px-0 px-8">
                 <div className="flex items-center gap-4">
                     <Logo />
                     <NavigationMenu>

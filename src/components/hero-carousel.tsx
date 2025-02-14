@@ -32,13 +32,18 @@ const HeroCarousel = ({}: HeroCarouselProps) => {
                 loop: true,
             }}
             setApi={setApi}
+            className="xl:block hidden"
         >
             <CarouselContent>
                 {[1, 2, 3].map((index) => (
                     <CarouselItem key={index}>
                         <div
                             className="h-[424px] w-[1280px] bg-no-repeat p-6 grid grid-cols-3"
-                            style={{ backgroundImage: 'url(/hero-carousel/1.svg)', backgroundSize: '1280px' }}
+                            style={{
+                                backgroundImage: 'url(/hero-carousel/1.svg)',
+                                backgroundSize: '1280px',
+                                backgroundPosition: 'center',
+                            }}
                         >
                             <div className="flex flex-col gap-12 p-8 justify-center">
                                 <div>
@@ -81,7 +86,7 @@ const HeroCarousel = ({}: HeroCarouselProps) => {
                     <button
                         key={i}
                         className={`transition-all rounded-full cursor-pointer ${
-                            current - 1 === i ? 'h-3 w-3 bg-primary scale-125' : 'h-2 w-2 bg-gray-200'
+                            current - 1 === i ? 'h-2 w-2 bg-primary scale-100' : 'h-1 w-1 bg-gray-200'
                         }`}
                         onClick={() => api?.scrollTo(i)}
                     />
