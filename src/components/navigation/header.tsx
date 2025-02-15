@@ -35,7 +35,7 @@ const Header = ({}: HeaderProps) => {
                         </NavigationMenuList>
                     </NavigationMenu>
                 </div>
-                <GlobalSearch />
+                <GlobalSearch className="pt-1" />
                 <div className="flex items-center gap-4">
                     <Link href={'/'} className="translate-y-0.5">
                         <Button variant="link" size="link" className="text-foreground">
