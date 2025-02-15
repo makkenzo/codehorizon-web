@@ -1,4 +1,4 @@
-type BaseMetadata = {
+export type BaseMetadata = {
     title: string;
     description: string;
     keywords?: string;

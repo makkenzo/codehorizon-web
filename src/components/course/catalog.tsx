@@ -6,9 +6,7 @@ import PopularMentors from './popular-mentors';
 import SuggestedAuthorCourses from './suggested-author-courses';
 import TrendingCourses from './trending-courses';
 
-interface CourseCatalogProps {}
-
-const CourseCatalog = ({}: CourseCatalogProps) => {
+const CourseCatalog = () => {
     return (
         <div className="space-y-[40px]">
             <CategoryRowSelect />

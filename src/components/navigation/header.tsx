@@ -16,9 +16,7 @@ import {
 
 import GlobalSearch from '../reusable/global-search';
 
-interface HeaderProps {}
-
-const Header = ({}: HeaderProps) => {
+const Header = () => {
     return (
         <div className="w-full bg-white ">
             <div className="mx-auto flex max-w-[1208px] items-center justify-between py-2 xl:px-0 px-8">

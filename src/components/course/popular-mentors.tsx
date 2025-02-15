@@ -1,8 +1,6 @@
 'use client';
 
-interface PopularMentorsProps {}
-
-const PopularMentors = ({}: PopularMentorsProps) => {
+const PopularMentors = () => {
     return (
         <div>
             <h1>PopularMentors</h1>
@@ -11,3 +9,4 @@ const PopularMentors = ({}: PopularMentorsProps) => {
 };
 
 export default PopularMentors;
+

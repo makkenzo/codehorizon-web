@@ -1,3 +1,5 @@
+import { BaseMetadata } from '@/types';
+
 export const createMetadata = (path: string, pageSpecificData?: any): BaseMetadata => {
     const baseMetadata: BaseMetadata = {
         title: 'CodeHorizon | Онлайн-обучение программированию',

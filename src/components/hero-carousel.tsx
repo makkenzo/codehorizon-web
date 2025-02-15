@@ -6,9 +6,7 @@ import { Avatar, AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
 import { Carousel, CarouselApi, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
 
-interface HeroCarouselProps {}
-
-const HeroCarousel = ({}: HeroCarouselProps) => {
+const HeroCarousel = () => {
     const [api, setApi] = useState<CarouselApi>();
     const [current, setCurrent] = useState(0);
     const [count, setCount] = useState(0);

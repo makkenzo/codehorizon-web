@@ -4,9 +4,7 @@ import Link from 'next/link';
 
 import Logo from '../reusable/logo';
 
-interface FooterProps {}
-
-const Footer = ({}: FooterProps) => {
+const Footer = () => {
     return (
         <div className="bg-surface-dark max-h-[302px] h-full flex flex-col gap-12 justify-between">
             <div className="max-w-[1208px] grid grid-cols-4 mx-auto xl:px-0 px-8 pt-[40px] w-full">

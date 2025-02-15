@@ -4,22 +4,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
-
-const FloatingInput = React.forwardRef<HTMLInputElement, InputProps & { endIcon?: React.ReactNode; errMsg?: string }>(
-    ({ className, endIcon, errMsg, ...props }, ref) => {
-        return (
-            <Input
-                placeholder=" "
-                className={cn('peer', className)}
-                ref={ref}
-                endIcon={endIcon}
-                errMsg={errMsg}
-                {...props}
-            />
-        );
-    }
-);
+const FloatingInput = React.forwardRef<
+    HTMLInputElement,
+    React.InputHTMLAttributes<HTMLInputElement> & { endIcon?: React.ReactNode; errMsg?: string }
+>(({ className, endIcon, errMsg, ...props }, ref) => {
+    return (
+        <Input
+            placeholder=" "
+            className={cn('peer', className)}
+            ref={ref}
+            endIcon={endIcon}
+            errMsg={errMsg}
+            {...props}
+        />
+    );
+});
 FloatingInput.displayName = 'FloatingInput';
 
 const FloatingLabel = React.forwardRef<
@@ -42,7 +41,7 @@ const FloatingLabel = React.forwardRef<
 });
 FloatingLabel.displayName = 'FloatingLabel';
 
-type FloatingLabelInputProps = InputProps & { label?: string };
+type FloatingLabelInputProps = React.InputHTMLAttributes<HTMLInputElement> & { label?: string };
 
 const FloatingLabelInput = React.forwardRef<
     React.ElementRef<typeof FloatingInput>,

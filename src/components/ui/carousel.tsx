@@ -3,9 +3,7 @@
 import * as React from 'react';
 
 import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-react';
-import { ArrowLeft, ArrowRight, ChevronLeft } from 'lucide-react';
 import { BsChevronCompactLeft, BsChevronCompactRight } from 'react-icons/bs';
-import { HiChevronLeft } from 'react-icons/hi';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';

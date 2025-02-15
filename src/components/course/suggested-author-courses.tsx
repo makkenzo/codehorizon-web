@@ -1,8 +1,6 @@
 'use client';
 
-interface SuggestedAuthorCoursesProps {}
-
-const SuggestedAuthorCourses = ({}: SuggestedAuthorCoursesProps) => {
+const SuggestedAuthorCourses = () => {
     return (
         <div>
             <h1>SuggestedAuthorCourses</h1>
@@ -11,3 +9,4 @@ const SuggestedAuthorCourses = ({}: SuggestedAuthorCoursesProps) => {
 };
 
 export default SuggestedAuthorCourses;
+

@@ -1,8 +1,6 @@
 'use client';
 
-interface TrendingCoursesProps {}
-
-const TrendingCourses = ({}: TrendingCoursesProps) => {
+const TrendingCourses = () => {
     return (
         <div>
             <h1>TrendingCourses</h1>
@@ -11,3 +9,4 @@ const TrendingCourses = ({}: TrendingCoursesProps) => {
 };
 
 export default TrendingCourses;
+

@@ -8,6 +8,7 @@ import { ChevronDownIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const preventHover = (event: any) => {
     const e = event as Event;
     e.preventDefault();

@@ -1,8 +1,6 @@
 'use client';
 
-interface SubscribeNewsletterBannerProps {}
-
-const SubscribeNewsletterBanner = ({}: SubscribeNewsletterBannerProps) => {
+const SubscribeNewsletterBanner = () => {
     return (
         <div>
             <h1>SubscribeNewsletterBanner</h1>

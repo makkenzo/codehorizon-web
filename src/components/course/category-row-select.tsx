@@ -2,8 +2,6 @@
 
 import { Button } from '../ui/button';
 
-interface CategoryRowSelectProps {}
-
 const mockCategories = [
     'All Recommendation',
     'Adobe Illustrator',
@@ -15,7 +13,7 @@ const mockCategories = [
     'Vue JS',
 ];
 
-const CategoryRowSelect = ({}: CategoryRowSelectProps) => {
+const CategoryRowSelect = () => {
     return (
         <div className="flex gap-2 items-center">
             {mockCategories.map((category, index) => (
