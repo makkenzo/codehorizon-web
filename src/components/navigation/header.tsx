@@ -43,13 +43,17 @@ const Header = () => {
                     <Button size="sm" variant="ghost" className="!px-2">
                         <HiShoppingCart className="size-[20px]" />
                     </Button>
-                    <Button size="sm" variant="outline">
-                        <span className="font-bold">Войти</span>
-                    </Button>
-                    <Button size="sm">
-                        <RiProgress5Line />
-                        <span className="font-bold">Зарегистрироваться</span>
-                    </Button>
+                    <Link href={'/sign-in'}>
+                        <Button size="sm" variant="outline">
+                            <span className="font-bold">Войти</span>
+                        </Button>
+                    </Link>
+                    <Link href={'/sign-up'}>
+                        <Button size="sm">
+                            <RiProgress5Line />
+                            <span className="font-bold">Зарегистрироваться</span>
+                        </Button>
+                    </Link>
                 </div>
             </div>
         </div>

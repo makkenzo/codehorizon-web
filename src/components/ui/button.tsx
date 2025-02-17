@@ -18,8 +18,8 @@ const buttonVariants = cva(
                 link: 'text-primary underline-offset-4 hover:underline active:border-transparent',
             },
             size: {
-                default: 'h-[41px] rounded-md px-4 has-[>svg]:px-2.5',
-                sm: 'h-[32px] rounded-sm px-3 has-[>svg]:px-4',
+                default: 'h-[41px] font-bold rounded-md px-4 has-[>svg]:px-2.5',
+                sm: 'h-[32px] rounded-sm font-bold px-3 has-[>svg]:px-4',
                 md: 'h-[41px] font-bold text-lg rounded-md px-4 has-[>svg]:px-[18px]',
                 lg: 'h-[50px] font-bold text-xl rounded-lg px-6 has-[>svg]:px-6',
                 'icon-sm': 'h-[32px] w-fit px-4 rounded-sm',
