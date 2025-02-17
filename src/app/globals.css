@@ -215,6 +215,9 @@
 
     --text-lg: 1rem;
     --shadow-sm: 0 0 8px 0 rgba(0, 0, 0, 0.06);
+
+    --breakpoint-3xl: 120rem;
+    --breakpoint-4xl: 140rem;
 }
 
 @layer base {

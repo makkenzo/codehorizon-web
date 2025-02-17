@@ -51,7 +51,7 @@ const SignInPage = () => {
     return (
         <div className="grid grid-cols-5 h-screen ">
             <div className="bg-primary col-span-3 m-4 rounded-md">
-                <div className="flex flex-col h-full justify-between pt-80 px-30 pb-10">
+                <div className="flex flex-col h-full justify-between pt-60 px-30 pb-10">
                     <div className="flex flex-col gap-10">
                         <BoxReveal duration={0.5} boxColor="#fff">
                             <Logo showText={false} size={120} />
@@ -66,19 +66,21 @@ const SignInPage = () => {
                                 </span>
                             </h1>
                         </BoxReveal>
-                        <BoxReveal duration={0.5} boxColor="#fff">
-                            <p className="text-xl text-white/90 font-semibold">
-                                Войдите в свой аккаунт, чтобы получить доступ к курсам и тестам. Если у вас нет
-                                аккаунта, зарегистрируйтесь и начните учёбу уже сегодня!
-                            </p>
-                        </BoxReveal>
+                        <div className="max-w-2/3">
+                            <BoxReveal duration={0.5} boxColor="#fff">
+                                <p className="text-xl text-white/90 font-semibold ">
+                                    Войдите в свой аккаунт, чтобы получить доступ к курсам и тестам. Если у вас нет
+                                    аккаунта, зарегистрируйтесь и начните учёбу уже сегодня!
+                                </p>
+                            </BoxReveal>
+                        </div>
                     </div>
                     <BoxReveal duration={0.5} boxColor="#fff">
                         <p className="text-white">© {new Date().getFullYear()} CodeHorizon. Все права защищены.</p>
                     </BoxReveal>
                 </div>
             </div>
-            <div className="col-span-2 justify-center flex flex-col gap-6 pl-16 pr-20">
+            <div className="col-span-2 justify-center flex flex-col gap-6 3xl:pl-36 3xl:pr-40 pl-16 pr-20">
                 <div className="flex flex-col gap-2">
                     <BlurFade delay={ANIMATION_DELAYS.WELCOME}>
                         <h2 className="text-3xl font-bold">Добро пожаловать!</h2>
