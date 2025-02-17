@@ -25,18 +25,28 @@ const ANIMATION_DELAYS = {
     FORGOT_PASSWORD: 0.5,
 };
 
-const formSchema = z.object({
-    username: z
-        .string({ message: 'Обязательно для заполнения' })
-        .min(2, { message: 'Имя пользователя должно быть не менее 2 символов' })
-        .max(50, { message: 'Имя пользователя должно быть не более 50 символов' })
-        .trim(),
-    password: z
-        .string({ message: 'Обязательно для заполнения' })
-        .min(2, { message: 'Пароль должен быть не менее 2 символов' })
-        .max(50, { message: 'Пароль должен быть не более 50 символов' })
-        .trim(),
-});
+const formSchema = z
+    .object({
+        username: z
+            .string({ message: 'Обязательно для заполнения' })
+            .min(6, { message: 'Имя пользователя должно быть не менее 6 символов' })
+            .max(50, { message: 'Имя пользователя должно быть не более 50 символов' })
+            .trim(),
+        email: z
+            .string({ message: 'Обязательно для заполнения' })
+            .email({ message: 'Неверный формат электронной почты' })
+            .trim(),
+        password: z
+            .string({ message: 'Обязательно для заполнения' })
+            .min(8, { message: 'Пароль должен быть не менее 8 символов' })
+            .max(50, { message: 'Пароль должен быть не более 50 символов' })
+            .trim(),
+        confirmPassword: z.string({ message: 'Обязательно для заполнения' }).trim(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+        message: 'Пароли не совпадают',
+        path: ['confirmPassword'],
+    });
 
 const SignUpPage = () => {
     const form = useForm<z.infer<typeof formSchema>>({
@@ -67,22 +77,10 @@ const SignUpPage = () => {
                 >
                     <div className="flex flex-col gap-2">
                         <BlurFade delay={ANIMATION_DELAYS.WELCOME}>
-                            <h2 className="text-3xl font-bold">Добро пожаловать!</h2>
+                            <h2 className="text-3xl font-bold">Регистрация</h2>
                         </BlurFade>
                         <BlurFade delay={ANIMATION_DELAYS.SIGNUP_TEXT}>
-                            <p className="text-border">
-                                Нет аккаунта?{' '}
-                                <Link href={'/sign-up'}>
-                                    <Button
-                                        variant="link"
-                                        size="link"
-                                        className="inline-block text-border font-semibold underline hover:text-border/80"
-                                    >
-                                        Создайте новый аккаунт сейчас,
-                                    </Button>
-                                </Link>{' '}
-                                это БЕСПЛАТНО и не займет больше минуты.
-                            </p>
+                            <p className="text-border">Войти в IT - это просто</p>
                         </BlurFade>
                     </div>
                     <Form {...form}>
@@ -98,6 +96,26 @@ const SignUpPage = () => {
                                                 <Input
                                                     placeholder="just_student"
                                                     type="text"
+                                                    className="!text-lg"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </BlurFade>
+                            <BlurFade delay={ANIMATION_DELAYS.USERNAME}>
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-xl">E-mail</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="juststudent@example.com"
+                                                    type="email"
                                                     className="!text-lg"
                                                     {...field}
                                                 />
@@ -127,21 +145,63 @@ const SignUpPage = () => {
                                     )}
                                 />
                             </BlurFade>
+                            <BlurFade delay={ANIMATION_DELAYS.PASSWORD}>
+                                <FormField
+                                    control={form.control}
+                                    name="confirmPassword"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-xl">Подтвердите пароль</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="my$super@password"
+                                                    type="password"
+                                                    className="!text-lg"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </BlurFade>
+                            <p className="text-xs">
+                                Я согласен с{' '}
+                                <Link href="/legal/terms">
+                                    <Button
+                                        variant="link"
+                                        size="link"
+                                        className="inline-block text-border underline hover:text-border/80"
+                                    >
+                                        Условиями и положениями
+                                    </Button>
+                                </Link>{' '}
+                                и
+                                <Link href="/legal/privacy">
+                                    <Button
+                                        variant="link"
+                                        size="link"
+                                        className="inline-block text-border underline hover:text-border/80"
+                                    >
+                                        Политикой конфиденциальности
+                                    </Button>
+                                </Link>
+                            </p>
                             <BlurFade delay={ANIMATION_DELAYS.SUBMIT}>
                                 <Button type="submit" size="lg" className="w-full">
-                                    Войти
+                                    Зарегистрироваться
                                 </Button>
                             </BlurFade>
                             <BlurFade delay={ANIMATION_DELAYS.FORGOT_PASSWORD}>
                                 <p className="text-center">
-                                    Забыли пароль?{' '}
-                                    <Link href={'/forgot-password'}>
+                                    Уже есть аккаунт?{' '}
+                                    <Link href={'/sign-in'}>
                                         <Button
                                             variant="link"
                                             size="link"
                                             className="inline-block text-border font-semibold underline hover:text-border/80"
                                         >
-                                            Нажмите сюда
+                                            Войти
                                         </Button>
                                     </Link>
                                 </p>

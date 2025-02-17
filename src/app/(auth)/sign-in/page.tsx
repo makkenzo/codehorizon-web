@@ -19,12 +19,11 @@ import { Input } from '@/components/ui/input';
 const formSchema = z.object({
     username: z
         .string({ message: 'Обязательно для заполнения' })
-        .min(2, { message: 'Имя пользователя должно быть не менее 2 символов' })
+        .min(1, { message: 'Обязательно для заполнения' })
         .max(50, { message: 'Имя пользователя должно быть не более 50 символов' })
         .trim(),
     password: z
         .string({ message: 'Обязательно для заполнения' })
-        .min(2, { message: 'Пароль должен быть не менее 2 символов' })
         .max(50, { message: 'Пароль должен быть не более 50 символов' })
         .trim(),
 });
