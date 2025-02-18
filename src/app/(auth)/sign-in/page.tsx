@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
 import { AnimatePresence } from 'framer-motion';
@@ -15,9 +17,10 @@ import { BoxReveal } from '@/components/ui/box-reveal';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import AuthApiClient from '@/server/auth';
 
 const formSchema = z.object({
-    username: z
+    login: z
         .string({ message: 'Обязательно для заполнения' })
         .min(1, { message: 'Обязательно для заполнения' })
         .max(50, { message: 'Имя пользователя должно быть не более 50 символов' })
@@ -38,16 +41,29 @@ const ANIMATION_DELAYS = {
 };
 
 const SignInPage = () => {
+    const [status, setStatus] = useState<'idle' | 'loading' | 'error' | 'success'>('idle');
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            username: '',
+            login: '',
             password: '',
         },
     });
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-        console.log(values);
+    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        setStatus('loading');
+        setErrorMessage(null);
+
+        try {
+            const response = await new AuthApiClient().login(values.login, values.password);
+            console.log(response);
+            setStatus('success');
+        } catch (error) {
+            setErrorMessage('Ошибка авторизации. Пожалуйста, попробуйте еще раз.');
+            setStatus('error');
+        }
     };
 
     return (
@@ -120,10 +136,10 @@ const SignInPage = () => {
                             <BlurFade delay={ANIMATION_DELAYS.USERNAME}>
                                 <FormField
                                     control={form.control}
-                                    name="username"
+                                    name="login"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-xl">Имя пользователя</FormLabel>
+                                            <FormLabel className="text-xl">Имя пользователя / E-mail</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     placeholder="just_student"
@@ -162,6 +178,9 @@ const SignInPage = () => {
                                     Войти
                                 </Button>
                             </BlurFade>
+                            {status === 'error' && errorMessage && (
+                                <p className="text-destructive text-sm">{errorMessage}</p>
+                            )}
                             <BlurFade delay={ANIMATION_DELAYS.FORGOT_PASSWORD}>
                                 <p className="text-center">
                                     Забыли пароль?{' '}
