@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
 import { AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
-import { PiHandWavingDuotone } from 'react-icons/pi';
+import { FaWandMagicSparkles } from 'react-icons/fa6';
 import { z } from 'zod';
 
 import Link from 'next/link';
@@ -165,28 +165,30 @@ const SignUpPage = () => {
                                     )}
                                 />
                             </BlurFade>
-                            <p className="text-xs">
-                                Я согласен с{' '}
-                                <Link href="/legal/terms">
-                                    <Button
-                                        variant="link"
-                                        size="link"
-                                        className="inline-block text-border underline hover:text-border/80"
-                                    >
-                                        Условиями и положениями
-                                    </Button>
-                                </Link>{' '}
-                                и
-                                <Link href="/legal/privacy">
-                                    <Button
-                                        variant="link"
-                                        size="link"
-                                        className="inline-block text-border underline hover:text-border/80"
-                                    >
-                                        Политикой конфиденциальности
-                                    </Button>
-                                </Link>
-                            </p>
+                            <BlurFade delay={ANIMATION_DELAYS.SUBMIT}>
+                                <p className="text-xs">
+                                    Я согласен с{' '}
+                                    <Link href="/legal/terms">
+                                        <Button
+                                            variant="link"
+                                            size="link"
+                                            className="inline-block text-border underline hover:text-border/80"
+                                        >
+                                            Условиями и положениями
+                                        </Button>
+                                    </Link>{' '}
+                                    и{' '}
+                                    <Link href="/legal/privacy">
+                                        <Button
+                                            variant="link"
+                                            size="link"
+                                            className="inline-block text-border underline hover:text-border/80"
+                                        >
+                                            Политикой конфиденциальности
+                                        </Button>
+                                    </Link>
+                                </p>
+                            </BlurFade>
                             <BlurFade delay={ANIMATION_DELAYS.SUBMIT}>
                                 <Button type="submit" size="lg" className="w-full">
                                     Зарегистрироваться
@@ -217,23 +219,24 @@ const SignUpPage = () => {
                             </BoxReveal>
                             <BoxReveal duration={0.5} boxColor="#fff">
                                 <h1 className="text-5xl leading-18 font-bold text-white">
-                                    Привет от
+                                    Добро пожаловать в
                                     <br />
                                     CodeHorizon!{' '}
                                     <span className="inline-block translate-y-1">
-                                        <PiHandWavingDuotone />
+                                        <FaWandMagicSparkles />
                                     </span>
                                 </h1>
                             </BoxReveal>
                             <div className="max-w-2/3">
                                 <BoxReveal duration={0.5} boxColor="#fff">
                                     <p className="text-xl text-white/90 font-semibold ">
-                                        Войдите в свой аккаунт, чтобы получить доступ к курсам и тестам. Если у вас нет
-                                        аккаунта, зарегистрируйтесь и начните учёбу уже сегодня!
+                                        Создайте аккаунт, чтобы получить доступ к курсам и тестам. Изучайте новые темы,
+                                        проходите испытания и развивайте свои навыки вместе с нами!
                                     </p>
                                 </BoxReveal>
                             </div>
                         </div>
+
                         <BoxReveal duration={0.5} boxColor="#fff">
                             <p className="text-white">© {new Date().getFullYear()} CodeHorizon. Все права защищены.</p>
                         </BoxReveal>

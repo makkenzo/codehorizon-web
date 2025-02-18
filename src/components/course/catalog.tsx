@@ -1,5 +1,9 @@
 'use client';
 
+import { motion } from 'framer-motion';
+
+import { fadeInVariants } from '@/lib/constants';
+
 import SubscribeNewsletterBanner from '../subscribe-newsletter-banner';
 import CategoryRowSelect from './category-row-select';
 import PopularMentors from './popular-mentors';
@@ -8,13 +12,19 @@ import TrendingCourses from './trending-courses';
 
 const CourseCatalog = () => {
     return (
-        <div className="space-y-[40px]">
+        <motion.div
+            variants={fadeInVariants}
+            initial="hidden"
+            animate="visible"
+            transition={{ duration: 0.5, ease: 'easeOut', delay: 0.3 }}
+            className="space-y-[40px]"
+        >
             <CategoryRowSelect />
             <SuggestedAuthorCourses />
             <TrendingCourses />
             <PopularMentors />
             <SubscribeNewsletterBanner />
-        </div>
+        </motion.div>
     );
 };
 
