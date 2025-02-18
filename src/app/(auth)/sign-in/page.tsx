@@ -42,6 +42,7 @@ const SignInPage = () => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             username: '',
+            password: '',
         },
     });
 

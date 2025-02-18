@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
 import { AnimatePresence } from 'framer-motion';
@@ -49,15 +51,30 @@ const formSchema = z
     });
 
 const SignUpPage = () => {
+    const [status, setStatus] = useState<'idle' | 'loading' | 'error' | 'success'>('idle');
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             username: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
         },
     });
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-        console.log(values);
+    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        setStatus('loading');
+        setErrorMessage(null);
+
+        try {
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            setStatus('success');
+        } catch (error) {
+            setErrorMessage('Ошибка регистрации. Пожалуйста, попробуйте еще раз.');
+            setStatus('error');
+        }
     };
 
     return (
@@ -70,147 +87,170 @@ const SignUpPage = () => {
                 transition={{ duration: 0.3 }}
                 className="grid grid-cols-5 h-screen"
             >
-                <motion.div
-                    layout
-                    layoutId="panel-right"
-                    className="col-span-2 justify-center flex flex-col gap-6 3xl:pl-36 3xl:pr-40 pl-16 pr-20"
-                >
-                    <div className="flex flex-col gap-2">
-                        <BlurFade delay={ANIMATION_DELAYS.WELCOME}>
-                            <h2 className="text-3xl font-bold">Регистрация</h2>
-                        </BlurFade>
-                        <BlurFade delay={ANIMATION_DELAYS.SIGNUP_TEXT}>
-                            <p className="text-border">Войти в IT - это просто</p>
-                        </BlurFade>
-                    </div>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                            <BlurFade delay={ANIMATION_DELAYS.USERNAME}>
-                                <FormField
-                                    control={form.control}
-                                    name="username"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-xl">Имя пользователя</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="just_student"
-                                                    type="text"
-                                                    className="!text-lg"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                {status !== 'success' && (
+                    <motion.div
+                        key="registration-form"
+                        exit={{ opacity: 0, x: -50 }}
+                        transition={{ duration: 0.3 }}
+                        layout
+                        layoutId="panel-right"
+                        className="col-span-2 justify-center flex flex-col gap-6 3xl:pl-36 3xl:pr-40 pl-16 pr-20"
+                    >
+                        <div className="flex flex-col gap-2">
+                            <BlurFade delay={ANIMATION_DELAYS.WELCOME}>
+                                <h2 className="text-3xl font-bold">Регистрация</h2>
                             </BlurFade>
-                            <BlurFade delay={ANIMATION_DELAYS.USERNAME}>
-                                <FormField
-                                    control={form.control}
-                                    name="email"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-xl">E-mail</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="juststudent@example.com"
-                                                    type="email"
-                                                    className="!text-lg"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                            <BlurFade delay={ANIMATION_DELAYS.SIGNUP_TEXT}>
+                                <p className="text-border">Войти в IT - это просто</p>
                             </BlurFade>
-                            <BlurFade delay={ANIMATION_DELAYS.PASSWORD}>
-                                <FormField
-                                    control={form.control}
-                                    name="password"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-xl">Пароль</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="my$super@password"
-                                                    type="password"
-                                                    className="!text-lg"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </BlurFade>
-                            <BlurFade delay={ANIMATION_DELAYS.PASSWORD}>
-                                <FormField
-                                    control={form.control}
-                                    name="confirmPassword"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-xl">Подтвердите пароль</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="my$super@password"
-                                                    type="password"
-                                                    className="!text-lg"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </BlurFade>
-                            <BlurFade delay={ANIMATION_DELAYS.SUBMIT}>
-                                <p className="text-xs">
-                                    Я согласен с{' '}
-                                    <Link href="/legal/terms">
-                                        <Button
-                                            variant="link"
-                                            size="link"
-                                            className="inline-block text-border underline hover:text-border/80"
-                                        >
-                                            Условиями и положениями
-                                        </Button>
-                                    </Link>{' '}
-                                    и{' '}
-                                    <Link href="/legal/privacy">
-                                        <Button
-                                            variant="link"
-                                            size="link"
-                                            className="inline-block text-border underline hover:text-border/80"
-                                        >
-                                            Политикой конфиденциальности
-                                        </Button>
-                                    </Link>
-                                </p>
-                            </BlurFade>
-                            <BlurFade delay={ANIMATION_DELAYS.SUBMIT}>
-                                <Button type="submit" size="lg" className="w-full">
-                                    Зарегистрироваться
-                                </Button>
-                            </BlurFade>
-                            <BlurFade delay={ANIMATION_DELAYS.FORGOT_PASSWORD}>
-                                <p className="text-center">
-                                    Уже есть аккаунт?{' '}
-                                    <Link href={'/sign-in'}>
-                                        <Button
-                                            variant="link"
-                                            size="link"
-                                            className="inline-block text-border font-semibold underline hover:text-border/80"
-                                        >
-                                            Войти
-                                        </Button>
-                                    </Link>
-                                </p>
-                            </BlurFade>
-                        </form>
-                    </Form>
-                </motion.div>
+                        </div>
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                                <BlurFade delay={ANIMATION_DELAYS.USERNAME}>
+                                    <FormField
+                                        control={form.control}
+                                        name="username"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xl">Имя пользователя</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="just_student"
+                                                        type="text"
+                                                        className="!text-lg"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </BlurFade>
+                                <BlurFade delay={ANIMATION_DELAYS.USERNAME}>
+                                    <FormField
+                                        control={form.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xl">E-mail</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="juststudent@example.com"
+                                                        type="email"
+                                                        className="!text-lg"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </BlurFade>
+                                <BlurFade delay={ANIMATION_DELAYS.PASSWORD}>
+                                    <FormField
+                                        control={form.control}
+                                        name="password"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xl">Пароль</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="my$super@password"
+                                                        type="password"
+                                                        className="!text-lg"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </BlurFade>
+                                <BlurFade delay={ANIMATION_DELAYS.PASSWORD}>
+                                    <FormField
+                                        control={form.control}
+                                        name="confirmPassword"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xl">Подтвердите пароль</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="my$super@password"
+                                                        type="password"
+                                                        className="!text-lg"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </BlurFade>
+                                <BlurFade delay={ANIMATION_DELAYS.SUBMIT}>
+                                    <p className="text-xs">
+                                        Я согласен с{' '}
+                                        <Link href="/legal/terms">
+                                            <Button
+                                                variant="link"
+                                                size="link"
+                                                className="inline-block text-border underline hover:text-border/80"
+                                            >
+                                                Условиями и положениями
+                                            </Button>
+                                        </Link>{' '}
+                                        и{' '}
+                                        <Link href="/legal/privacy">
+                                            <Button
+                                                variant="link"
+                                                size="link"
+                                                className="inline-block text-border underline hover:text-border/80"
+                                            >
+                                                Политикой конфиденциальности
+                                            </Button>
+                                        </Link>
+                                    </p>
+                                </BlurFade>
+                                <BlurFade delay={ANIMATION_DELAYS.SUBMIT}>
+                                    <Button type="submit" size="lg" className="w-full" isLoading={status === 'loading'}>
+                                        {status === 'loading' ? 'Загрузка...' : 'Зарегистрироваться'}
+                                    </Button>
+                                </BlurFade>
+                                {status === 'error' && errorMessage && (
+                                    <p className="text-destructive text-sm">{errorMessage}</p>
+                                )}
+                                <BlurFade delay={ANIMATION_DELAYS.FORGOT_PASSWORD}>
+                                    <p className="text-center">
+                                        Уже есть аккаунт?{' '}
+                                        <Link href={'/sign-in'}>
+                                            <Button
+                                                variant="link"
+                                                size="link"
+                                                className="inline-block text-border font-semibold underline hover:text-border/80"
+                                            >
+                                                Войти
+                                            </Button>
+                                        </Link>
+                                    </p>
+                                </BlurFade>
+                            </form>
+                        </Form>
+                    </motion.div>
+                )}
+                {status === 'success' && (
+                    <motion.div
+                        key="success-message"
+                        initial={{ opacity: 0, x: 50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 50 }}
+                        transition={{ duration: 0.3 }}
+                        className="col-span-2 justify-center flex flex-col gap-6 3xl:pl-36 3xl:pr-40 pl-16 pr-20"
+                    >
+                        <h2 className="text-3xl font-bold">Регистрация завершена</h2>
+                        <p className="text-lg mt-4">
+                            На ваш email отправлена ссылка для верификации. Пожалуйста, проверьте вашу почту.
+                        </p>
+                    </motion.div>
+                )}
                 <motion.div layout layoutId="panel-left" className="bg-primary col-span-3 m-4 rounded-md">
                     <div className="flex flex-col h-full justify-between pt-60 px-30 pb-10">
                         <div className="flex flex-col gap-10">
