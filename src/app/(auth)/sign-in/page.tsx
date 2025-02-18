@@ -58,7 +58,6 @@ const SignInPage = () => {
 
         try {
             const response = await new AuthApiClient().login(values.login, values.password);
-            console.log(response);
             setStatus('success');
         } catch (error) {
             setErrorMessage('Ошибка авторизации. Пожалуйста, попробуйте еще раз.');

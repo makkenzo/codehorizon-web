@@ -17,6 +17,7 @@ import { BoxReveal } from '@/components/ui/box-reveal';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import AuthApiClient from '@/server/auth';
 
 const ANIMATION_DELAYS = {
     WELCOME: 0,
@@ -69,7 +70,12 @@ const SignUpPage = () => {
         setErrorMessage(null);
 
         try {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            const response = await new AuthApiClient().register(
+                values.username,
+                values.email,
+                values.password,
+                values.confirmPassword
+            );
             setStatus('success');
         } catch (error) {
             setErrorMessage('Ошибка регистрации. Пожалуйста, попробуйте еще раз.');
