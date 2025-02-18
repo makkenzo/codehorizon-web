@@ -17,6 +17,10 @@ class ApiClient {
 
     private initializeInterceptors() {
         this.axiosInstance.interceptors.request.use((config) => {
+            if (config.url === '/auth/login' || config.url === '/auth/register') {
+                return config;
+            }
+
             const token = getAccessToken();
             if (token && config.headers) {
                 config.headers.Authorization = `Bearer ${token}`;
@@ -28,6 +32,11 @@ class ApiClient {
             (response) => response,
             async (error) => {
                 const originalRequest = error.config;
+
+                if (originalRequest.url === '/auth/login' || originalRequest.url === '/auth/register') {
+                    return Promise.reject(error);
+                }
+
                 if (error.response?.status === 401 && !originalRequest._retry) {
                     originalRequest._retry = true;
                     try {
@@ -75,7 +84,7 @@ class ApiClient {
 
     private logout() {
         clearTokens();
-        window.location.href = '/login';
+        window.location.href = '/sign-in';
     }
 
     public async get<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
