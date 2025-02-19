@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import AuthApiClient from '@/server/auth';
-import { useAuthStore } from '@/stores/auth-store-provider';
+import { useAuthStore } from '@/stores/auth/auth-store-provider';
 
 const formSchema = z.object({
     login: z

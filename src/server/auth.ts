@@ -1,4 +1,5 @@
 import { setAccessToken, setTokens } from '@/helpers/auth';
+import { User } from '@/types';
 
 import ApiClient from './api-client';
 
@@ -24,14 +25,40 @@ class AuthApiClient extends ApiClient {
         try {
             const response = await this.get<{ accessToken: string; refreshToken: string }>('/auth/token', {
                 withCredentials: true,
-            });
+            })
+                .then((res) => {
+                    return res.data;
+                })
+                .catch((error) => {
+                    console.log('Ошибка получения токена', error.response?.status);
+                });
 
-            if (response.data.accessToken && response.data.refreshToken) {
-                setTokens({ newAccessToken: response.data.accessToken, newRefreshToken: response.data.refreshToken });
-                return { access_token: response.data.accessToken, refresh_token: response.data.refreshToken };
+            if (response) {
+                setTokens({ newAccessToken: response.accessToken, newRefreshToken: response.refreshToken });
+                return { access_token: response.accessToken, refresh_token: response.refreshToken };
             }
         } catch (error) {
             console.log('Ошибка получения токена', error);
+        }
+
+        return null;
+    }
+
+    async getMe() {
+        try {
+            const response = await this.get<User>('/auth/me')
+                .then((res) => {
+                    return res.data;
+                })
+                .catch((error) => {
+                    console.log('Ошибка получения юзера', error.response?.status);
+                });
+
+            if (response) {
+                return response;
+            }
+        } catch (error) {
+            console.log('Ошибка получения юзера', error);
         }
 
         return null;

@@ -28,7 +28,7 @@ export const useAuthStore = <T,>(selector: (store: AuthStore) => T): T => {
     const authStoreContext = useContext(AuthStoreContext);
 
     if (!authStoreContext) {
-        throw new Error(`useCounterStore must be used within CounterStoreProvider`);
+        throw new Error(`useAuthStore must be used within AuthStoreProvider`);
     }
 
     return useStore(authStoreContext, selector);

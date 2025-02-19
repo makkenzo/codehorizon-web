@@ -22,6 +22,7 @@ class ApiClient {
             }
 
             const token = getAccessToken();
+
             if (token && config.headers) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
@@ -36,7 +37,9 @@ class ApiClient {
                 if (
                     originalRequest.url === '/auth/login' ||
                     originalRequest.url === '/auth/register' ||
-                    originalRequest.url === '/auth/token'
+                    originalRequest.url === '/auth/token' ||
+                    originalRequest.url === '/profiles/' ||
+                    originalRequest.url === '/auth/me'
                 ) {
                     return Promise.reject(error);
                 }
@@ -87,8 +90,9 @@ class ApiClient {
     }
 
     private logout() {
-        clearTokens();
-        window.location.href = '/sign-in';
+        // clearTokens();
+        // window.location.href = '/sign-in';
+        window.location.href = '/';
     }
 
     public async get<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
