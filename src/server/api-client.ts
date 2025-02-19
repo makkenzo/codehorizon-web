@@ -33,7 +33,11 @@ class ApiClient {
             async (error) => {
                 const originalRequest = error.config;
 
-                if (originalRequest.url === '/auth/login' || originalRequest.url === '/auth/register') {
+                if (
+                    originalRequest.url === '/auth/login' ||
+                    originalRequest.url === '/auth/register' ||
+                    originalRequest.url === '/auth/token'
+                ) {
                     return Promise.reject(error);
                 }
 
