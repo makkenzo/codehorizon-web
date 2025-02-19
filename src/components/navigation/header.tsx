@@ -2,23 +2,6 @@
 
 import { useEffect, useState } from 'react';
 
-import {
-    Cloud,
-    CreditCard,
-    Github,
-    Heart,
-    Keyboard,
-    LifeBuoy,
-    LogOut,
-    Mail,
-    MessageSquare,
-    Plus,
-    PlusCircle,
-    Settings,
-    User,
-    UserPlus,
-    Users,
-} from 'lucide-react';
 import { FaUserSecret } from 'react-icons/fa6';
 import { HiShoppingCart } from 'react-icons/hi';
 import { RiProgress5Line } from 'react-icons/ri';
@@ -33,12 +16,7 @@ import {
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuPortal,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -49,6 +27,7 @@ import {
     NavigationMenuList,
     NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
+import { useAuthStore } from '@/stores/auth/auth-store-provider';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
 
@@ -58,8 +37,9 @@ import { Skeleton } from '../ui/skeleton';
 
 const Header = () => {
     const [isLoading, setIsLoading] = useState(true);
-    const { profile } = useProfileStore((state) => state);
-    const { user } = useUserStore((state) => state);
+    const { profile, clearProfile } = useProfileStore((state) => state);
+    const { user, clearUser } = useUserStore((state) => state);
+    const { clearTokens } = useAuthStore((state) => state);
 
     useEffect(() => {
         setIsLoading(false);
@@ -150,7 +130,16 @@ const Header = () => {
                                             </DropdownMenuItem>
                                         </DropdownMenuGroup>
                                         <DropdownMenuSeparator />
-                                        <DropdownMenuItem variant="destructive">
+                                        <DropdownMenuItem
+                                            variant="destructive"
+                                            onClick={() => {
+                                                clearTokens();
+                                                clearProfile();
+                                                clearUser();
+
+                                                window.location.reload();
+                                            }}
+                                        >
                                             <span>Выйти</span>
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
