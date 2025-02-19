@@ -1,10 +1,14 @@
-import { setAccessToken } from '@/helpers/auth';
+import { setAccessToken, setTokens } from '@/helpers/auth';
 
 import ApiClient from './api-client';
 
 class AuthApiClient extends ApiClient {
     async login(login: string, password: string) {
-        return await this.post<{ accessToken: string; refreshToken: string }>('/auth/login', { login, password });
+        const response = await this.post<{ accessToken: string; refreshToken: string }>('/auth/login', {
+            login,
+            password,
+        });
+        return { access_token: response.data.accessToken, refresh_token: response.data.refreshToken };
     }
 
     async register(username: string, email: string, password: string, confirmPassword: string) {
@@ -16,13 +20,15 @@ class AuthApiClient extends ApiClient {
         });
     }
 
-    async getToken(): Promise<string | null> {
+    async getToken() {
         try {
-            const response = await this.get<{ access_token: string }>('/auth/token', { withCredentials: true });
+            const response = await this.get<{ accessToken: string; refreshToken: string }>('/auth/token', {
+                withCredentials: true,
+            });
 
-            if (response.data.access_token) {
-                setAccessToken(response.data.access_token);
-                return response.data.access_token;
+            if (response.data.accessToken && response.data.refreshToken) {
+                setTokens({ newAccessToken: response.data.accessToken, newRefreshToken: response.data.refreshToken });
+                return { access_token: response.data.accessToken, refresh_token: response.data.refreshToken };
             }
         } catch (error) {
             console.log('Ошибка получения токена', error);

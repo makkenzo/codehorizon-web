@@ -2,8 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 
-import { setAccessToken } from '@/helpers/auth';
 import AuthApiClient from '@/server/auth';
+import { useAuthStore } from '@/stores/auth-store-provider';
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -13,12 +13,15 @@ const AuthContext = createContext<AuthContextType>({ isAuthenticated: false });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const { setAccessToken, setRefreshToken } = useAuthStore((state) => state);
 
     useEffect(() => {
         const fetchToken = async () => {
-            const token = await new AuthApiClient().getToken();
-            if (token) {
-                setAccessToken(token);
+            const response = await new AuthApiClient().getToken();
+
+            if (response) {
+                setAccessToken(response.access_token);
+                setRefreshToken(response.refresh_token);
                 setIsAuthenticated(true);
             }
         };

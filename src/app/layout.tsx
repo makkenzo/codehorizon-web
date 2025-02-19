@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/react';
 import type { Metadata } from 'next';
 
 import { createMetadata } from '@/lib/metadata';
+import { AuthStoreProvider } from '@/stores/auth-store-provider';
 
 import './globals.css';
 
@@ -35,7 +36,7 @@ export default function RootLayout({
                 <meta name="apple-mobile-web-app-title" content="CodeHorizon" />
             </head>
             <body className={`antialiased`}>
-                {children} <Analytics />
+                <AuthStoreProvider>{children}</AuthStoreProvider> <Analytics />
             </body>
         </html>
     );

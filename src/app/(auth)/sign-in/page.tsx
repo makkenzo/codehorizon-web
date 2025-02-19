@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import AuthApiClient from '@/server/auth';
+import { useAuthStore } from '@/stores/auth-store-provider';
 
 const formSchema = z.object({
     login: z
@@ -44,6 +45,8 @@ const SignInPage = () => {
     const [status, setStatus] = useState<'idle' | 'loading' | 'error' | 'success'>('idle');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+    const { setAccessToken, setRefreshToken } = useAuthStore((state) => state);
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -58,7 +61,10 @@ const SignInPage = () => {
 
         try {
             const response = await new AuthApiClient().login(values.login, values.password);
+            setAccessToken(response.access_token);
+            setRefreshToken(response.refresh_token);
             setStatus('success');
+            window.location.href = '/';
         } catch (error) {
             setErrorMessage('Ошибка авторизации. Пожалуйста, попробуйте еще раз.');
             setStatus('error');
@@ -173,7 +179,7 @@ const SignInPage = () => {
                                 />
                             </BlurFade>
                             <BlurFade delay={ANIMATION_DELAYS.SUBMIT}>
-                                <Button type="submit" size="lg" className="w-full">
+                                <Button type="submit" size="lg" className="w-full" isLoading={status === 'loading'}>
                                     Войти
                                 </Button>
                             </BlurFade>
