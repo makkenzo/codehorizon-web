@@ -1,7 +1,7 @@
 import { createStore } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { setAccessToken } from '@/helpers/auth';
+import { clearTokens as clearLocalTokens, setAccessToken } from '@/helpers/auth';
 
 import { AuthState, AuthStore } from './types';
 
@@ -20,7 +20,10 @@ export const createAuthStore = (initState: AuthState = defaultInitState) => {
                     if (accessToken) setAccessToken(accessToken);
                 },
                 setRefreshToken: (refreshToken: string | null) => set({ refreshToken }),
-                clearTokens: () => set({ accessToken: null, refreshToken: null }),
+                clearTokens: () => {
+                    clearLocalTokens();
+                    set({ accessToken: null, refreshToken: null });
+                },
             }),
             {
                 name: 'auth-storage',
