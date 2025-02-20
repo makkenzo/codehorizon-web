@@ -2,8 +2,6 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 
-import { stat } from 'fs';
-
 import AuthApiClient from '@/server/auth';
 import ProfileApiClient from '@/server/profile';
 import { useAuthStore } from '@/stores/auth/auth-store-provider';

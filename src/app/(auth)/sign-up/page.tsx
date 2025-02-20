@@ -70,14 +70,9 @@ const SignUpPage = () => {
         setErrorMessage(null);
 
         try {
-            const response = await new AuthApiClient().register(
-                values.username,
-                values.email,
-                values.password,
-                values.confirmPassword
-            );
+            await new AuthApiClient().register(values.username, values.email, values.password, values.confirmPassword);
             setStatus('success');
-        } catch (error) {
+        } catch {
             setErrorMessage('Ошибка регистрации. Пожалуйста, попробуйте еще раз.');
             setStatus('error');
         }
