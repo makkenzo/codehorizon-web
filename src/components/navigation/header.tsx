@@ -26,6 +26,7 @@ import {
     NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
 import { useHasHydrated } from '@/hooks/use-has-hydrated';
+import AuthApiClient from '@/server/auth';
 import { useAuthStore } from '@/stores/auth/auth-store-provider';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
@@ -127,10 +128,12 @@ const Header = () => {
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem
                                             variant="destructive"
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 clearTokens();
                                                 clearProfile();
                                                 clearUser();
+
+                                                await new AuthApiClient().logOut();
 
                                                 window.location.reload();
                                             }}

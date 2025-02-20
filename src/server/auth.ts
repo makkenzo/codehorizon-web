@@ -1,4 +1,4 @@
-import { setAccessToken, setTokens } from '@/helpers/auth';
+import { clearTokens, setAccessToken, setTokens } from '@/helpers/auth';
 import { User } from '@/types';
 
 import ApiClient from './api-client';
@@ -62,6 +62,29 @@ class AuthApiClient extends ApiClient {
         }
 
         return null;
+    }
+
+    async logOut() {
+        try {
+            const response = await this.post<string>('/auth/logout', {
+                withCredentials: true,
+            })
+                .then((res) => {
+                    return res.data;
+                })
+                .catch((error) => {
+                    console.log('Ошибка выхода', error.response?.status);
+                });
+
+            if (response) {
+                clearTokens();
+                return true;
+            }
+        } catch (error) {
+            console.log('Ошибка выхода', error);
+        }
+
+        return false;
     }
 }
 
