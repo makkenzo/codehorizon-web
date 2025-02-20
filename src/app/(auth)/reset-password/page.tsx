@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
@@ -9,8 +9,7 @@ import { useForm } from 'react-hook-form';
 import { PiHandWavingDuotone } from 'react-icons/pi';
 import { z } from 'zod';
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import Logo from '@/components/reusable/logo';
 import { BlurFade } from '@/components/ui/blur-fade';
@@ -18,21 +17,21 @@ import { BoxReveal } from '@/components/ui/box-reveal';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import usePreservePreviousRoute from '@/hooks/use-prev-route';
 import AuthApiClient from '@/server/auth';
-import { useAuthStore } from '@/stores/auth/auth-store-provider';
 
-const formSchema = z.object({
-    login: z
-        .string({ message: 'Обязательно для заполнения' })
-        .min(1, { message: 'Обязательно для заполнения' })
-        .max(50, { message: 'Имя пользователя должно быть не более 50 символов' })
-        .trim(),
-    password: z
-        .string({ message: 'Обязательно для заполнения' })
-        .max(50, { message: 'Пароль должен быть не более 50 символов' })
-        .trim(),
-});
+const formSchema = z
+    .object({
+        password: z
+            .string({ message: 'Обязательно для заполнения' })
+            .min(8, { message: 'Пароль должен быть не менее 8 символов' })
+            .max(50, { message: 'Пароль должен быть не более 50 символов' })
+            .trim(),
+        confirmPassword: z.string({ message: 'Обязательно для заполнения' }).trim(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+        message: 'Пароли не совпадают',
+        path: ['confirmPassword'],
+    });
 
 const ANIMATION_DELAYS = {
     WELCOME: 0,
@@ -43,20 +42,21 @@ const ANIMATION_DELAYS = {
     FORGOT_PASSWORD: 0.5,
 };
 
-const SignInPage = () => {
-    const previousRoute = usePreservePreviousRoute();
-    const pathname = usePathname();
+const ResetPasswordPage = () => {
+    const searchParams = useSearchParams();
 
+    const token = searchParams.get('token');
+    if (!token) {
+        window.location.href = '/sign-in';
+    }
     const [status, setStatus] = useState<'idle' | 'loading' | 'error' | 'success'>('idle');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-    const { setAccessToken, setRefreshToken } = useAuthStore((state) => state);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            login: '',
             password: '',
+            confirmPassword: '',
         },
     });
 
@@ -65,17 +65,24 @@ const SignInPage = () => {
         setErrorMessage(null);
 
         try {
-            const response = await new AuthApiClient().login(values.login, values.password);
-            setAccessToken(response.access_token);
-            setRefreshToken(response.refresh_token);
-            setStatus('success');
-            window.location.href = '/';
+            const isPasswordChanged = await new AuthApiClient().resetPassword(
+                token!,
+                values.password,
+                values.confirmPassword
+            );
+            if (isPasswordChanged) {
+                window.location.href = '/sign-in';
+                setStatus('success');
+                return;
+            } else {
+                setErrorMessage('Пароль не изменен. Пожалуйста, попробуйте еще раз.');
+                setStatus('error');
+            }
         } catch (error) {
-            setErrorMessage('Ошибка авторизации. Пожалуйста, попробуйте еще раз.');
+            setErrorMessage('Аккаунт не найден. Пожалуйста, попробуйте еще раз.');
             setStatus('error');
         }
     };
-
     return (
         <AnimatePresence>
             <motion.div
@@ -111,9 +118,13 @@ const SignInPage = () => {
                                 </BoxReveal>
                             </div>
                         </div>
-                        <BoxReveal duration={0.5} boxColor="#fff">
-                            <p className="text-white">© {new Date().getFullYear()} CodeHorizon. Все права защищены.</p>
-                        </BoxReveal>
+                        <div>
+                            <BoxReveal duration={0.5} boxColor="#fff">
+                                <p className="text-white">
+                                    © {new Date().getFullYear()} CodeHorizon. Все права защищены.
+                                </p>
+                            </BoxReveal>
+                        </div>
                     </div>
                 </motion.div>
                 <motion.div
@@ -123,46 +134,15 @@ const SignInPage = () => {
                 >
                     <div className="flex flex-col gap-2">
                         <BlurFade delay={ANIMATION_DELAYS.WELCOME}>
-                            <h2 className="text-3xl font-bold">Добро пожаловать!</h2>
+                            <h2 className="text-3xl font-bold">Восстановление пароля</h2>
                         </BlurFade>
                         <BlurFade delay={ANIMATION_DELAYS.SIGNUP_TEXT}>
-                            <p className="text-border">
-                                Нет аккаунта?{' '}
-                                <Link href={'/sign-up'}>
-                                    <Button
-                                        variant="link"
-                                        size="link"
-                                        className="inline-block text-border font-semibold underline hover:text-border/80"
-                                    >
-                                        Создайте новый аккаунт сейчас,
-                                    </Button>
-                                </Link>{' '}
-                                это БЕСПЛАТНО и не займет больше минуты.
-                            </p>
+                            <p className="text-border">Заполните форму для создания нового пароля</p>
                         </BlurFade>
                     </div>
+
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                            <BlurFade delay={ANIMATION_DELAYS.USERNAME}>
-                                <FormField
-                                    control={form.control}
-                                    name="login"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-xl">Имя пользователя / E-mail</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="just_student"
-                                                    type="text"
-                                                    className="!text-lg"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </BlurFade>
                             <BlurFade delay={ANIMATION_DELAYS.PASSWORD}>
                                 <FormField
                                     control={form.control}
@@ -183,31 +163,34 @@ const SignInPage = () => {
                                     )}
                                 />
                             </BlurFade>
+                            <BlurFade delay={ANIMATION_DELAYS.PASSWORD}>
+                                <FormField
+                                    control={form.control}
+                                    name="confirmPassword"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-xl">Подтвердите пароль</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="my$super@password"
+                                                    type="password"
+                                                    className="!text-lg"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </BlurFade>
                             <BlurFade delay={ANIMATION_DELAYS.SUBMIT}>
                                 <Button type="submit" size="lg" className="w-full" isLoading={status === 'loading'}>
-                                    Войти
+                                    Завершить
                                 </Button>
                             </BlurFade>
                             {status === 'error' && errorMessage && (
                                 <p className="text-destructive text-sm">{errorMessage}</p>
                             )}
-                            <BlurFade delay={ANIMATION_DELAYS.FORGOT_PASSWORD}>
-                                <p className="text-center">
-                                    Забыли пароль?{' '}
-                                    <Link
-                                        href={`/forgot-password?prev=${encodeURIComponent(pathname)}`}
-                                        referrerPolicy="origin"
-                                    >
-                                        <Button
-                                            variant="link"
-                                            size="link"
-                                            className="inline-block text-border font-semibold underline hover:text-border/80"
-                                        >
-                                            Нажмите сюда
-                                        </Button>
-                                    </Link>
-                                </p>
-                            </BlurFade>
                         </form>
                     </Form>
                 </motion.div>
@@ -216,5 +199,5 @@ const SignInPage = () => {
     );
 };
 
-export default SignInPage;
+export default ResetPasswordPage;
 

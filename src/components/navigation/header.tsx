@@ -133,7 +133,7 @@ const Header = () => {
                                                 clearProfile();
                                                 clearUser();
 
-                                                await new AuthApiClient().logOut();
+                                                await new AuthApiClient().isLoggedOut();
 
                                                 window.location.reload();
                                             }}

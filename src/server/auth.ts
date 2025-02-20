@@ -64,7 +64,7 @@ class AuthApiClient extends ApiClient {
         return null;
     }
 
-    async logOut() {
+    async isLoggedOut() {
         try {
             const response = await this.post<string>('/auth/logout', {
                 withCredentials: true,
@@ -82,6 +82,51 @@ class AuthApiClient extends ApiClient {
             }
         } catch (error) {
             console.log('Ошибка выхода', error);
+        }
+
+        return false;
+    }
+
+    async isLoginExists(login: string) {
+        try {
+            const response = await this.post<{ message: string }>('/auth/reset-password/check-login', { login })
+                .then((res) => {
+                    return res.data;
+                })
+                .catch((error) => {
+                    console.log('Пользователь не найден', error.response?.status);
+                });
+
+            if (response) {
+                return true;
+            }
+        } catch (error) {
+            console.log('Ошибка проверки логина', error);
+        }
+
+        return false;
+    }
+
+    async resetPassword(token: string, password: string, confirmPassword: string) {
+        try {
+            const response = await this.post<{ access_token: string; refresh_token: string }>(
+                '/auth/reset-password',
+                { password, confirmPassword },
+                { headers: { Authorization: `Bearer ${token}` } }
+            )
+                .then((res) => {
+                    return res.data;
+                })
+                .catch((error) => {
+                    console.log('Пользователь не найден', error.response?.status);
+                });
+
+            if (response) {
+                setTokens({ newAccessToken: response.access_token, newRefreshToken: response.refresh_token });
+                return true;
+            }
+        } catch (error) {
+            console.log('Ошибка проверки логина', error);
         }
 
         return false;

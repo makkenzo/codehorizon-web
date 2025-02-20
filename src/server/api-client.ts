@@ -1,11 +1,13 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-import { clearTokens, getAccessToken, getRefreshToken, setAccessToken } from '@/helpers/auth';
+import { getAccessToken, getRefreshToken, setAccessToken } from '@/helpers/auth';
 
 class ApiClient {
     private axiosInstance: AxiosInstance;
     private isRefreshing = false;
     private refreshSubscribers: ((token: string) => void)[] = [];
+    private excludedRequestPaths = ['/auth/login', '/auth/register', '/auth/reset-password'];
+    private excludedResponsePaths = ['/auth/login', '/auth/register', '/auth/token', '/profiles/', '/auth/me'];
 
     constructor() {
         this.axiosInstance = axios.create({
@@ -17,7 +19,7 @@ class ApiClient {
 
     private initializeInterceptors() {
         this.axiosInstance.interceptors.request.use((config) => {
-            if (config.url === '/auth/login' || config.url === '/auth/register') {
+            if (typeof config.url === 'string' && this.excludedRequestPaths.includes(config.url)) {
                 return config;
             }
 
@@ -35,11 +37,8 @@ class ApiClient {
                 const originalRequest = error.config;
 
                 if (
-                    originalRequest.url === '/auth/login' ||
-                    originalRequest.url === '/auth/register' ||
-                    originalRequest.url === '/auth/token' ||
-                    originalRequest.url === '/profiles/' ||
-                    originalRequest.url === '/auth/me'
+                    typeof originalRequest.url === 'string' &&
+                    this.excludedResponsePaths.includes(originalRequest.url)
                 ) {
                     return Promise.reject(error);
                 }
