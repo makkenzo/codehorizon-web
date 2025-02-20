@@ -53,3 +53,20 @@ export type AccountSettings = {
         loginAlerts: boolean;
     };
 };
+
+export interface NavItem {
+    id: string;
+    href?: string;
+    label: string;
+    icon: React.ReactNode;
+    variant?: 'ghost' | 'default';
+    className?: string;
+    subItems?: {
+        id: string;
+        href: string;
+        label: string;
+        icon: React.ReactNode;
+        variant?: 'ghost' | 'default';
+        className?: string;
+    }[];
+}

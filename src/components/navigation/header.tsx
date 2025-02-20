@@ -34,6 +34,7 @@ import { useUserStore } from '@/stores/user/user-store-provider';
 import GlobalSearch from '../reusable/global-search';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Skeleton } from '../ui/skeleton';
+import MobileBurgerMenu from './mobile-burger-menu';
 
 const Header = () => {
     const hasHydrated = useHasHydrated();
@@ -43,7 +44,7 @@ const Header = () => {
 
     return (
         <div className="w-full bg-white">
-            <div className="mx-auto flex max-w-[1208px] items-center justify-between py-2 xl:px-0 px-8">
+            <div className="mx-auto flex max-w-[1208px] items-center justify-between py-2 xl:px-0 px-4">
                 {!hasHydrated ? (
                     <>
                         <div className="flex items-center gap-4">
@@ -64,8 +65,11 @@ const Header = () => {
                 ) : (
                     <>
                         <div className="flex items-center gap-4">
-                            <Logo />
-                            <NavigationMenu>
+                            <div className="flex items-center gap-2">
+                                <MobileBurgerMenu profile={profile} />
+                                <Logo />
+                            </div>
+                            <NavigationMenu className="lg:block hidden">
                                 <NavigationMenuList>
                                     <NavigationMenuItem>
                                         <NavigationMenuTrigger>Каталог</NavigationMenuTrigger>
@@ -76,9 +80,9 @@ const Header = () => {
                                 </NavigationMenuList>
                             </NavigationMenu>
                         </div>
-                        <GlobalSearch className="pt-1" />
+                        <GlobalSearch className="pt-1 lg:block hidden" />
                         <div className="flex items-center gap-4">
-                            <Link href={'/'} className="translate-y-0.5">
+                            <Link href={'/'} className="translate-y-0.5 lg:block hidden">
                                 <Button variant="link" size="link" className="text-foreground">
                                     Стать ментором
                                 </Button>
@@ -89,7 +93,7 @@ const Header = () => {
                             {profile ? (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Avatar className="hover:cursor-pointer hover:outline-4 outline-primary outline-0 ease-in-out transition-all duration-100">
+                                        <Avatar className="hover:cursor-pointer lg:block hidden hover:outline-4 outline-primary outline-0 ease-in-out transition-all duration-100">
                                             <AvatarFallback>
                                                 <FaUserSecret />
                                             </AvatarFallback>
@@ -144,12 +148,12 @@ const Header = () => {
                                 </DropdownMenu>
                             ) : (
                                 <>
-                                    <Link href={'/sign-in'}>
+                                    <Link href={'/sign-in'} className="lg:block hidden">
                                         <Button size="sm" variant="outline">
                                             <span className="font-bold">Войти</span>
                                         </Button>
                                     </Link>
-                                    <Link href={'/sign-up'}>
+                                    <Link href={'/sign-up'} className="lg:block hidden">
                                         <Button size="sm">
                                             <RiProgress5Line />
                                             <span className="font-bold">Зарегистрироваться</span>

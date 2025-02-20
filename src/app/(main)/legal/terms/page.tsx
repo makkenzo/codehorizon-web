@@ -1,6 +1,6 @@
 const TermsPage = () => {
     return (
-        <div className="xl:px-0 px-8 max-w-[1208px] mx-auto mt-[40px]">
+        <div className="xl:px-0 px-4 max-w-[1208px] mx-auto mt-[40px]">
             <h1 className="text-center text-2xl font-semibold">Пользовательское соглашение</h1>
             <section className="space-y-4 mb-20">
                 <div>

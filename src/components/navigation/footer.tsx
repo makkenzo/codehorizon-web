@@ -6,8 +6,8 @@ import Logo from '../reusable/logo';
 
 const Footer = () => {
     return (
-        <div className="bg-surface-dark max-h-[302px] h-full flex flex-col gap-12 justify-between">
-            <div className="max-w-[1208px] grid grid-cols-4 mx-auto xl:px-0 px-8 pt-[40px] w-full">
+        <div className="lg:flex hidden bg-surface-dark max-h-[302px] h-full flex-col gap-12 justify-between">
+            <div className="max-w-[1208px] grid grid-cols-4 mx-auto xl:px-0 px-4 pt-[40px] w-full">
                 <Logo whiteText />
                 <ul className="text-white space-y-4">
                     <li className="text-lg">
@@ -46,7 +46,7 @@ const Footer = () => {
                     </li>
                 </ul>
             </div>
-            <div className="max-w-[1208px] flex justify-between items-center mx-auto text-white-90 pb-4 w-full">
+            <div className="max-w-[1208px] flex justify-between items-center xl:px-0 px-4 mx-auto text-white-90 pb-4 w-full">
                 <p>Copyright © {new Date().getFullYear()} Code Horizon. All rights reserved.</p>
                 <div className="flex items-center gap-4">
                     <Link href={'https://t.me/makkenz0'} className="group" target="_blank">
