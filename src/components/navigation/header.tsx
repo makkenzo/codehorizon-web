@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 import { FaUserSecret } from 'react-icons/fa6';
 import { HiShoppingCart } from 'react-icons/hi';
 import { RiProgress5Line } from 'react-icons/ri';
@@ -27,6 +25,7 @@ import {
     NavigationMenuList,
     NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
+import { useHasHydrated } from '@/hooks/use-has-hydrated';
 import { useAuthStore } from '@/stores/auth/auth-store-provider';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
@@ -36,19 +35,15 @@ import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Skeleton } from '../ui/skeleton';
 
 const Header = () => {
-    const [isLoading, setIsLoading] = useState(true);
+    const hasHydrated = useHasHydrated();
     const { profile, clearProfile } = useProfileStore((state) => state);
     const { user, clearUser } = useUserStore((state) => state);
     const { clearTokens } = useAuthStore((state) => state);
 
-    useEffect(() => {
-        setIsLoading(false);
-    }, []);
-
     return (
         <div className="w-full bg-white">
             <div className="mx-auto flex max-w-[1208px] items-center justify-between py-2 xl:px-0 px-8">
-                {isLoading ? (
+                {!hasHydrated ? (
                     <>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">

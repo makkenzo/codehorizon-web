@@ -18,7 +18,7 @@ export const createUserStore = (initState: UserState = defaultInitState) => {
                 clearUser: () => set({ user: undefined }),
             }),
             {
-                name: 'profile-storage',
+                name: 'user-storage',
             }
         )
     );
