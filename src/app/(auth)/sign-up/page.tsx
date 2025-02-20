@@ -197,6 +197,7 @@ const SignUpPage = () => {
                                         Я согласен с{' '}
                                         <Link href="/legal/terms">
                                             <Button
+                                                type="button"
                                                 variant="link"
                                                 size="link"
                                                 className="inline-block text-border underline hover:text-border/80"
@@ -207,6 +208,7 @@ const SignUpPage = () => {
                                         и{' '}
                                         <Link href="/legal/privacy">
                                             <Button
+                                                type="button"
                                                 variant="link"
                                                 size="link"
                                                 className="inline-block text-border underline hover:text-border/80"

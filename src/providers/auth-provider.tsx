@@ -35,10 +35,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         };
 
         const fetchProfile = async () => {
+            await fetchToken();
             const profile = await new ProfileApiClient().getProfile();
             if (profile) {
                 setProfile(profile);
-                console.log('profile', profile);
 
                 const user = await new AuthApiClient().getMe();
 
@@ -47,7 +47,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         };
 
         fetchProfile();
-        fetchToken();
     }, []);
 
     return <AuthContext.Provider value={{ isAuthenticated }}>{children}</AuthContext.Provider>;
