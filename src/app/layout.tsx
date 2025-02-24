@@ -27,7 +27,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="ru">
             <head>
                 <meta property="og:image" content="/opengraph-image.png" />
                 <meta property="og:image:type" content="image/png" />
