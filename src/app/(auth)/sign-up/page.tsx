@@ -86,7 +86,7 @@ const SignUpPage = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="grid grid-cols-5 h-screen"
+                className="grid grid-cols-1 lg:grid-cols-5 h-screen"
             >
                 {status !== 'success' && (
                     <motion.div
@@ -95,9 +95,12 @@ const SignUpPage = () => {
                         transition={{ duration: 0.3 }}
                         layout
                         layoutId="panel-right"
-                        className="col-span-2 justify-center flex flex-col gap-6 3xl:pl-36 3xl:pr-40 pl-16 pr-20"
+                        className="col-span-1 lg:col-span-2 justify-center flex flex-col gap-6 3xl:pl-36 3xl:pr-40 2xl:pl-20 2xl:pr-24 px-8"
                     >
                         <div className="flex flex-col gap-2">
+                            <BlurFade delay={ANIMATION_DELAYS.WELCOME} className="mb-8 lg:hidden">
+                                <Logo />
+                            </BlurFade>
                             <BlurFade delay={ANIMATION_DELAYS.WELCOME}>
                                 <h2 className="text-3xl font-bold">Регистрация</h2>
                             </BlurFade>
@@ -246,7 +249,7 @@ const SignUpPage = () => {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 50 }}
                         transition={{ duration: 0.3 }}
-                        className="col-span-2 justify-center flex flex-col gap-6 3xl:pl-36 3xl:pr-40 pl-16 pr-20"
+                        className="col-span-1 lg:col-span-2 justify-center flex flex-col gap-6 3xl:pl-36 3xl:pr-40 2xl:pl-20 2xl:pr-24 px-8"
                     >
                         <h2 className="text-3xl font-bold">Регистрация завершена</h2>
                         <p className="text-lg mt-4">
@@ -254,7 +257,11 @@ const SignUpPage = () => {
                         </p>
                     </motion.div>
                 )}
-                <motion.div layout layoutId="panel-left" className="bg-primary col-span-3 m-4 rounded-md">
+                <motion.div
+                    layout
+                    layoutId="panel-left"
+                    className="bg-primary col-span-3 m-4 rounded-md lg:block hidden"
+                >
                     <div className="flex flex-col h-full justify-between pt-60 px-30 pb-10">
                         <div className="flex flex-col gap-10">
                             <BoxReveal duration={0.5} boxColor="#fff">
