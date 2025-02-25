@@ -89,9 +89,7 @@ class ApiClient {
     }
 
     private logout() {
-        // clearStorage();
-        // window.location.href = '/sign-in';
-        // window.location.href = '/';
+        clearStorage();
     }
 
     public async get<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
