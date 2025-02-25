@@ -1,13 +1,13 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-import { getAccessToken, getRefreshToken, setAccessToken } from '@/helpers/auth';
+import { clearStorage, getAccessToken, getRefreshToken, setAccessToken } from '@/helpers/auth';
 
 class ApiClient {
     private axiosInstance: AxiosInstance;
     private isRefreshing = false;
     private refreshSubscribers: ((token: string) => void)[] = [];
     private excludedRequestPaths = ['/auth/login', '/auth/register', '/auth/reset-password'];
-    private excludedResponsePaths = ['/auth/login', '/auth/register', '/auth/token', '/profiles/', '/auth/me'];
+    private excludedResponsePaths = ['/auth/login', '/auth/register', '/auth/token', '/auth/me'];
 
     constructor() {
         this.axiosInstance = axios.create({
@@ -89,9 +89,9 @@ class ApiClient {
     }
 
     private logout() {
-        // clearTokens();
+        // clearStorage();
         // window.location.href = '/sign-in';
-        window.location.href = '/';
+        // window.location.href = '/';
     }
 
     public async get<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {

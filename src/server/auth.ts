@@ -1,5 +1,5 @@
-import { clearTokens, setAccessToken, setTokens } from '@/helpers/auth';
-import { User } from '@/types';
+import { clearStorage, setAccessToken, setTokens } from '@/helpers/auth';
+import { User } from '@/models';
 
 import ApiClient from './api-client';
 
@@ -77,7 +77,7 @@ class AuthApiClient extends ApiClient {
                 });
 
             if (response) {
-                clearTokens();
+                clearStorage();
                 return true;
             }
         } catch (error) {

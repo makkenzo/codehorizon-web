@@ -1,7 +1,7 @@
 import { createStore } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { User } from '@/types';
+import { User } from '@/models';
 
 import { UserState, UserStore } from './types';
 

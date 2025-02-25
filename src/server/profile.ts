@@ -1,4 +1,4 @@
-import { Profile } from '@/types';
+import { Profile } from '@/models';
 
 import ApiClient from './api-client';
 
@@ -8,6 +8,7 @@ class ProfileApiClient extends ApiClient {
             .then((response) => response.data)
             .catch((error) => {
                 console.log('Ошибка получения профиля', error.response?.status);
+                throw error;
             });
 
         return response;

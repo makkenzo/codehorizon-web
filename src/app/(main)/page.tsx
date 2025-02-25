@@ -1,14 +1,15 @@
 import CourseCatalog from '@/components/course/catalog';
 import HeroCarousel from '@/components/hero-carousel';
+import PageWrapper from '@/components/reusable/page-wrapper';
 import { AuthProvider } from '@/providers/auth-provider';
 
 export default function Home() {
     return (
         <AuthProvider>
-            <div className="xl:px-0 px-4 max-w-[1208px] space-y-[40px] mx-auto mt-[40px]">
+            <PageWrapper className="space-y-[40px] ">
                 <HeroCarousel />
                 <CourseCatalog />
-            </div>
+            </PageWrapper>
         </AuthProvider>
     );
 }

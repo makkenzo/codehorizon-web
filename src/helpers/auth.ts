@@ -26,10 +26,13 @@ export function getRefreshToken(): string | null {
     return refreshToken || localStorage.getItem('refreshToken');
 }
 
-export function clearTokens() {
+export function clearStorage() {
     accessToken = null;
     refreshToken = null;
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('auth-storage');
+    localStorage.removeItem('profile-storage');
+    localStorage.removeItem('user-storage');
 }
 

@@ -1,6 +1,8 @@
+import PageWrapper from '@/components/reusable/page-wrapper';
+
 const PrivacyPage = () => {
     return (
-        <div className="xl:px-0 px-4 max-w-[1208px] mx-auto mt-[40px]">
+        <PageWrapper>
             <h1 className="text-center text-2xl font-semibold">Политика конфиденциальности</h1>
             <section className="space-y-4 mb-20">
                 <div>
@@ -104,7 +106,7 @@ const PrivacyPage = () => {
                     </p>
                 </div>
             </section>
-        </div>
+        </PageWrapper>
     );
 };
 

@@ -1,4 +1,4 @@
-import { Profile } from '@/types';
+import { Profile } from '@/models';
 
 export type ProfileState = {
     profile?: Profile;

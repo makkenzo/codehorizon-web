@@ -51,7 +51,7 @@ const HeroCarousel = () => {
                                 <div
                                     className="h-[424px] w-[1208px] bg-no-repeat p-8 grid grid-cols-3"
                                     style={{
-                                        backgroundImage: 'url(/hero-carousel/1.svg)',
+                                        backgroundImage: 'url(/hero-carousel/1.webp)',
                                         backgroundSize: '1208px',
                                         backgroundPosition: 'center',
                                     }}

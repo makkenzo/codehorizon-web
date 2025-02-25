@@ -110,9 +110,9 @@ const Header = () => {
                                         </DropdownMenuLabel>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuGroup>
-                                            <DropdownMenuItem>
-                                                <span>Профиль</span>
-                                            </DropdownMenuItem>
+                                            <Link href="/me/profile">
+                                                <DropdownMenuItem>Профиль</DropdownMenuItem>
+                                            </Link>
                                             <DropdownMenuItem>
                                                 <span>Моя корзина</span>
                                             </DropdownMenuItem>

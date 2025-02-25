@@ -6,7 +6,8 @@ import { RiProfileFill, RiProfileLine, RiProgress5Line } from 'react-icons/ri';
 
 import Link from 'next/link';
 
-import { NavItem, Profile } from '@/types';
+import { Profile } from '@/models';
+import { NavItem } from '@/types';
 
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';

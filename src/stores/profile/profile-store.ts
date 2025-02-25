@@ -1,7 +1,7 @@
 import { createStore } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { Profile } from '@/types';
+import { Profile } from '@/models';
 
 import { ProfileState, ProfileStore } from './types';
 
