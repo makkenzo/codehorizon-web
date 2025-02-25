@@ -47,6 +47,10 @@ class ApiClient {
                     originalRequest._retry = true;
                     try {
                         const newToken = await this.refreshToken();
+                        if (!newToken) {
+                            this.logout();
+                            return Promise.reject(error);
+                        }
                         originalRequest.headers.Authorization = `Bearer ${newToken}`;
                         return this.axiosInstance(originalRequest);
                     } catch (refreshError) {
@@ -60,7 +64,7 @@ class ApiClient {
         );
     }
 
-    private async refreshToken(): Promise<string> {
+    private async refreshToken(): Promise<string | undefined> {
         if (this.isRefreshing) {
             return new Promise((resolve) => {
                 this.refreshSubscribers.push(resolve);
@@ -82,7 +86,6 @@ class ApiClient {
             return newAccessToken;
         } catch (error) {
             this.logout();
-            throw error;
         } finally {
             this.isRefreshing = false;
         }
