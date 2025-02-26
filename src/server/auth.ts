@@ -20,26 +20,6 @@ class AuthApiClient extends ApiClient {
         });
     }
 
-    async getToken() {
-        try {
-            const response = await this.get<{ accessToken: string; refreshToken: string }>('/auth/token')
-                .then((res) => {
-                    return res.data;
-                })
-                .catch((error) => {
-                    console.log('Ошибка получения токена', error.response?.status);
-                });
-
-            if (response) {
-                return { access_token: response.accessToken, refresh_token: response.refreshToken };
-            }
-        } catch (error) {
-            console.log('Ошибка получения токена', error);
-        }
-
-        return null;
-    }
-
     async getMe() {
         try {
             const response = await this.get<User>('/auth/me')

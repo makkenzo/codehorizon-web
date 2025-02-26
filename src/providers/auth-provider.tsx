@@ -9,40 +9,37 @@ import { useUserStore } from '@/stores/user/user-store-provider';
 
 interface AuthContextType {
     isAuthenticated: boolean;
+    isPending: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({ isAuthenticated: false });
+const AuthContext = createContext<AuthContextType>({ isAuthenticated: false, isPending: true });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isPending, setIsPending] = useState(true);
     const { setProfile } = useProfileStore((state) => state);
     const { setUser } = useUserStore((state) => state);
 
     useEffect(() => {
-        const fetchToken = async () => {
-            const response = await new AuthApiClient().getToken();
-
-            if (response) {
-                setIsAuthenticated(true);
-            }
-        };
-
         const fetchProfile = async () => {
-            await fetchToken();
-            const profile = await new ProfileApiClient().getProfile();
-            if (profile) {
-                setProfile(profile);
-
-                const user = await new AuthApiClient().getMe();
-
-                if (user) setUser(user);
+            try {
+                const profile = await new ProfileApiClient().getProfile();
+                if (profile) {
+                    setProfile(profile);
+                    const user = await new AuthApiClient().getMe();
+                    if (user) setUser(user);
+                    setIsAuthenticated(true);
+                }
+            } catch {
+            } finally {
+                setIsPending(false);
             }
         };
 
         fetchProfile();
     }, []);
 
-    return <AuthContext.Provider value={{ isAuthenticated }}>{children}</AuthContext.Provider>;
+    return <AuthContext.Provider value={{ isAuthenticated, isPending }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

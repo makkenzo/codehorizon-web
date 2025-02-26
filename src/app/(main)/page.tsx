@@ -5,11 +5,9 @@ import { AuthProvider } from '@/providers/auth-provider';
 
 export default function Home() {
     return (
-        <AuthProvider>
-            <PageWrapper className="space-y-[40px] ">
-                <HeroCarousel />
-                <CourseCatalog />
-            </PageWrapper>
-        </AuthProvider>
+        <PageWrapper className="space-y-[40px] ">
+            <HeroCarousel />
+            <CourseCatalog />
+        </PageWrapper>
     );
 }

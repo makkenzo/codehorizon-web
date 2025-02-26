@@ -26,6 +26,7 @@ import {
     NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
 import { useHasHydrated } from '@/hooks/use-has-hydrated';
+import { useAuth } from '@/providers/auth-provider';
 import AuthApiClient from '@/server/auth';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
@@ -36,14 +37,16 @@ import { Skeleton } from '../ui/skeleton';
 import MobileBurgerMenu from './mobile-burger-menu';
 
 const Header = () => {
-    const hasHydrated = useHasHydrated();
+    const { isAuthenticated, isPending } = useAuth();
+
     const { profile, clearProfile } = useProfileStore((state) => state);
+
     const { user, clearUser } = useUserStore((state) => state);
 
     return (
         <div className="w-full bg-white">
             <div className="mx-auto flex max-w-[1208px] items-center justify-between py-2 xl:px-0 px-4">
-                {!hasHydrated ? (
+                {isPending ? (
                     <>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
@@ -88,7 +91,7 @@ const Header = () => {
                             <Button size="sm" variant="ghost" className="!px-2">
                                 <HiShoppingCart className="size-[20px]" />
                             </Button>
-                            {profile ? (
+                            {isAuthenticated ? (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Avatar className="hover:cursor-pointer lg:block hidden hover:outline-4 outline-primary outline-0 ease-in-out transition-all duration-100">
@@ -99,7 +102,7 @@ const Header = () => {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent className="w-56" align="end">
                                         <DropdownMenuLabel className="pb-0">
-                                            {profile.firstName && profile.lastName
+                                            {profile && profile.firstName && profile.lastName
                                                 ? profile.firstName + ' ' + profile.lastName
                                                 : 'Мой Аккаунт'}
                                         </DropdownMenuLabel>

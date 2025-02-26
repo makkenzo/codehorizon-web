@@ -10,17 +10,10 @@ export const defaultInitState: ProfileState = {
 };
 
 export const createProfileStore = (initState: ProfileState = defaultInitState) => {
-    return createStore<ProfileStore>()(
-        persist(
-            (set) => ({
-                ...initState,
-                setProfile: (profile: Profile) => set({ profile }),
-                clearProfile: () => set({ profile: undefined }),
-            }),
-            {
-                name: 'profile-storage',
-            }
-        )
-    );
+    return createStore<ProfileStore>()((set) => ({
+        ...initState,
+        setProfile: (profile: Profile) => set({ profile }),
+        clearProfile: () => set({ profile: undefined }),
+    }));
 };
 

@@ -4,7 +4,7 @@ class ApiClient {
     private axiosInstance: AxiosInstance;
     private isRefreshing = false;
     private refreshSubscribers: ((token: string) => void)[] = [];
-    private excludedResponsePaths = ['/auth/login', '/auth/register', '/auth/token', '/auth/me'];
+    private excludedResponsePaths = ['/auth/login', '/auth/register', '/auth/me'];
 
     constructor() {
         this.axiosInstance = axios.create({
