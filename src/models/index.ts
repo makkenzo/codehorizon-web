@@ -23,7 +23,6 @@ export type Profile = {
     lastName: string | null;
     location: string | null;
     website: string | null;
-    socialLinks: Map<string, string> | null;
 };
 
 export type CourseProgress = {
@@ -47,3 +46,4 @@ export type AccountSettings = {
         loginAlerts: boolean;
     };
 };
+

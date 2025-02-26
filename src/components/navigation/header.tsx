@@ -27,7 +27,6 @@ import {
 } from '@/components/ui/navigation-menu';
 import { useHasHydrated } from '@/hooks/use-has-hydrated';
 import AuthApiClient from '@/server/auth';
-import { useAuthStore } from '@/stores/auth/auth-store-provider';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
 
@@ -40,7 +39,6 @@ const Header = () => {
     const hasHydrated = useHasHydrated();
     const { profile, clearProfile } = useProfileStore((state) => state);
     const { user, clearUser } = useUserStore((state) => state);
-    const { clearTokens } = useAuthStore((state) => state);
 
     return (
         <div className="w-full bg-white">
@@ -133,7 +131,6 @@ const Header = () => {
                                         <DropdownMenuItem
                                             variant="destructive"
                                             onClick={async () => {
-                                                clearTokens();
                                                 clearProfile();
                                                 clearUser();
 

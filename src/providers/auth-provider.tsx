@@ -4,7 +4,6 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 import AuthApiClient from '@/server/auth';
 import ProfileApiClient from '@/server/profile';
-import { useAuthStore } from '@/stores/auth/auth-store-provider';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
 
@@ -16,7 +15,6 @@ const AuthContext = createContext<AuthContextType>({ isAuthenticated: false });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const { setAccessToken, setRefreshToken } = useAuthStore((state) => state);
     const { setProfile } = useProfileStore((state) => state);
     const { setUser } = useUserStore((state) => state);
 
@@ -25,9 +23,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const response = await new AuthApiClient().getToken();
 
             if (response) {
-                setAccessToken(response.access_token);
-                setRefreshToken(response.refresh_token);
-
                 setIsAuthenticated(true);
             }
         };

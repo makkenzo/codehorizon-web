@@ -10,7 +10,7 @@ import { PiHandWavingDuotone } from 'react-icons/pi';
 import { z } from 'zod';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 import Logo from '@/components/reusable/logo';
 import { BlurFade } from '@/components/ui/blur-fade';
@@ -19,7 +19,6 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import AuthApiClient from '@/server/auth';
-import { useAuthStore } from '@/stores/auth/auth-store-provider';
 
 const formSchema = z.object({
     login: z
@@ -44,11 +43,10 @@ const ANIMATION_DELAYS = {
 
 const SignInPage = () => {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     const [status, setStatus] = useState<'idle' | 'loading' | 'error' | 'success'>('idle');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-    const { setAccessToken, setRefreshToken } = useAuthStore((state) => state);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -64,10 +62,10 @@ const SignInPage = () => {
 
         try {
             const response = await new AuthApiClient().login(values.login, values.password);
-            setAccessToken(response.access_token);
-            setRefreshToken(response.refresh_token);
             setStatus('success');
-            window.location.href = '/';
+
+            const redirectUrl = searchParams.get('from') || '/';
+            window.location.href = redirectUrl;
         } catch {
             setErrorMessage('Ошибка авторизации. Пожалуйста, попробуйте еще раз.');
             setStatus('error');

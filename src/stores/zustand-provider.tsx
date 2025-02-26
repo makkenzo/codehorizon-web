@@ -2,7 +2,6 @@
 
 import { ReactNode } from 'react';
 
-import { AuthStoreProvider } from './auth/auth-store-provider';
 import { ProfileStoreProvider } from './profile/profile-store-provider';
 import { UserStoreProvider } from './user/user-store-provider';
 
@@ -12,11 +11,9 @@ interface ZustandProviderProps {
 
 const ZustandProvider = ({ children }: ZustandProviderProps) => {
     return (
-        <AuthStoreProvider>
-            <ProfileStoreProvider>
-                <UserStoreProvider>{children}</UserStoreProvider>
-            </ProfileStoreProvider>
-        </AuthStoreProvider>
+        <ProfileStoreProvider>
+            <UserStoreProvider>{children}</UserStoreProvider>
+        </ProfileStoreProvider>
     );
 };
 

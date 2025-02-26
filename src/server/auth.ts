@@ -1,4 +1,3 @@
-import { clearStorage, setAccessToken, setTokens } from '@/helpers/auth';
 import { User } from '@/models';
 
 import ApiClient from './api-client';
@@ -23,9 +22,7 @@ class AuthApiClient extends ApiClient {
 
     async getToken() {
         try {
-            const response = await this.get<{ accessToken: string; refreshToken: string }>('/auth/token', {
-                withCredentials: true,
-            })
+            const response = await this.get<{ accessToken: string; refreshToken: string }>('/auth/token')
                 .then((res) => {
                     return res.data;
                 })
@@ -34,7 +31,6 @@ class AuthApiClient extends ApiClient {
                 });
 
             if (response) {
-                setTokens({ newAccessToken: response.accessToken, newRefreshToken: response.refreshToken });
                 return { access_token: response.accessToken, refresh_token: response.refreshToken };
             }
         } catch (error) {
@@ -77,7 +73,6 @@ class AuthApiClient extends ApiClient {
                 });
 
             if (response) {
-                clearStorage();
                 return true;
             }
         } catch (error) {
@@ -122,7 +117,6 @@ class AuthApiClient extends ApiClient {
                 });
 
             if (response) {
-                setTokens({ newAccessToken: response.access_token, newRefreshToken: response.refresh_token });
                 return true;
             }
         } catch (error) {

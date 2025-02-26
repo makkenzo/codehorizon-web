@@ -1,36 +1,21 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-import { clearStorage, getAccessToken, getRefreshToken, setAccessToken } from '@/helpers/auth';
-
 class ApiClient {
     private axiosInstance: AxiosInstance;
     private isRefreshing = false;
     private refreshSubscribers: ((token: string) => void)[] = [];
-    private excludedRequestPaths = ['/auth/login', '/auth/register', '/auth/reset-password'];
     private excludedResponsePaths = ['/auth/login', '/auth/register', '/auth/token', '/auth/me'];
 
     constructor() {
         this.axiosInstance = axios.create({
             baseURL: process.env.NEXT_PUBLIC_API_URL,
+            withCredentials: true,
         });
 
         this.initializeInterceptors();
     }
 
     private initializeInterceptors() {
-        this.axiosInstance.interceptors.request.use((config) => {
-            if (typeof config.url === 'string' && this.excludedRequestPaths.includes(config.url)) {
-                return config;
-            }
-
-            const token = getAccessToken();
-
-            if (token && config.headers) {
-                config.headers.Authorization = `Bearer ${token}`;
-            }
-            return config;
-        });
-
         this.axiosInstance.interceptors.response.use(
             (response) => response,
             async (error) => {
@@ -73,12 +58,8 @@ class ApiClient {
 
         this.isRefreshing = true;
         try {
-            const currentRefreshToken = getRefreshToken();
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`, {
-                refreshToken: currentRefreshToken,
-            });
+            const response = await this.axiosInstance.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`);
             const newAccessToken = response.data.accessToken;
-            setAccessToken(newAccessToken);
 
             this.refreshSubscribers.forEach((callback) => callback(newAccessToken));
             this.refreshSubscribers = [];
@@ -92,7 +73,7 @@ class ApiClient {
     }
 
     private logout() {
-        clearStorage();
+        // const response = this.axiosInstance.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`);
     }
 
     public async get<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
