@@ -58,6 +58,46 @@ pnpm install
 pnpm dev
 ```
 
+<h2>🗺️ Roadmap:</h2>
+
+<p>Main development phases:</p>
+
+<h3>📅 Q1 2025</h3>
+<ul>
+    <li>✅ Implement basic course functionality (creation, editing, deletion).</li>
+    <li>✅ Add authentication and authorization system (JWT).</li>
+    <li>✅ Integrate SMTP for email notifications.</li>
+    <li>✅ Set up CI/CD using GitHub Actions.</li>
+    <li>❌ Develop lesson and assignment functionality.</li>
+    <li>❌ Implement role-based access control (student, author, admin).</li>
+    <li>❌ Integrate payment systems (Stripe, PayPal).</li>
+    <li>❌ Add ratings and review system.</li>
+    <li>❌ Develop course analytics for authors.</li>
+</ul>
+
+<h3>📅 Q2 2025</h3>
+<ul>
+    <li>❌ Implement certificate system.</li>
+    <li>❌ Integrate social media authentication.</li>
+    <li>❌ Optimize performance and scalability.</li>
+    <li>❌ Add multilingual support.</li>
+</ul>
+
+<h3>📅 Q3 2025</h3>
+<ul>
+    <li>❌ Develop a mobile application.</li>
+    <li>❌ Implement interactive courses with a built-in code editor.</li>
+    <li>❌ Improve SEO and page loading optimization.</li>
+</ul>
+
+<h2>🔮 Future Ideas</h2>
+<ul>
+    <li><strong>LMS Integration:</strong> Support SCORM standards for corporate training.</li>
+    <li><strong>Gamification:</strong> Add an achievement and badge system.</li>
+    <li><strong>Multilingual Support:</strong> Provide multiple language options for the interface.</li>
+    <li><strong>AI Assistant:</strong> Integrate Google Gemini to assist students.</li>
+</ul>
+
 <h2>🛡️ License:</h2>
 
 This project is licensed under the BSD 3-Clause
