@@ -1,36 +1,23 @@
+// middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-const apiUrl = process.env.API_URL;
 
 export async function middleware(request: NextRequest) {
     console.log('Middleware invoked');
 
-    // Получаем куку из запроса
-    const authCookie = request.cookies.get('access_token')?.value;
-    const refreshCookie = request.cookies.get('refresh_token')?.value;
-    console.log('ALL:', request.cookies.getAll());
-    console.log('AUTH-COOKIE:', authCookie);
-
-    if (!authCookie) {
-        console.log('No auth cookie found, redirecting to sign-in');
-        return redirectToLogin(request);
-    }
-
-    try {
-        const authResponse = await fetch(`${apiUrl}/auth/me`, {
+    // Выполняем запрос к вашему API-маршруту для проверки аутентификации
+    const authCheckResponse = await fetch(
+        `${request.nextUrl.origin}/api/auth/me`,
+        {
             headers: {
-                cookie: `access_token=${authCookie};refresh_token=${refreshCookie}`,
+                cookie: request.headers.get('cookie') || '',
             },
-            credentials: 'include',
-        });
-
-        if (authResponse.ok) {
-            console.log('Auth successful');
-            return NextResponse.next();
         }
-    } catch (error) {
-        console.error('Auth request failed:', error);
+    );
+
+    if (authCheckResponse.ok) {
+        console.log('Auth successful');
+        return NextResponse.next();
     }
 
     console.log('Auth failed, redirecting to sign-in');
