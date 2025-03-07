@@ -4,7 +4,11 @@ class ApiClient {
     private axiosInstance: AxiosInstance;
     private isRefreshing = false;
     private refreshSubscribers: ((token: string) => void)[] = [];
-    private excludedResponsePaths = ['/auth/login', '/auth/register', '/auth/me'];
+    private excludedResponsePaths = [
+        '/auth/login',
+        '/auth/register',
+        '/auth/me',
+    ];
 
     constructor() {
         this.axiosInstance = axios.create({
@@ -39,7 +43,10 @@ class ApiClient {
                         originalRequest.headers.Authorization = `Bearer ${newToken}`;
                         return this.axiosInstance(originalRequest);
                     } catch (refreshError) {
-                        console.error('Не удалось обновить токен', refreshError);
+                        console.error(
+                            'Не удалось обновить токен',
+                            refreshError
+                        );
                         this.logout();
                         return Promise.reject(error);
                     }
@@ -58,10 +65,14 @@ class ApiClient {
 
         this.isRefreshing = true;
         try {
-            const response = await this.axiosInstance.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`);
+            const response = await this.axiosInstance.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`
+            );
             const newAccessToken = response.data.accessToken;
 
-            this.refreshSubscribers.forEach((callback) => callback(newAccessToken));
+            this.refreshSubscribers.forEach((callback) =>
+                callback(newAccessToken)
+            );
             this.refreshSubscribers = [];
 
             return newAccessToken;
@@ -76,11 +87,14 @@ class ApiClient {
         // const response = this.axiosInstance.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`);
     }
 
-    public async get<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    public async get<T>(
+        url: string,
+        config?: AxiosRequestConfig
+    ): Promise<AxiosResponse<T>> {
         return this.axiosInstance.get(url, config);
     }
 
-    public async post<T, D = Record<string, unknown>>(
+    public async post<T, D = Record<string, unknown> | FormData>(
         url: string,
         data?: D,
         config?: AxiosRequestConfig
@@ -88,15 +102,22 @@ class ApiClient {
         return this.axiosInstance.post<T>(url, data, config);
     }
 
-    public async put<T, D = Record<string, unknown>>(
+    public async put<T, D = Record<string, unknown> | FormData>(
         url: string,
         data?: D,
         config?: AxiosRequestConfig
     ): Promise<AxiosResponse<T>> {
-        return this.axiosInstance.put<T, AxiosResponse<T>, D>(url, data, config);
+        return this.axiosInstance.put<T, AxiosResponse<T>, D>(
+            url,
+            data,
+            config
+        );
     }
 
-    public async delete<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    public async delete<T>(
+        url: string,
+        config?: AxiosRequestConfig
+    ): Promise<AxiosResponse<T>> {
         return this.axiosInstance.delete(url, config);
     }
 }

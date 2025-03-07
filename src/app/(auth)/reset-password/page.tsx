@@ -14,6 +14,7 @@ const ResetPasswordPage = () => {
             }
         >
             <ResetPasswordPageContent />
+            <h1>asdasd</h1>
         </Suspense>
     );
 };

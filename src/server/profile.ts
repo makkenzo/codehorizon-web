@@ -12,6 +12,15 @@ class ProfileApiClient extends ApiClient {
             return response;
         } catch (error) {}
     }
+
+    async updateProfile(profile: Omit<Profile, 'id' | 'userId'>) {
+        try {
+            const response = await this.put<Profile>('/profiles/', profile)
+                .then((response) => response.data)
+                .catch((e) => console.error(e));
+            return response;
+        } catch (error) {}
+    }
 }
 
 export default ProfileApiClient;
