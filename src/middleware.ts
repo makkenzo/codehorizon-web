@@ -10,6 +10,7 @@ export async function middleware(request: NextRequest) {
 
     // Получаем куку из запроса
     const authCookie = request.cookies.get('access_token')?.value;
+    const refreshCookie = request.cookies.get('refresh_token')?.value;
     console.log('ALL:', request.cookies.getAll());
     console.log('AUTH-COOKIE:', authCookie);
 
@@ -20,7 +21,9 @@ export async function middleware(request: NextRequest) {
 
     try {
         const authResponse = await axios.get(`${apiUrl}/auth/me`, {
-            headers: { cookie: `access_token=${authCookie}` },
+            headers: {
+                cookie: `access_token=${authCookie};refresh_token=${refreshCookie}`,
+            },
             withCredentials: true,
         });
 
@@ -29,7 +32,7 @@ export async function middleware(request: NextRequest) {
             return NextResponse.next();
         }
     } catch (error) {
-        console.error('Auth request failed:', error);
+        console.error('Auth request failed:');
     }
 
     console.log('Auth failed, redirecting to sign-in');
