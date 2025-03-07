@@ -24,4 +24,5 @@ export interface NavItem {
 export interface ProfileNavItem {
     label: string;
     href: string;
+    disabled: boolean;
 }

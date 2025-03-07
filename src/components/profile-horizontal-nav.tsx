@@ -16,26 +16,32 @@ const profileNavLinks: ProfileNavItem[] = [
     {
         label: 'Профиль',
         href: '/me/profile',
+        disabled: false,
     },
     {
         label: 'Персонализация',
         href: '/me/personalization',
+        disabled: true,
     },
     {
         label: 'Аккаунт',
         href: '/me/account',
+        disabled: true,
     },
     {
         label: 'Способы оплаты',
         href: '/me/payment-methods',
+        disabled: true,
     },
     {
         label: 'Уведомления',
         href: '/me/notifications',
+        disabled: true,
     },
     {
         label: 'Конфиденциальность',
         href: '/me/privacy',
+        disabled: true,
     },
 ];
 
@@ -59,9 +65,11 @@ const ProfileHorizontalNav = ({}: ProfileHorizontalNavProps) => {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: (index + 4) * 0.1, duration: 0.3 }}
+                        aria-disabled={link.disabled}
                     >
-                        <Link href={link.href}>
+                        {link.disabled ? (
                             <Button
+                                disabled={link.disabled}
                                 variant="link"
                                 className={cn(
                                     'font-normal text-foreground underline-offset-[12px] decoration-2 decoration-primary',
@@ -70,7 +78,23 @@ const ProfileHorizontalNav = ({}: ProfileHorizontalNavProps) => {
                             >
                                 {link.label}
                             </Button>
-                        </Link>
+                        ) : (
+                            <Link
+                                href={link.href}
+                                aria-disabled={link.disabled}
+                            >
+                                <Button
+                                    disabled={link.disabled}
+                                    variant="link"
+                                    className={cn(
+                                        'font-normal text-foreground underline-offset-[12px] decoration-2 decoration-primary',
+                                        pathname === link.href && 'underline'
+                                    )}
+                                >
+                                    {link.label}
+                                </Button>
+                            </Link>
+                        )}
                     </motion.div>
                 ))}
             </div>

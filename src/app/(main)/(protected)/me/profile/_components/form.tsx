@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import { Profile } from '@/models';
 import ProfileApiClient from '@/server/profile';
 import S3ApiClient from '@/server/s3';
@@ -43,7 +44,7 @@ const formVariants = {
     visible: (i: number) => ({
         opacity: 1,
         y: 0,
-        transition: { duration: 0.4, ease: 'easeInOut', delay: i * 0.1 },
+        transition: { duration: 0.4, ease: 'easeInOut', delay: (i + 3) * 0.1 },
     }),
 };
 
@@ -146,9 +147,16 @@ const ProfileForm = ({}) => {
     if (isLoading)
         return (
             <div className="space-y-4 px-[45px] mt-10">
-                <div className="relative mx-auto">
+                <div className="relative mx-auto w-fit">
                     <Skeleton className="size-[60px] rounded-full" />
                 </div>
+                {Array.from({ length: 5 }).map((_, index) => (
+                    <div key={index} className="flex flex-col gap-2">
+                        <Skeleton className="h-[14px] w-[60px]" />
+                        <Skeleton className="h-[36px]" />
+                    </div>
+                ))}
+                <Skeleton className="w-[179px] h-[41px] mx-auto mt-10" />
             </div>
         );
 
