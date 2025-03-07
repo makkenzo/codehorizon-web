@@ -34,5 +34,6 @@ function redirectToLogin(request: NextRequest) {
 
 export const config = {
     matcher: ['/me/:path*'],
+    runtime: 'nodejs',
 };
 
