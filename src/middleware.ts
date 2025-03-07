@@ -9,6 +9,13 @@ export async function middleware(request: NextRequest) {
     console.log('Middleware invoked');
 
     try {
+        const cookie = request.cookies.get('refresh_token');
+        if (!cookie) throw new Error('No cookie found');
+        console.log(cookie);
+
+        const response = NextResponse.next();
+        response.cookies.set('refresh_token', cookie?.value);
+
         console.log(request.headers.get('cookie'));
 
         const authResponse = await axios.get(`${apiUrl}/auth/me`, {
@@ -34,6 +41,5 @@ function redirectToLogin(request: NextRequest) {
 
 export const config = {
     matcher: ['/me/:path*'],
-    runtime: 'nodejs',
 };
 
