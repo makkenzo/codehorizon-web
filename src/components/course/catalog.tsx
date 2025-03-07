@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 
 import { fadeInVariants } from '@/lib/constants';
 
-import SubscribeNewsletterBanner from '../subscribe-newsletter-banner';
 import CategoryRowSelect from './category-row-select';
 import PopularMentors from './popular-mentors';
 import SuggestedAuthorCourses from './suggested-author-courses';
@@ -23,7 +22,6 @@ const CourseCatalog = () => {
             <SuggestedAuthorCourses />
             <TrendingCourses />
             <PopularMentors />
-            <SubscribeNewsletterBanner />
         </motion.div>
     );
 };
