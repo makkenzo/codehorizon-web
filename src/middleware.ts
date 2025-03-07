@@ -9,6 +9,8 @@ export async function middleware(request: NextRequest) {
     console.log('Middleware invoked');
 
     try {
+        console.log(request.headers.get('cookie'));
+
         const authResponse = await axios.get(`${apiUrl}/auth/me`, {
             headers: { cookie: request.headers.get('cookie') || '' },
             withCredentials: true,

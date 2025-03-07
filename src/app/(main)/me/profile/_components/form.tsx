@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { FaUserSecret } from 'react-icons/fa6';
 import { MdAddAPhoto } from 'react-icons/md';
@@ -20,6 +21,7 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Profile } from '@/models';
 import ProfileApiClient from '@/server/profile';
 import S3ApiClient from '@/server/s3';
@@ -36,6 +38,15 @@ const profileSchema = z.object({
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
+const formVariants = {
+    hidden: { opacity: 0, y: -10 },
+    visible: (i: number) => ({
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.4, ease: 'easeInOut', delay: i * 0.1 },
+    }),
+};
+
 const fields: Record<
     Exclude<keyof z.infer<typeof profileSchema>, 'avatarUrl'>,
     { label: string | null; placeholder: string | null }
@@ -50,6 +61,7 @@ const fields: Record<
 const ProfileForm = ({}) => {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [pending, setPending] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
     const form = useForm<z.infer<typeof profileSchema>>({
         resolver: zodResolver(profileSchema),
@@ -76,6 +88,7 @@ const ProfileForm = ({}) => {
                 console.error(e);
             } finally {
                 setPending(false);
+                setIsLoading(false);
             }
         };
 
@@ -107,7 +120,7 @@ const ProfileForm = ({}) => {
 
             if (!response) throw new Error('Ошибка загрузки файла');
 
-            form.setValue('avatarUrl', response.url); // Обновляем ссылку на фото в форме
+            form.setValue('avatarUrl', response.url);
         } catch (error) {
             console.error(error);
         }
@@ -130,9 +143,20 @@ const ProfileForm = ({}) => {
         uploadAvatar(file);
     };
 
+    if (isLoading)
+        return (
+            <div className="space-y-4 px-[45px] mt-10">
+                <div className="relative mx-auto">
+                    <Skeleton className="size-[60px] rounded-full" />
+                </div>
+            </div>
+        );
+
     return (
         <Form {...form}>
-            <form
+            <motion.form
+                initial="hidden"
+                animate="visible"
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4 px-[45px] mt-10"
             >
@@ -143,7 +167,11 @@ const ProfileForm = ({}) => {
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <div className="relative mx-auto">
+                                <motion.div
+                                    className="relative mx-auto"
+                                    variants={formVariants}
+                                    custom={0}
+                                >
                                     <Avatar className="size-[60px]">
                                         <AvatarImage
                                             src={form.watch('avatarUrl') ?? ''}
@@ -162,7 +190,7 @@ const ProfileForm = ({}) => {
                                             disabled={pending}
                                         />
                                     </label>
-                                </div>
+                                </motion.div>
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -170,7 +198,8 @@ const ProfileForm = ({}) => {
                 />
                 {Object.entries(fields).map(
                     (
-                        [key, { label, placeholder }] // Пропускаем сложные поля
+                        [key, { label, placeholder }],
+                        index // Пропускаем сложные поля
                     ) => (
                         <FormField
                             key={key}
@@ -178,14 +207,26 @@ const ProfileForm = ({}) => {
                             name={key as keyof typeof fields}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>{label}</FormLabel>
+                                    <FormLabel>
+                                        <motion.label
+                                            variants={formVariants}
+                                            custom={index + 1}
+                                        >
+                                            {label}
+                                        </motion.label>
+                                    </FormLabel>
                                     <FormControl>
-                                        <Input
-                                            placeholder={placeholder!}
-                                            {...field}
-                                            value={field.value ?? ''}
-                                            disabled={pending}
-                                        />
+                                        <motion.div
+                                            variants={formVariants}
+                                            custom={index + 1}
+                                        >
+                                            <Input
+                                                placeholder={placeholder!}
+                                                {...field}
+                                                value={field.value ?? ''}
+                                                disabled={pending}
+                                            />
+                                        </motion.div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -193,14 +234,19 @@ const ProfileForm = ({}) => {
                         />
                     )
                 )}
-                <Button
-                    type="submit"
-                    className="max-w-[179px] w-full mx-auto mt-10"
-                    isLoading={pending}
+                <motion.div
+                    variants={formVariants}
+                    custom={Object.keys(fields).length + 1}
                 >
-                    {pending ? 'Загрузка...' : 'Сохранить'}
-                </Button>
-            </form>
+                    <Button
+                        type="submit"
+                        className="max-w-[179px] w-full mx-auto mt-10"
+                        isLoading={pending}
+                    >
+                        {pending ? 'Загрузка...' : 'Сохранить'}
+                    </Button>
+                </motion.div>
+            </motion.form>
         </Form>
     );
 };
