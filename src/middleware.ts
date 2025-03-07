@@ -8,18 +8,19 @@ const apiUrl = process.env.API_URL;
 export async function middleware(request: NextRequest) {
     console.log('Middleware invoked');
 
+    // Получаем куку из запроса
+    const authCookie = request.cookies.get('access_token')?.value;
+    console.log('ALL:', request.cookies.getAll());
+    console.log('AUTH-COOKIE:', authCookie);
+
+    if (!authCookie) {
+        console.log('No auth cookie found, redirecting to sign-in');
+        return redirectToLogin(request);
+    }
+
     try {
-        const cookie = request.cookies.get('refresh_token');
-        if (!cookie) throw new Error('No cookie found');
-        console.log(cookie);
-
-        const response = NextResponse.next();
-        response.cookies.set('refresh_token', cookie?.value);
-
-        console.log(request.headers.get('cookie'));
-
         const authResponse = await axios.get(`${apiUrl}/auth/me`, {
-            headers: { cookie: request.headers.get('cookie') || '' },
+            headers: { cookie: `access_token=${authCookie}` },
             withCredentials: true,
         });
 
@@ -27,7 +28,9 @@ export async function middleware(request: NextRequest) {
             console.log('Auth successful');
             return NextResponse.next();
         }
-    } catch (error) {}
+    } catch (error) {
+        console.error('Auth request failed:', error);
+    }
 
     console.log('Auth failed, redirecting to sign-in');
     return redirectToLogin(request);
