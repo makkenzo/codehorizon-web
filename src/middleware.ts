@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -20,19 +18,19 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
-        const authResponse = await axios.get(`${apiUrl}/auth/me`, {
+        const authResponse = await fetch(`${apiUrl}/auth/me`, {
             headers: {
                 cookie: `access_token=${authCookie};refresh_token=${refreshCookie}`,
             },
-            withCredentials: true,
+            credentials: 'include',
         });
 
-        if (authResponse.status === 200) {
+        if (authResponse.ok) {
             console.log('Auth successful');
             return NextResponse.next();
         }
     } catch (error) {
-        console.error('Auth request failed:');
+        console.error('Auth request failed:', error);
     }
 
     console.log('Auth failed, redirecting to sign-in');
@@ -48,4 +46,3 @@ function redirectToLogin(request: NextRequest) {
 export const config = {
     matcher: ['/me/:path*'],
 };
-
