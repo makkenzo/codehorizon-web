@@ -7,9 +7,10 @@ import { useAuth } from '@/providers/auth-provider';
 
 import PageWrapper from './reusable/page-wrapper';
 import { Button } from './ui/button';
+import { Skeleton } from './ui/skeleton';
 
 const Hero = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, isPending } = useAuth();
     return (
         <motion.div
             variants={heroFadeInVariants}
@@ -33,14 +34,21 @@ const Hero = () => {
                             Станьте профессионалами и будьте готовы
                             присоединиться к IT-миру
                         </p>
-                        <div className="flex items-center gap-4 mt-2">
-                            <Button variant="primary-inverted">
-                                Выбрать курс
-                            </Button>
-                            {!isAuthenticated && (
-                                <Button>Создать аккаунт</Button>
-                            )}
-                        </div>
+                        {isPending ? (
+                            <div className="w-full flex items-center gap-4 mt-2">
+                                <Skeleton className="w-[125px] h-[41px]" />
+                                <Skeleton className="w-[165px] h-[41px]" />
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-4 mt-2">
+                                <Button variant="primary-inverted">
+                                    Выбрать курс
+                                </Button>
+                                {!isAuthenticated && (
+                                    <Button>Создать аккаунт</Button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </PageWrapper>
             </div>

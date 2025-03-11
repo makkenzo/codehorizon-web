@@ -19,14 +19,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-    NavigationMenu,
-    NavigationMenuContent,
-    NavigationMenuItem,
-    NavigationMenuLink,
-    NavigationMenuList,
-    NavigationMenuTrigger,
-} from '@/components/ui/navigation-menu';
 import { heroFadeInVariants } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
@@ -34,6 +26,7 @@ import AuthApiClient from '@/server/auth';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
 
+import CatalogDropdown from '../catalog-dropdown';
 import GlobalSearch from '../reusable/global-search';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Skeleton } from '../ui/skeleton';
@@ -81,32 +74,7 @@ const Header = () => {
                                 <MobileBurgerMenu profile={profile} />
                                 <Logo />
                             </div>
-                            <NavigationMenu className="lg:block hidden">
-                                <NavigationMenuList>
-                                    <NavigationMenuItem>
-                                        <NavigationMenuTrigger className="bg-transparent">
-                                            Каталог
-                                        </NavigationMenuTrigger>
-                                        <NavigationMenuContent>
-                                            <NavigationMenuLink>
-                                                Дизайн
-                                            </NavigationMenuLink>
-                                            <NavigationMenuLink>
-                                                Программирование
-                                            </NavigationMenuLink>
-                                            <NavigationMenuLink>
-                                                Фото и видео
-                                            </NavigationMenuLink>
-                                            <NavigationMenuLink>
-                                                Бизнес и маркетинг
-                                            </NavigationMenuLink>
-                                            <NavigationMenuLink>
-                                                Информационные технологии
-                                            </NavigationMenuLink>
-                                        </NavigationMenuContent>
-                                    </NavigationMenuItem>
-                                </NavigationMenuList>
-                            </NavigationMenu>
+                            <CatalogDropdown />
                         </div>
                         <GlobalSearch className="pt-1 lg:block hidden" />
                         <div className="flex items-center gap-4 w-full justify-end">
@@ -140,7 +108,7 @@ const Header = () => {
                                         </Avatar>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent
-                                        className="w-56"
+                                        className="w-56 px-4 py-2"
                                         align="end"
                                     >
                                         <DropdownMenuLabel className="pb-0 pl-0">
