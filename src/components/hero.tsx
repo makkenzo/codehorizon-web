@@ -3,11 +3,13 @@
 import { motion } from 'framer-motion';
 
 import { heroFadeInVariants } from '@/lib/constants';
+import { useAuth } from '@/providers/auth-provider';
 
 import PageWrapper from './reusable/page-wrapper';
 import { Button } from './ui/button';
 
 const Hero = () => {
+    const { isAuthenticated } = useAuth();
     return (
         <motion.div
             variants={heroFadeInVariants}
@@ -35,7 +37,9 @@ const Hero = () => {
                             <Button variant="primary-inverted">
                                 Выбрать курс
                             </Button>
-                            <Button>Создать аккаунт</Button>
+                            {!isAuthenticated && (
+                                <Button>Создать аккаунт</Button>
+                            )}
                         </div>
                     </div>
                 </PageWrapper>
