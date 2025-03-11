@@ -5,6 +5,7 @@ import { HiShoppingCart } from 'react-icons/hi';
 import { RiProgress5Line } from 'react-icons/ri';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import Logo from '@/components/reusable/logo';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,7 @@ import {
     NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
 import { useHasHydrated } from '@/hooks/use-has-hydrated';
+import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import AuthApiClient from '@/server/auth';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
@@ -38,13 +40,14 @@ import MobileBurgerMenu from './mobile-burger-menu';
 
 const Header = () => {
     const { isAuthenticated, isPending } = useAuth();
+    const pathname = usePathname();
 
     const { profile, clearProfile } = useProfileStore((state) => state);
 
     const { user, clearUser } = useUserStore((state) => state);
 
     return (
-        <div className="w-full bg-white">
+        <div className={cn('w-full', pathname !== '/' && 'bg-white')}>
             <div className="mx-auto flex max-w-[1208px] items-center justify-between py-2 xl:px-0 px-4">
                 {isPending ? (
                     <>
@@ -73,9 +76,25 @@ const Header = () => {
                             <NavigationMenu className="lg:block hidden">
                                 <NavigationMenuList>
                                     <NavigationMenuItem>
-                                        <NavigationMenuTrigger>Каталог</NavigationMenuTrigger>
+                                        <NavigationMenuTrigger className="bg-transparent">
+                                            Каталог
+                                        </NavigationMenuTrigger>
                                         <NavigationMenuContent>
-                                            <NavigationMenuLink>Ссылочка</NavigationMenuLink>
+                                            <NavigationMenuLink>
+                                                Дизайн
+                                            </NavigationMenuLink>
+                                            <NavigationMenuLink>
+                                                Программирование
+                                            </NavigationMenuLink>
+                                            <NavigationMenuLink>
+                                                Фото и видео
+                                            </NavigationMenuLink>
+                                            <NavigationMenuLink>
+                                                Бизнес и маркетинг
+                                            </NavigationMenuLink>
+                                            <NavigationMenuLink>
+                                                Информационные технологии
+                                            </NavigationMenuLink>
                                         </NavigationMenuContent>
                                     </NavigationMenuItem>
                                 </NavigationMenuList>
@@ -83,8 +102,15 @@ const Header = () => {
                         </div>
                         <GlobalSearch className="pt-1 lg:block hidden" />
                         <div className="flex items-center gap-4">
-                            <Link href={'/'} className="translate-y-0.5 lg:block hidden">
-                                <Button variant="link" size="link" className="text-foreground">
+                            <Link
+                                href={'/'}
+                                className="translate-y-0.5 lg:block hidden"
+                            >
+                                <Button
+                                    variant="link"
+                                    size="link"
+                                    className="text-foreground"
+                                >
                                     Стать ментором
                                 </Button>
                             </Link>
@@ -100,19 +126,28 @@ const Header = () => {
                                             </AvatarFallback>
                                         </Avatar>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-56" align="end">
-                                        <DropdownMenuLabel className="pb-0">
-                                            {profile && profile.firstName && profile.lastName
-                                                ? profile.firstName + ' ' + profile.lastName
+                                    <DropdownMenuContent
+                                        className="w-56"
+                                        align="end"
+                                    >
+                                        <DropdownMenuLabel className="pb-0 pl-0">
+                                            {profile &&
+                                            profile.firstName &&
+                                            profile.lastName
+                                                ? profile.firstName +
+                                                  ' ' +
+                                                  profile.lastName
                                                 : 'Мой Аккаунт'}
                                         </DropdownMenuLabel>
-                                        <DropdownMenuLabel className="font-normal pt-0">
+                                        <DropdownMenuLabel className="font-normal pt-0 pl-0">
                                             {user?.email}
                                         </DropdownMenuLabel>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuGroup>
                                             <Link href="/me/profile">
-                                                <DropdownMenuItem>Профиль</DropdownMenuItem>
+                                                <DropdownMenuItem>
+                                                    Профиль
+                                                </DropdownMenuItem>
                                             </Link>
                                             <DropdownMenuItem>
                                                 <span>Моя корзина</span>
@@ -148,15 +183,25 @@ const Header = () => {
                                 </DropdownMenu>
                             ) : (
                                 <>
-                                    <Link href={'/sign-in'} className="lg:block hidden">
+                                    <Link
+                                        href={'/sign-in'}
+                                        className="lg:block hidden"
+                                    >
                                         <Button size="sm" variant="outline">
-                                            <span className="font-bold">Войти</span>
+                                            <span className="font-bold">
+                                                Войти
+                                            </span>
                                         </Button>
                                     </Link>
-                                    <Link href={'/sign-up'} className="lg:block hidden">
+                                    <Link
+                                        href={'/sign-up'}
+                                        className="lg:block hidden"
+                                    >
                                         <Button size="sm">
                                             <RiProgress5Line />
-                                            <span className="font-bold">Зарегистрироваться</span>
+                                            <span className="font-bold">
+                                                Зарегистрироваться
+                                            </span>
                                         </Button>
                                     </Link>
                                 </>

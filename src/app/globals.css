@@ -78,6 +78,7 @@
         --radius: 14px;
 
         --white-90: 0 0% 97.65%;
+        --black-60: 0 0% 10.59%;
         --surface-dark: 0 0% 10.59%;
     }
 
@@ -107,6 +108,9 @@
         --chart-3: 30 80% 55%;
         --chart-4: 280 65% 60%;
         --chart-5: 340 75% 55%;
+
+        --white-90: 0 0% 97.65%;
+        --black-60: 0 0% 10.59%;
     }
 }
 
@@ -145,6 +149,7 @@
     --radius: 14px;
 
     --white-90: hsl(0 0% 97.65%);
+    --black-60: hsl(0 0% 10.59%);
     --surface-dark: hsl(0 0% 10.59%);
 }
 
@@ -186,6 +191,7 @@
     --color-primary: var(--primary);
     --color-primary-foreground: var(--primary-foreground);
     --color-white-90: var(--white-90);
+    --color-black-60: var(--black-60);
     --color-secondary: var(--secondary);
     --color-secondary-foreground: var(--secondary-foreground);
     --color-muted: var(--muted);

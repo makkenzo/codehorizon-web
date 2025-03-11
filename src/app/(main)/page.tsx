@@ -1,12 +1,14 @@
 import CourseCatalog from '@/components/course/catalog';
-import HeroCarousel from '@/components/hero-carousel';
+import Hero from '@/components/hero';
 import PageWrapper from '@/components/reusable/page-wrapper';
 
 export default function Home() {
     return (
-        <PageWrapper className="space-y-[40px] ">
-            <HeroCarousel />
-            <CourseCatalog />
-        </PageWrapper>
+        <>
+            <Hero />
+            <PageWrapper className="space-y-[40px] ">
+                <CourseCatalog />
+            </PageWrapper>
+        </>
     );
 }
