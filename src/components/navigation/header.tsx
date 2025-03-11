@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { FaUserSecret } from 'react-icons/fa6';
 import { HiShoppingCart } from 'react-icons/hi';
 import { RiProgress5Line } from 'react-icons/ri';
@@ -26,7 +27,7 @@ import {
     NavigationMenuList,
     NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
-import { useHasHydrated } from '@/hooks/use-has-hydrated';
+import { heroFadeInVariants } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import AuthApiClient from '@/server/auth';
@@ -67,8 +68,15 @@ const Header = () => {
                         </div>
                     </>
                 ) : (
-                    <>
-                        <div className="flex items-center gap-4">
+                    <motion.div
+                        variants={heroFadeInVariants}
+                        animate="visible"
+                        initial="hidden"
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5, ease: 'easeOut' }}
+                        className="flex w-full"
+                    >
+                        <div className="flex items-center gap-4 w-full">
                             <div className="flex items-center gap-2">
                                 <MobileBurgerMenu profile={profile} />
                                 <Logo />
@@ -101,7 +109,7 @@ const Header = () => {
                             </NavigationMenu>
                         </div>
                         <GlobalSearch className="pt-1 lg:block hidden" />
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 w-full justify-end">
                             <Link
                                 href={'/'}
                                 className="translate-y-0.5 lg:block hidden"
@@ -212,7 +220,7 @@ const Header = () => {
                                 </>
                             )}
                         </div>
-                    </>
+                    </motion.div>
                 )}
             </div>
         </div>

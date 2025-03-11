@@ -1,5 +1,7 @@
 'use client';
 
+import { motion } from 'framer-motion';
+
 import { Button } from '../ui/button';
 
 const mockCategories = [
@@ -15,7 +17,12 @@ const mockCategories = [
 
 const CategoryRowSelect = () => {
     return (
-        <div className="flex gap-2 items-center">
+        <motion.div
+            className="flex gap-2 items-center"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 5 * 0.1, duration: 0.3 }}
+        >
             {mockCategories.map((category, index) => (
                 <Button
                     variant="outline"
@@ -27,7 +34,7 @@ const CategoryRowSelect = () => {
                     {category}
                 </Button>
             ))}
-        </div>
+        </motion.div>
     );
 };
 

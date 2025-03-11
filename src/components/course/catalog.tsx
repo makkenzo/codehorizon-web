@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 
-import { fadeInVariants } from '@/lib/constants';
+import { fadeInVariants, heroFadeInVariants } from '@/lib/constants';
 
 import CategoryRowSelect from './category-row-select';
 import CoursesInProgress from './courses-in-progress';
@@ -13,10 +13,11 @@ import TrendingCourses from './trending-courses';
 const CourseCatalog = () => {
     return (
         <motion.div
-            variants={fadeInVariants}
-            initial="hidden"
+            variants={heroFadeInVariants}
             animate="visible"
-            transition={{ duration: 0.5, ease: 'easeOut', delay: 0.3 }}
+            initial="visible"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
             className="space-y-[40px]"
         >
             <CoursesInProgress />

@@ -166,7 +166,7 @@ const ProfileForm = ({}) => {
                 initial="hidden"
                 animate="visible"
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4 px-[45px] mt-10"
+                className="space-y-4 md:px-[45px] mt-10"
             >
                 <FormField
                     key="avatarUrl"
