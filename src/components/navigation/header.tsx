@@ -34,7 +34,7 @@ import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
 
 import GlobalSearch from '../reusable/global-search';
-import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Skeleton } from '../ui/skeleton';
 import MobileBurgerMenu from './mobile-burger-menu';
 
@@ -121,6 +121,11 @@ const Header = () => {
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Avatar className="hover:cursor-pointer lg:block hidden hover:outline-4 outline-primary outline-0 ease-in-out transition-all duration-100">
+                                            {profile?.avatarUrl && (
+                                                <AvatarImage
+                                                    src={profile?.avatarUrl}
+                                                />
+                                            )}
                                             <AvatarFallback>
                                                 <FaUserSecret />
                                             </AvatarFallback>
