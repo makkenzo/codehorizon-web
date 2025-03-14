@@ -10,16 +10,17 @@ class CoursesApiClient extends ApiClient {
             title?: string;
             description?: string;
             minRating?: number;
+            minDuration?: number;
             maxDuration?: number;
             category?: string;
             difficulty?: string[];
             sortBy?: string;
             page?: number;
             size?: number;
-        } = { size: 12 }
+        } = {}
     ) {
         try {
-            console.log(params);
+            const defaultParams = { size: 12, ...params };
 
             const response = await this.get<{
                 content: Omit<Course, 'lessons'>[];
@@ -28,7 +29,10 @@ class CoursesApiClient extends ApiClient {
                 totalElements: number;
                 totalPages: number;
                 isLast: boolean;
-            }>('/courses', { params, paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }) })
+            }>('/courses', {
+                params: defaultParams,
+                paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
+            })
                 .then((res) => {
                     return res.data;
                 })
