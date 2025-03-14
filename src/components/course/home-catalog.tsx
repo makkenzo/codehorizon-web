@@ -10,7 +10,7 @@ import PopularMentors from './popular-mentors';
 import SuggestedAuthorCourses from './suggested-author-courses';
 import TrendingCourses from './trending-courses';
 
-const CourseCatalog = () => {
+const HomeCourseCatalog = () => {
     return (
         <motion.div
             variants={heroFadeInVariants}
@@ -29,4 +29,4 @@ const CourseCatalog = () => {
     );
 };
 
-export default CourseCatalog;
+export default HomeCourseCatalog;

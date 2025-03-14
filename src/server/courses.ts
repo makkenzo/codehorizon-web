@@ -5,7 +5,14 @@ import ApiClient from './api-client';
 class CoursesApiClient extends ApiClient {
     async getCourses() {
         try {
-            const response = await this.get<Course>('/courses')
+            const response = await this.get<{
+                content: Omit<Course, 'lessons'>[];
+                pageNumber: number;
+                pageSize: number;
+                totalElements: number;
+                totalPages: number;
+                isLast: boolean;
+            }>('/courses')
                 .then((res) => {
                     return res.data;
                 })
