@@ -20,16 +20,16 @@ const CoursesPage = () => {
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="grid grid-cols-3 bg-emerald-200">
+                <div className="grid grid-cols-3 gap-5">
                     {Array(12)
                         .fill(0)
                         .map((course, idx) => (
-                            <div key={idx} className="w-[285px] h-[318px] text-center">
+                            <div key={idx} className="w-[285px] h-[318px] text-center bg-emerald-200">
                                 Card
                             </div>
                         ))}
                 </div>
-                <div className="bg-purple-200">Pagination here</div>
+                <div className="bg-purple-200 mt-15">Pagination here</div>
             </div>
         </PageWrapper>
     );
