@@ -2,6 +2,8 @@
 
 import { ChevronUp } from 'lucide-react';
 
+import Link from 'next/link';
+
 import { Button } from './ui/button';
 import {
     DropdownMenu,
@@ -16,6 +18,11 @@ import {
 } from './ui/dropdown-menu';
 
 const links = [
+    {
+        label: 'Все курсы',
+        description: 'Весь список курсов',
+        href: '/courses',
+    },
     {
         label: 'Дизайн',
         description: 'Все про дизайн',
@@ -82,9 +89,7 @@ const links = [
     },
 ];
 
-interface CatalogDropdownProps {}
-
-const CatalogDropdown = ({}: CatalogDropdownProps) => {
+const CatalogDropdown = () => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -140,19 +145,21 @@ const CatalogDropdown = ({}: CatalogDropdownProps) => {
                                 </DropdownMenuPortal>
                             </DropdownMenuSub>
                         ) : (
-                            <DropdownMenuItem
-                                key={category.label}
-                                className="group focus:no-underline"
+                            <Link
+                                key={`${category.label}-${category.label}`}
+                                href={category.href}
                             >
-                                <div className="flex flex-col px-3 py-2 group">
-                                    <h2 className="font-medium group-focus:underline">
-                                        {category.label}
-                                    </h2>
-                                    <p className="text-xs text-muted-foreground">
-                                        {category.description}
-                                    </p>
-                                </div>
-                            </DropdownMenuItem>
+                                <DropdownMenuItem className="group focus:no-underline">
+                                    <div className="flex flex-col px-3 py-2 group">
+                                        <h2 className="font-medium group-focus:underline">
+                                            {category.label}
+                                        </h2>
+                                        <p className="text-xs text-muted-foreground">
+                                            {category.description}
+                                        </p>
+                                    </div>
+                                </DropdownMenuItem>
+                            </Link>
                         )
                     )}
                 </DropdownMenuGroup>

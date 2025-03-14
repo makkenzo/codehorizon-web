@@ -26,3 +26,46 @@ export interface ProfileNavItem {
     href: string;
     disabled: boolean;
 }
+
+export enum CourseDifficultyLevels {
+    BEGINNER = 'BEGINNER',
+    INTERMEDIATE = 'INTERMEDIATE',
+    ADVANCED = 'ADVANCED',
+}
+
+export interface Course {
+    id: string;
+    title: string;
+    description: string;
+    imagePreview?: string;
+    videoPreview?: string;
+    authorId: string;
+    lessons: Lesson[];
+    rating: number;
+    price: number;
+    discount: number;
+    difficulty: CourseDifficultyLevels;
+}
+
+export interface Lesson {
+    id: string;
+    title: string;
+    content: string;
+    codeExamples?: string[];
+    tasks?: Task[];
+}
+
+export interface Task {
+    id: string;
+    question: string;
+    options: string[];
+    correctAnswer: string;
+}
+
+export interface Review {
+    id: string;
+    text?: string;
+    rating: number;
+    authorId: string;
+    courseId: string;
+}

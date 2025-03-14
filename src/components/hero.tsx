@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 
+import Link from 'next/link';
+
 import { heroFadeInVariants } from '@/lib/constants';
 import { useAuth } from '@/providers/auth-provider';
 
@@ -41,9 +43,11 @@ const Hero = () => {
                             </div>
                         ) : (
                             <div className="flex items-center gap-4 mt-2">
-                                <Button variant="primary-inverted">
-                                    Выбрать курс
-                                </Button>
+                                <Link href="/courses">
+                                    <Button variant="primary-inverted">
+                                        Выбрать курс
+                                    </Button>
+                                </Link>
                                 {!isAuthenticated && (
                                     <Button>Создать аккаунт</Button>
                                 )}
