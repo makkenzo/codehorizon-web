@@ -36,7 +36,7 @@ const CoursesPage = () => {
     const debouncedFetchCourses = debounce(fetchCourses, 500);
 
     useEffect(() => {
-        debouncedFetchCourses(state);
+        fetchCourses(state);
     }, [state]);
 
     return (
@@ -72,7 +72,7 @@ const CoursesPage = () => {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        transition={{ duration: 0.5, ease: 'easeInOut', delay: idx * 0.1 }}
+                                        transition={{ duration: 0.5, ease: 'easeInOut', delay: idx * 0.05 }}
                                     >
                                         <CourseCard course={course} />
                                     </motion.div>
