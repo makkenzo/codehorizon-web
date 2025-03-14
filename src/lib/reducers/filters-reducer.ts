@@ -2,11 +2,11 @@ export type FiltersActionType = 'SET_RATING' | 'TOGGLE_VIDEO_DURATION' | 'TOGGLE
 
 export interface FiltersAction {
     type: FiltersActionType;
-    payload?: string | number;
+    payload?: string;
 }
 
 export interface FiltersState {
-    rating: number | 'all';
+    rating: string;
     videoDuration: string[];
     categories: string[];
     level: string[];
@@ -29,7 +29,7 @@ export const initialFiltersState: FiltersState = {
 export const filtersReducer = (state: FiltersState, action: FiltersAction): FiltersState => {
     switch (action.type) {
         case 'SET_RATING':
-            return { ...state, rating: action.payload as number };
+            return { ...state, rating: action.payload ?? 'all' };
         case 'TOGGLE_VIDEO_DURATION':
             return {
                 ...state,

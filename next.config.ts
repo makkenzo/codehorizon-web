@@ -8,10 +8,6 @@ const nextConfig: NextConfig = {
                 protocol: 'https',
                 hostname: 'codehorizon-bucket.makkenzo.com',
             },
-            {
-                protocol: 'http',
-                hostname: 'marchenzo',
-            },
         ],
     },
 };

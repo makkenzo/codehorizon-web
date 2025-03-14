@@ -1,46 +1,26 @@
 'use client';
 
-import { useEffect, useReducer, useState } from 'react';
+import { ActionDispatch, useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 import debounce from 'lodash.debounce';
 import { FaGreaterThanEqual } from 'react-icons/fa6';
 
+import RatingStars from '@/components/reusable/rating-stars';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { filtersReducer, initialFiltersState } from '@/lib/reducers/filters-reducer';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Separator } from '@/components/ui/separator';
+import { FiltersAction, FiltersState } from '@/lib/reducers/filters-reducer';
 import { formatNumber } from '@/lib/utils';
+import { FiltersData } from '@/types';
 
-import RatingStars from '../reusable/rating-stars';
-import { Button } from '../ui/button';
-import { Checkbox } from '../ui/checkbox';
-import { Label } from '../ui/label';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import { Separator } from '../ui/separator';
-
-interface CatalogFiltersProps {}
-
-export type FiltersData = {
-    ratingCounts: {
-        key: string;
-        label?: string;
-        count: number;
-    }[];
-    videoDurationCounts: {
-        key: string;
-        label: string;
-        count: number;
-    }[];
-    categoriesCounts: {
-        key: string;
-        label: string;
-        count: number;
-    }[];
-    levelCounts: {
-        key: string;
-        label: string;
-        count: number;
-    }[];
-};
+interface CatalogFiltersProps {
+    state: FiltersState;
+    dispatch: ActionDispatch<[action: FiltersAction]>;
+}
 
 const fetchFiltersData = async (): Promise<FiltersData> => {
     return new Promise<FiltersData>((resolve) => {
@@ -141,8 +121,7 @@ const fetchFiltersData = async (): Promise<FiltersData> => {
     });
 };
 
-const CatalogFilters = ({}: CatalogFiltersProps) => {
-    const [state, dispatch] = useReducer(filtersReducer, initialFiltersState);
+const CatalogFilters = ({ state, dispatch }: CatalogFiltersProps) => {
     const [filtersData, setFiltersData] = useState<FiltersData | null>(null);
 
     useEffect(() => {
@@ -267,10 +246,10 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
                                     transition={{ duration: 0.3, delay: i * 0.05 }}
                                 >
                                     <Checkbox
-                                        checked={state.categories.includes(item.key)}
+                                        checked={state.videoDuration.includes(item.key)}
                                         onCheckedChange={() =>
                                             dispatch({
-                                                type: 'TOGGLE_CATEGORY',
+                                                type: 'TOGGLE_VIDEO_DURATION',
                                                 payload: item.key,
                                             })
                                         }
@@ -349,10 +328,10 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
                                     transition={{ duration: 0.3, delay: i * 0.05 }}
                                 >
                                     <Checkbox
-                                        checked={state.categories.includes(item.key)}
+                                        checked={state.level.includes(item.key)}
                                         onCheckedChange={() =>
                                             dispatch({
-                                                type: 'TOGGLE_CATEGORY',
+                                                type: 'TOGGLE_LEVEL',
                                                 payload: item.key,
                                             })
                                         }

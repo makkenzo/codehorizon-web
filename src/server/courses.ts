@@ -1,10 +1,26 @@
+import qs from 'qs';
+
 import { Course } from '@/types';
 
 import ApiClient from './api-client';
 
 class CoursesApiClient extends ApiClient {
-    async getCourses() {
+    async getCourses(
+        params: {
+            title?: string;
+            description?: string;
+            minRating?: number;
+            maxDuration?: number;
+            category?: string;
+            difficulty?: string[];
+            sortBy?: string;
+            page?: number;
+            size?: number;
+        } = { size: 12 }
+    ) {
         try {
+            console.log(params);
+
             const response = await this.get<{
                 content: Omit<Course, 'lessons'>[];
                 pageNumber: number;
@@ -12,7 +28,7 @@ class CoursesApiClient extends ApiClient {
                 totalElements: number;
                 totalPages: number;
                 isLast: boolean;
-            }>('/courses')
+            }>('/courses', { params, paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }) })
                 .then((res) => {
                     return res.data;
                 })

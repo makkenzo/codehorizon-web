@@ -1,23 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import debounce from 'lodash.debounce';
 
 import CatalogFilters from '@/components/catalog/filters';
 import CourseCard from '@/components/course/card';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FiltersState, filtersReducer, initialFiltersState } from '@/lib/reducers/filters-reducer';
+import { mapFiltersToApiParams } from '@/lib/utils';
 import CoursesApiClient from '@/server/courses';
 import { Course } from '@/types';
 
 const CoursesPage = () => {
+    const [state, dispatch] = useReducer(filtersReducer, initialFiltersState);
     const [courses, setCourses] = useState<Omit<Course, 'lessons'>[] | null>(null);
 
-    const fetchCourses = async () => {
+    const fetchCourses = async (filters: FiltersState) => {
         try {
-            const data = await new CoursesApiClient().getCourses();
+            const data = await new CoursesApiClient().getCourses(mapFiltersToApiParams(filters));
 
             if (data) {
                 setCourses(data?.content);
@@ -29,13 +33,15 @@ const CoursesPage = () => {
         }
     };
 
+    const debouncedFetchCourses = debounce(fetchCourses, 500);
+
     useEffect(() => {
-        fetchCourses();
-    }, []);
+        debouncedFetchCourses(state);
+    }, [state]);
 
     return (
         <PageWrapper className="grid grid-cols-4 mb-20 gap-5">
-            <CatalogFilters />
+            <CatalogFilters state={state} dispatch={dispatch} />
             <div className="col-span-3">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="font-semibold">Все курсы</h2>
