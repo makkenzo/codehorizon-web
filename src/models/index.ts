@@ -46,4 +46,3 @@ export type AccountSettings = {
         loginAlerts: boolean;
     };
 };
-

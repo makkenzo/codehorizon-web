@@ -5,16 +5,8 @@ import { useEffect, useReducer, useState } from 'react';
 import debounce from 'lodash.debounce';
 import { FaGreaterThanEqual } from 'react-icons/fa6';
 
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from '@/components/ui/accordion';
-import {
-    filtersReducer,
-    initialFiltersState,
-} from '@/lib/reducers/filters-reducer';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { filtersReducer, initialFiltersState } from '@/lib/reducers/filters-reducer';
 import { formatNumber } from '@/lib/utils';
 
 import RatingStars from '../reusable/rating-stars';
@@ -148,10 +140,6 @@ const fetchFiltersData = async (): Promise<FiltersData> => {
     });
 };
 
-/**
- * Type of the filters data.
- */
-
 const CatalogFilters = ({}: CatalogFiltersProps) => {
     const [state, dispatch] = useReducer(filtersReducer, initialFiltersState);
     const [filtersData, setFiltersData] = useState<FiltersData | null>(null);
@@ -173,27 +161,15 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
         <div className="shadow-[0px_6px_20px_0px_rgba(0,0,0,0.05)] rounded-[6px] bg-white h-fit">
             <div className="flex items-center justify-between py-4 px-6">
                 Фильтры
-                <Button
-                    variant="link"
-                    size="link"
-                    className="text-primary"
-                    onClick={() => dispatch({ type: 'RESET' })}
-                >
+                <Button variant="link" size="link" className="text-primary" onClick={() => dispatch({ type: 'RESET' })}>
                     Сбросить
                 </Button>
             </div>
             <Separator />
             <div className="flex items-center justify-between px-6">
-                <Accordion
-                    type="single"
-                    collapsible
-                    defaultValue="rating"
-                    className="w-full"
-                >
+                <Accordion type="single" collapsible defaultValue="rating" className="w-full">
                     <AccordionItem value="rating">
-                        <AccordionTrigger className="font-semibold">
-                            Рейтинг
-                        </AccordionTrigger>
+                        <AccordionTrigger className="font-semibold">Рейтинг</AccordionTrigger>
                         <AccordionContent>
                             <RadioGroup
                                 value={state.rating.toString()}
@@ -207,21 +183,11 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
                                 {filtersData?.ratingCounts
                                     .filter((a) => a.label !== undefined)
                                     .map((item) => (
-                                        <div
-                                            key={item.key}
-                                            className="flex items-center gap-2"
-                                        >
-                                            <RadioGroupItem
-                                                value={item.key}
-                                                id={item.key}
-                                            />
-                                            <Label
-                                                htmlFor={item.key}
-                                                className="w-full"
-                                            >
+                                        <div key={item.key} className="flex items-center gap-2">
+                                            <RadioGroupItem value={item.key} id={item.key} />
+                                            <Label htmlFor={item.key} className="w-full">
                                                 <div className="flex items-center gap-1 text-black-60/60">
-                                                    {item.label} (
-                                                    {formatNumber(item.count)})
+                                                    {item.label} ({formatNumber(item.count)})
                                                 </div>
                                             </Label>
                                         </div>
@@ -229,27 +195,13 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
                                 {filtersData?.ratingCounts
                                     .filter((a) => a.label === undefined)
                                     .map((item) => (
-                                        <div
-                                            key={item.key}
-                                            className="flex items-center gap-2"
-                                        >
-                                            <RadioGroupItem
-                                                value={item.key}
-                                                id={item.key}
-                                            />
-                                            <Label
-                                                htmlFor={item.key}
-                                                className="w-full grid grid-cols-2"
-                                            >
-                                                <RatingStars
-                                                    count={parseFloat(item.key)}
-                                                />
+                                        <div key={item.key} className="flex items-center gap-2">
+                                            <RadioGroupItem value={item.key} id={item.key} />
+                                            <Label htmlFor={item.key} className="w-full grid grid-cols-2">
+                                                <RatingStars count={parseFloat(item.key)} />
                                                 <div className="flex items-center gap-1 text-black-60/60">
-                                                    {parseFloat(item.key)}{' '}
-                                                    <FaGreaterThanEqual
-                                                        size={10}
-                                                    />{' '}
-                                                    ({formatNumber(item.count)})
+                                                    {parseFloat(item.key)} <FaGreaterThanEqual size={10} /> (
+                                                    {formatNumber(item.count)})
                                                 </div>
                                             </Label>
                                         </div>
@@ -261,26 +213,14 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
             </div>
             <Separator />
             <div className="flex items-center justify-between px-6">
-                <Accordion
-                    type="single"
-                    collapsible
-                    defaultValue="video-duration"
-                    className="w-full"
-                >
+                <Accordion type="single" collapsible defaultValue="video-duration" className="w-full">
                     <AccordionItem value="video-duration">
-                        <AccordionTrigger className="font-semibold">
-                            Длительность видео
-                        </AccordionTrigger>
+                        <AccordionTrigger className="font-semibold">Длительность видео</AccordionTrigger>
                         <AccordionContent className="space-y-2">
                             {filtersData?.videoDurationCounts.map((item) => (
-                                <div
-                                    key={item.key}
-                                    className="flex items-center gap-2"
-                                >
+                                <div key={item.key} className="flex items-center gap-2">
                                     <Checkbox
-                                        checked={state.categories.includes(
-                                            item.key
-                                        )}
+                                        checked={state.categories.includes(item.key)}
                                         onCheckedChange={() =>
                                             dispatch({
                                                 type: 'TOGGLE_CATEGORY',
@@ -289,12 +229,8 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
                                         }
                                         id={item.key}
                                     />
-                                    <Label
-                                        className="w-full text-black-60/60"
-                                        htmlFor={item.key}
-                                    >
-                                        {item.label} ({formatNumber(item.count)}
-                                        )
+                                    <Label className="w-full text-black-60/60" htmlFor={item.key}>
+                                        {item.label} ({formatNumber(item.count)})
                                     </Label>
                                 </div>
                             ))}
@@ -304,26 +240,14 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
             </div>
             <Separator />
             <div className="flex items-center justify-between px-6">
-                <Accordion
-                    type="single"
-                    collapsible
-                    defaultValue="categories"
-                    className="w-full"
-                >
+                <Accordion type="single" collapsible defaultValue="categories" className="w-full">
                     <AccordionItem value="categories">
-                        <AccordionTrigger className="font-semibold">
-                            Категории
-                        </AccordionTrigger>
+                        <AccordionTrigger className="font-semibold">Категории</AccordionTrigger>
                         <AccordionContent className="space-y-2">
                             {filtersData?.categoriesCounts.map((item) => (
-                                <div
-                                    key={item.key}
-                                    className="flex items-center gap-2"
-                                >
+                                <div key={item.key} className="flex items-center gap-2">
                                     <Checkbox
-                                        checked={state.categories.includes(
-                                            item.key
-                                        )}
+                                        checked={state.categories.includes(item.key)}
                                         onCheckedChange={() =>
                                             dispatch({
                                                 type: 'TOGGLE_CATEGORY',
@@ -332,12 +256,8 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
                                         }
                                         id={item.key}
                                     />
-                                    <Label
-                                        className="w-full text-black-60/60"
-                                        htmlFor={item.key}
-                                    >
-                                        {item.label} ({formatNumber(item.count)}
-                                        )
+                                    <Label className="w-full text-black-60/60" htmlFor={item.key}>
+                                        {item.label} ({formatNumber(item.count)})
                                     </Label>
                                 </div>
                             ))}
@@ -347,26 +267,14 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
             </div>
             <Separator />
             <div className="flex items-center justify-between px-6 pb-1">
-                <Accordion
-                    type="single"
-                    collapsible
-                    defaultValue="level"
-                    className="w-full"
-                >
+                <Accordion type="single" collapsible defaultValue="level" className="w-full">
                     <AccordionItem value="level">
-                        <AccordionTrigger className="font-semibold">
-                            Уровень
-                        </AccordionTrigger>
+                        <AccordionTrigger className="font-semibold">Уровень</AccordionTrigger>
                         <AccordionContent className="space-y-2">
                             {filtersData?.levelCounts.map((item) => (
-                                <div
-                                    key={item.key}
-                                    className="flex items-center gap-2"
-                                >
+                                <div key={item.key} className="flex items-center gap-2">
                                     <Checkbox
-                                        checked={state.categories.includes(
-                                            item.key
-                                        )}
+                                        checked={state.categories.includes(item.key)}
                                         onCheckedChange={() =>
                                             dispatch({
                                                 type: 'TOGGLE_CATEGORY',
@@ -375,12 +283,8 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
                                         }
                                         id={item.key}
                                     />
-                                    <Label
-                                        className="w-full text-black-60/60"
-                                        htmlFor={item.key}
-                                    >
-                                        {item.label} ({formatNumber(item.count)}
-                                        )
+                                    <Label className="w-full text-black-60/60" htmlFor={item.key}>
+                                        {item.label} ({formatNumber(item.count)})
                                     </Label>
                                 </div>
                             ))}
@@ -393,4 +297,3 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
 };
 
 export default CatalogFilters;
-

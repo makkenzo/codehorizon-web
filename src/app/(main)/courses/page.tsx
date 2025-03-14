@@ -1,12 +1,6 @@
 import CatalogFilters from '@/components/catalog/filters';
 import PageWrapper from '@/components/reusable/page-wrapper';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const CoursesPage = () => {
     return (
@@ -20,15 +14,9 @@ const CoursesPage = () => {
                             <SelectValue placeholder="Упорядочить по" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="most-popular">
-                                Самые популярные
-                            </SelectItem>
-                            <SelectItem value="cheapest">
-                                Сначала дешевые
-                            </SelectItem>
-                            <SelectItem value="most-expensive">
-                                Сначала дорогие
-                            </SelectItem>
+                            <SelectItem value="most-popular">Самые популярные</SelectItem>
+                            <SelectItem value="cheapest">Сначала дешевые</SelectItem>
+                            <SelectItem value="most-expensive">Сначала дорогие</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -36,10 +24,7 @@ const CoursesPage = () => {
                     {Array(12)
                         .fill(0)
                         .map((course, idx) => (
-                            <div
-                                key={idx}
-                                className="w-[285px] h-[318px] text-center"
-                            >
+                            <div key={idx} className="w-[285px] h-[318px] text-center">
                                 Card
                             </div>
                         ))}
@@ -51,4 +36,3 @@ const CoursesPage = () => {
 };
 
 export default CoursesPage;
-

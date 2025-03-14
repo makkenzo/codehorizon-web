@@ -207,4 +207,3 @@ const ResetPasswordPageContent = () => {
 };
 
 export default ResetPasswordPageContent;
-

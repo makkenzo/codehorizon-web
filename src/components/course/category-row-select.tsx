@@ -39,4 +39,3 @@ const CategoryRowSelect = () => {
 };
 
 export default CategoryRowSelect;
-

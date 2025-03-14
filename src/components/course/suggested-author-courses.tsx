@@ -15,4 +15,3 @@ const SuggestedAuthorCourses = () => {
 };
 
 export default SuggestedAuthorCourses;
-

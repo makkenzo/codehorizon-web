@@ -10,10 +10,7 @@ class CoursesApiClient extends ApiClient {
                     return res.data;
                 })
                 .catch((error) => {
-                    console.log(
-                        'Ошибка получения юзера',
-                        error.response?.status
-                    );
+                    console.log('Ошибка получения юзера', error.response?.status);
                 });
 
             if (response) {

@@ -10,4 +10,3 @@ export type ProfileActions = {
 };
 
 export type ProfileStore = ProfileState & ProfileActions;
-

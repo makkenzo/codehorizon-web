@@ -12,22 +12,11 @@ const RatingStars = ({ count }: RatingStarsProps) => {
     return (
         <div className="flex items-center gap-1">
             {Array.from({ length: fullStars }).map((_, i) => (
-                <FaStar
-                    key={`full-${i}`}
-                    size={14}
-                    className="text-secondary"
-                />
+                <FaStar key={`full-${i}`} size={14} className="text-secondary" />
             ))}
-            {hasHalfStar && (
-                <FaStarHalfAlt
-                    key="half"
-                    size={14}
-                    className="text-secondary"
-                />
-            )}
+            {hasHalfStar && <FaStarHalfAlt key="half" size={14} className="text-secondary" />}
         </div>
     );
 };
 
 export default RatingStars;
-

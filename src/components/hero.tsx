@@ -29,12 +29,9 @@ const Hero = () => {
             <div className="h-[603px]">
                 <PageWrapper className="h-full justify-center mt-0 flex flex-col">
                     <div className="w-1/2 flex flex-col gap-2">
-                        <h1 className="text-[48px] font-bold leading-[62px]">
-                            Узнавайте что-то новое каждый день
-                        </h1>
+                        <h1 className="text-[48px] font-bold leading-[62px]">Узнавайте что-то новое каждый день</h1>
                         <p className="text-black-60 font-light">
-                            Станьте профессионалами и будьте готовы
-                            присоединиться к IT-миру
+                            Станьте профессионалами и будьте готовы присоединиться к IT-миру
                         </p>
                         {isPending ? (
                             <div className="w-full flex items-center gap-4 mt-2">
@@ -44,13 +41,9 @@ const Hero = () => {
                         ) : (
                             <div className="flex items-center gap-4 mt-2">
                                 <Link href="/courses">
-                                    <Button variant="primary-inverted">
-                                        Выбрать курс
-                                    </Button>
+                                    <Button variant="primary-inverted">Выбрать курс</Button>
                                 </Link>
-                                {!isAuthenticated && (
-                                    <Button>Создать аккаунт</Button>
-                                )}
+                                {!isAuthenticated && <Button>Создать аккаунт</Button>}
                             </div>
                         )}
                     </div>
@@ -61,4 +54,3 @@ const Hero = () => {
 };
 
 export default Hero;
-

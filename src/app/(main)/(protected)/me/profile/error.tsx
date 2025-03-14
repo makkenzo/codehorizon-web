@@ -14,4 +14,3 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
         </div>
     );
 }
-

@@ -79,10 +79,7 @@ const ProfileHorizontalNav = ({}: ProfileHorizontalNavProps) => {
                                 {link.label}
                             </Button>
                         ) : (
-                            <Link
-                                href={link.href}
-                                aria-disabled={link.disabled}
-                            >
+                            <Link href={link.href} aria-disabled={link.disabled}>
                                 <Button
                                     disabled={link.disabled}
                                     variant="link"
@@ -103,4 +100,3 @@ const ProfileHorizontalNav = ({}: ProfileHorizontalNavProps) => {
 };
 
 export default ProfileHorizontalNav;
-

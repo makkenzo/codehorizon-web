@@ -10,4 +10,3 @@ export type UserActions = {
 };
 
 export type UserStore = UserState & UserActions;
-

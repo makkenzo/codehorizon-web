@@ -78,15 +78,8 @@ const Header = () => {
                         </div>
                         <GlobalSearch className="pt-1 lg:block hidden" />
                         <div className="flex items-center gap-4 w-full justify-end">
-                            <Link
-                                href={'/'}
-                                className="translate-y-0.5 lg:block hidden"
-                            >
-                                <Button
-                                    variant="link"
-                                    size="link"
-                                    className="text-foreground"
-                                >
+                            <Link href={'/'} className="translate-y-0.5 lg:block hidden">
+                                <Button variant="link" size="link" className="text-foreground">
                                     Стать ментором
                                 </Button>
                             </Link>
@@ -97,27 +90,16 @@ const Header = () => {
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Avatar className="hover:cursor-pointer lg:block hidden hover:outline-4 outline-primary outline-0 ease-in-out transition-all duration-100">
-                                            {profile?.avatarUrl && (
-                                                <AvatarImage
-                                                    src={profile?.avatarUrl}
-                                                />
-                                            )}
+                                            {profile?.avatarUrl && <AvatarImage src={profile?.avatarUrl} />}
                                             <AvatarFallback>
                                                 <FaUserSecret />
                                             </AvatarFallback>
                                         </Avatar>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent
-                                        className="w-56 px-4 py-2"
-                                        align="end"
-                                    >
+                                    <DropdownMenuContent className="w-56 px-4 py-2" align="end">
                                         <DropdownMenuLabel className="pb-0 pl-0">
-                                            {profile &&
-                                            profile.firstName &&
-                                            profile.lastName
-                                                ? profile.firstName +
-                                                  ' ' +
-                                                  profile.lastName
+                                            {profile && profile.firstName && profile.lastName
+                                                ? profile.firstName + ' ' + profile.lastName
                                                 : 'Мой Аккаунт'}
                                         </DropdownMenuLabel>
                                         <DropdownMenuLabel className="font-normal pt-0 pl-0">
@@ -126,9 +108,7 @@ const Header = () => {
                                         <DropdownMenuSeparator />
                                         <DropdownMenuGroup>
                                             <Link href="/me/profile">
-                                                <DropdownMenuItem>
-                                                    Профиль
-                                                </DropdownMenuItem>
+                                                <DropdownMenuItem>Профиль</DropdownMenuItem>
                                             </Link>
                                             <DropdownMenuItem>
                                                 <span>Моя корзина</span>
@@ -164,25 +144,15 @@ const Header = () => {
                                 </DropdownMenu>
                             ) : (
                                 <>
-                                    <Link
-                                        href={'/sign-in'}
-                                        className="lg:block hidden"
-                                    >
+                                    <Link href={'/sign-in'} className="lg:block hidden">
                                         <Button size="sm" variant="outline">
-                                            <span className="font-bold">
-                                                Войти
-                                            </span>
+                                            <span className="font-bold">Войти</span>
                                         </Button>
                                     </Link>
-                                    <Link
-                                        href={'/sign-up'}
-                                        className="lg:block hidden"
-                                    >
+                                    <Link href={'/sign-up'} className="lg:block hidden">
                                         <Button size="sm">
                                             <RiProgress5Line />
-                                            <span className="font-bold">
-                                                Зарегистрироваться
-                                            </span>
+                                            <span className="font-bold">Зарегистрироваться</span>
                                         </Button>
                                     </Link>
                                 </>

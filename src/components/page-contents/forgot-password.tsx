@@ -230,4 +230,3 @@ const ForgotPasswordPageContent = () => {
 };
 
 export default ForgotPasswordPageContent;
-

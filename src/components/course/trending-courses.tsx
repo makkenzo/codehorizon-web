@@ -15,4 +15,3 @@ const TrendingCourses = () => {
 };
 
 export default TrendingCourses;
-

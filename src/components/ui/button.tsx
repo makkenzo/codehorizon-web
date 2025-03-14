@@ -10,16 +10,11 @@ const buttonVariants = cva(
     {
         variants: {
             variant: {
-                default:
-                    'bg-primary text-primary-foreground hover:bg-accent-80',
-                'primary-inverted':
-                    'bg-white text-primary hover:bg-accent-80 hover:text-accent-foreground',
-                destructive:
-                    'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-                outline:
-                    'border border-border bg-background hover:bg-accent hover:text-accent-foreground',
-                secondary:
-                    'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+                default: 'bg-primary text-primary-foreground hover:bg-accent-80',
+                'primary-inverted': 'bg-white text-primary hover:bg-accent-80 hover:text-accent-foreground',
+                destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                outline: 'border border-border bg-background hover:bg-accent hover:text-accent-foreground',
+                secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
                 ghost: 'hover:bg-accent hover:text-accent-foreground',
                 link: 'text-primary underline-offset-4 hover:underline active:border-transparent',
             },
@@ -68,17 +63,9 @@ function Button({
                     <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-slate-600" />
                 ) : null}
                 {React.Children.map(children, (child) => {
-                    if (
-                        React.isValidElement<React.ComponentProps<'span'>>(
-                            child
-                        ) &&
-                        child.type == 'span'
-                    ) {
+                    if (React.isValidElement<React.ComponentProps<'span'>>(child) && child.type == 'span') {
                         return React.cloneElement(child, {
-                            className: cn(
-                                'translate-y-[0.5px]',
-                                child.props.className
-                            ),
+                            className: cn('translate-y-[0.5px]', child.props.className),
                         });
                     }
 

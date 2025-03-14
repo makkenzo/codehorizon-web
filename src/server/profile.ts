@@ -24,4 +24,3 @@ class ProfileApiClient extends ApiClient {
 }
 
 export default ProfileApiClient;
-

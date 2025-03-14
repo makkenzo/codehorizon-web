@@ -5,4 +5,3 @@ const ProfilePage = async () => {
 };
 
 export default ProfilePage;
-

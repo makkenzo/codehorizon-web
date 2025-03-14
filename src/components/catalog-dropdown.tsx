@@ -93,37 +93,26 @@ const CatalogDropdown = () => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button
-                    variant="link"
-                    className="text-foreground font-normal group"
-                >
+                <Button variant="link" className="text-foreground font-normal group">
                     <span>Каталог</span>
                     <ChevronUp className="ml-1 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-                className="w-72 left-12 after:right-0 after:left-7 after:-z-1"
-                align="start"
-            >
+            <DropdownMenuContent className="w-72 left-12 after:right-0 after:left-7 after:-z-1" align="start">
                 <DropdownMenuGroup>
                     {links.map((category) =>
                         category.sub ? (
                             <DropdownMenuSub key={category.label}>
                                 <DropdownMenuSubTrigger>
                                     <div className="flex flex-col px-3 py-2">
-                                        <h2 className="font-medium">
-                                            {category.label}
-                                        </h2>
+                                        <h2 className="font-medium">{category.label}</h2>
                                         <p className="text-xs text-muted-foreground focus:no-underline">
                                             {category.description}
                                         </p>
                                     </div>
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
-                                    <DropdownMenuSubContent
-                                        alignOffset={0}
-                                        sideOffset={5}
-                                    >
+                                    <DropdownMenuSubContent alignOffset={0} sideOffset={5}>
                                         {category.sub.map((subCategory) => (
                                             <DropdownMenuItem
                                                 key={subCategory.label}
@@ -134,9 +123,7 @@ const CatalogDropdown = () => {
                                                         {subCategory.label}
                                                     </h2>
                                                     <p className="text-xs text-muted-foreground ">
-                                                        {
-                                                            subCategory.description
-                                                        }
+                                                        {subCategory.description}
                                                     </p>
                                                 </div>
                                             </DropdownMenuItem>
@@ -145,18 +132,11 @@ const CatalogDropdown = () => {
                                 </DropdownMenuPortal>
                             </DropdownMenuSub>
                         ) : (
-                            <Link
-                                key={`${category.label}-${category.label}`}
-                                href={category.href}
-                            >
+                            <Link key={`${category.label}-${category.label}`} href={category.href}>
                                 <DropdownMenuItem className="group focus:no-underline">
                                     <div className="flex flex-col px-3 py-2 group">
-                                        <h2 className="font-medium group-focus:underline">
-                                            {category.label}
-                                        </h2>
-                                        <p className="text-xs text-muted-foreground">
-                                            {category.description}
-                                        </p>
+                                        <h2 className="font-medium group-focus:underline">{category.label}</h2>
+                                        <p className="text-xs text-muted-foreground">{category.description}</p>
                                     </div>
                                 </DropdownMenuItem>
                             </Link>
@@ -169,4 +149,3 @@ const CatalogDropdown = () => {
 };
 
 export default CatalogDropdown;
-

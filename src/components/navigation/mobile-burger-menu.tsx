@@ -1,17 +1,7 @@
 import { Fragment, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-    Bell,
-    Book,
-    ChevronDown,
-    Heart,
-    Home,
-    Menu,
-    Settings,
-    ShoppingBag,
-    X,
-} from 'lucide-react';
+import { Bell, Book, ChevronDown, Heart, Home, Menu, Settings, ShoppingBag, X } from 'lucide-react';
 import { RiProfileFill, RiProfileLine, RiProgress5Line } from 'react-icons/ri';
 
 import Link from 'next/link';
@@ -20,13 +10,7 @@ import { Profile } from '@/models';
 import { NavItem } from '@/types';
 
 import { Button } from '../ui/button';
-import {
-    Sheet,
-    SheetClose,
-    SheetContent,
-    SheetTitle,
-    SheetTrigger,
-} from '../ui/sheet';
+import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
 
 interface MobileBurgerMenuProps {
     profile?: Profile;
@@ -116,11 +100,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
               },
           ];
 
-    const allNavItems = [
-        ...commonNavItems.slice(0, 2),
-        ...authNavItems,
-        ...commonNavItems.slice(2),
-    ];
+    const allNavItems = [...commonNavItems.slice(0, 2), ...authNavItems, ...commonNavItems.slice(2)];
 
     return (
         <Sheet
@@ -177,19 +157,14 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                                         variant={item.variant || 'ghost'}
                                         className={`w-full justify-start ${item.className}`}
                                         size="lg"
-                                        onClick={() =>
-                                            item.subItems &&
-                                            toggleExpand(item.label)
-                                        }
+                                        onClick={() => item.subItems && toggleExpand(item.label)}
                                     >
                                         <div className="flex items-center justify-between w-full">
                                             <div className="flex items-center gap-2">
                                                 {item.icon}
                                                 {item.label}
                                             </div>
-                                            {item.subItems && (
-                                                <ChevronDown size={16} />
-                                            )}
+                                            {item.subItems && <ChevronDown size={16} />}
                                         </div>
                                     </Button>
                                 )}
@@ -203,49 +178,44 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                                         transition={{ duration: 0.3 }}
                                         className="flex flex-col gap-4"
                                     >
-                                        {item.subItems.map(
-                                            (subItem, subIndex) => (
-                                                <motion.div
-                                                    key={subItem.id}
-                                                    initial={{
-                                                        opacity: 0,
-                                                        x: -20,
-                                                    }}
-                                                    animate={{
-                                                        opacity: 1,
-                                                        x: 0,
-                                                    }}
-                                                    exit={{
-                                                        opacity: 0,
-                                                        x: -20,
-                                                    }}
-                                                    transition={{
-                                                        delay: subIndex * 0.1,
-                                                        duration: 0.3,
+                                        {item.subItems.map((subItem, subIndex) => (
+                                            <motion.div
+                                                key={subItem.id}
+                                                initial={{
+                                                    opacity: 0,
+                                                    x: -20,
+                                                }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    x: 0,
+                                                }}
+                                                exit={{
+                                                    opacity: 0,
+                                                    x: -20,
+                                                }}
+                                                transition={{
+                                                    delay: subIndex * 0.1,
+                                                    duration: 0.3,
+                                                }}
+                                            >
+                                                <Link
+                                                    href={subItem.href}
+                                                    onClick={() => {
+                                                        setOpen(false);
+                                                        setExpanded({});
                                                     }}
                                                 >
-                                                    <Link
-                                                        href={subItem.href}
-                                                        onClick={() => {
-                                                            setOpen(false);
-                                                            setExpanded({});
-                                                        }}
+                                                    <Button
+                                                        variant={subItem.variant || 'ghost'}
+                                                        className={`w-full justify-start ${subItem.className}`}
+                                                        size="lg"
                                                     >
-                                                        <Button
-                                                            variant={
-                                                                subItem.variant ||
-                                                                'ghost'
-                                                            }
-                                                            className={`w-full justify-start ${subItem.className}`}
-                                                            size="lg"
-                                                        >
-                                                            - {subItem.icon}
-                                                            {subItem.label}
-                                                        </Button>
-                                                    </Link>
-                                                </motion.div>
-                                            )
-                                        )}
+                                                        - {subItem.icon}
+                                                        {subItem.label}
+                                                    </Button>
+                                                </Link>
+                                            </motion.div>
+                                        ))}
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -258,4 +228,3 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
 };
 
 export default MobileBurgerMenu;
-

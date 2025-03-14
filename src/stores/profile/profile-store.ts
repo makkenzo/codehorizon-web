@@ -16,4 +16,3 @@ export const createProfileStore = (initState: ProfileState = defaultInitState) =
         clearProfile: () => set({ profile: undefined }),
     }));
 };
-

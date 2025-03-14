@@ -12,14 +12,7 @@ import { z } from 'zod';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -114,10 +107,7 @@ const ProfileForm = ({}) => {
         formData.append('file', file);
 
         try {
-            const response = await new S3ApiClient().uploadFile(
-                file,
-                'avatars'
-            );
+            const response = await new S3ApiClient().uploadFile(file, 'avatars');
 
             if (!response) throw new Error('Ошибка загрузки файла');
 
@@ -175,15 +165,9 @@ const ProfileForm = ({}) => {
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <motion.div
-                                    className="relative mx-auto"
-                                    variants={formVariants}
-                                    custom={0}
-                                >
+                                <motion.div className="relative mx-auto" variants={formVariants} custom={0}>
                                     <Avatar className="size-[60px]">
-                                        <AvatarImage
-                                            src={form.watch('avatarUrl') ?? ''}
-                                        />
+                                        <AvatarImage src={form.watch('avatarUrl') ?? ''} />
                                         <AvatarFallback>
                                             <FaUserSecret className="size-8" />
                                         </AvatarFallback>
@@ -216,18 +200,12 @@ const ProfileForm = ({}) => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>
-                                        <motion.label
-                                            variants={formVariants}
-                                            custom={index + 1}
-                                        >
+                                        <motion.label variants={formVariants} custom={index + 1}>
                                             {label}
                                         </motion.label>
                                     </FormLabel>
                                     <FormControl>
-                                        <motion.div
-                                            variants={formVariants}
-                                            custom={index + 1}
-                                        >
+                                        <motion.div variants={formVariants} custom={index + 1}>
                                             <Input
                                                 placeholder={placeholder!}
                                                 {...field}
@@ -242,15 +220,8 @@ const ProfileForm = ({}) => {
                         />
                     )
                 )}
-                <motion.div
-                    variants={formVariants}
-                    custom={Object.keys(fields).length + 1}
-                >
-                    <Button
-                        type="submit"
-                        className="max-w-[179px] w-full mx-auto mt-10"
-                        isLoading={pending}
-                    >
+                <motion.div variants={formVariants} custom={Object.keys(fields).length + 1}>
+                    <Button type="submit" className="max-w-[179px] w-full mx-auto mt-10" isLoading={pending}>
                         {pending ? 'Загрузка...' : 'Сохранить'}
                     </Button>
                 </motion.div>
@@ -260,4 +231,3 @@ const ProfileForm = ({}) => {
 };
 
 export default ProfileForm;
-

@@ -1,9 +1,4 @@
-export type FiltersActionType =
-    | 'SET_RATING'
-    | 'TOGGLE_VIDEO_DURATION'
-    | 'TOGGLE_CATEGORY'
-    | 'TOGGLE_LEVEL'
-    | 'RESET';
+export type FiltersActionType = 'SET_RATING' | 'TOGGLE_VIDEO_DURATION' | 'TOGGLE_CATEGORY' | 'TOGGLE_LEVEL' | 'RESET';
 
 export interface FiltersAction {
     type: FiltersActionType;
@@ -31,19 +26,14 @@ export const initialFiltersState: FiltersState = {
  * @param {FiltersAction} action - The action to perform on the state.
  * @returns {FiltersState} - The new state of the filters.
  */
-export const filtersReducer = (
-    state: FiltersState,
-    action: FiltersAction
-): FiltersState => {
+export const filtersReducer = (state: FiltersState, action: FiltersAction): FiltersState => {
     switch (action.type) {
         case 'SET_RATING':
             return { ...state, rating: action.payload as number };
         case 'TOGGLE_VIDEO_DURATION':
             return {
                 ...state,
-                videoDuration: state.videoDuration.includes(
-                    action.payload as string
-                )
+                videoDuration: state.videoDuration.includes(action.payload as string)
                     ? state.videoDuration.filter((d) => d !== action.payload)
                     : [...state.videoDuration, action.payload as string],
             };
@@ -67,4 +57,3 @@ export const filtersReducer = (
             return state;
     }
 };
-

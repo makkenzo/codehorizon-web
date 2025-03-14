@@ -33,4 +33,3 @@ export const useProfileStore = <T,>(selector: (store: ProfileStore) => T): T => 
 
     return useStore(profileStoreContext, selector);
 };
-

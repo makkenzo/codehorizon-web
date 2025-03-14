@@ -15,22 +15,18 @@
 [![Zod](https://img.shields.io/badge/Zod-3B82F6?style=for-the-badge&logo=typescript&logoColor=white)](https://zod.dev/)
 [![shadcn/ui](https://img.shields.io/badge/shadcn/ui-000000?style=for-the-badge&logo=shadcn&logoColor=white)](https://ui.shadcn.com/)
 
-
-
 <h2>🚀 Demo</h2>
 
 [https://codehorizon.makkenzo.com](https://codehorizon.makkenzo.com)
 
-  
-  
 <h2>🧐 Features</h2>
 
 Here're some of the project's best features:
 
-*   Browse and enroll in courses
-*   Take tests and quizzes
-*   Track learning progress
-*   User authentication and registration
+- Browse and enroll in courses
+- Take tests and quizzes
+- Track learning progress
+- User authentication and registration
 
 <h2>🛠️ Installation Steps:</h2>
 

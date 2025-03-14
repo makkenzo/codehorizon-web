@@ -18,4 +18,3 @@ const ZustandProvider = ({ children }: ZustandProviderProps) => {
 };
 
 export default ZustandProvider;
-

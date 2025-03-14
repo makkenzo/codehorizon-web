@@ -17,4 +17,3 @@ const CoursesInProgress = ({}: CoursesInProgressProps) => {
 };
 
 export default CoursesInProgress;
-

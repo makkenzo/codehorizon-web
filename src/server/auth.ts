@@ -108,4 +108,3 @@ class AuthApiClient extends ApiClient {
 }
 
 export default AuthApiClient;
-

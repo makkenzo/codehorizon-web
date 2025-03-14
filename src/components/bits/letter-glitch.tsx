@@ -287,4 +287,3 @@ const LetterGlitch = ({
 };
 
 export default LetterGlitch;
-

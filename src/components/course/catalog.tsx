@@ -30,4 +30,3 @@ const CourseCatalog = () => {
 };
 
 export default CourseCatalog;
-
