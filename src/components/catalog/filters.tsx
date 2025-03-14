@@ -2,6 +2,7 @@
 
 import { useEffect, useReducer, useState } from 'react';
 
+import { motion } from 'framer-motion';
 import debounce from 'lodash.debounce';
 import { FaGreaterThanEqual } from 'react-icons/fa6';
 
@@ -158,15 +159,33 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
     }, [state]);
 
     return (
-        <div className="shadow-[0px_6px_20px_0px_rgba(0,0,0,0.05)] rounded-[6px] bg-white h-fit">
-            <div className="flex items-center justify-between py-4 px-6">
+        <motion.div
+            className="shadow-[0px_6px_20px_0px_rgba(0,0,0,0.05)] rounded-[6px] bg-white h-fit"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.5 }}
+        >
+            <motion.div
+                className="flex items-center justify-between py-4 px-6"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+            >
                 Фильтры
                 <Button variant="link" size="link" className="text-primary" onClick={() => dispatch({ type: 'RESET' })}>
                     Сбросить
                 </Button>
-            </div>
+            </motion.div>
             <Separator />
-            <div className="flex items-center justify-between px-6">
+
+            {/* Рейтинг */}
+            <motion.div
+                className="flex items-center justify-between px-6"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+            >
                 <Accordion type="single" collapsible defaultValue="rating" className="w-full">
                     <AccordionItem value="rating">
                         <AccordionTrigger className="font-semibold">Рейтинг</AccordionTrigger>
@@ -182,20 +201,34 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
                             >
                                 {filtersData?.ratingCounts
                                     .filter((a) => a.label !== undefined)
-                                    .map((item) => (
-                                        <div key={item.key} className="flex items-center gap-2">
+                                    .map((item, i) => (
+                                        <motion.div
+                                            key={item.key}
+                                            className="flex items-center gap-2"
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            transition={{ duration: 0.3, delay: i * 0.05 }}
+                                        >
                                             <RadioGroupItem value={item.key} id={item.key} />
                                             <Label htmlFor={item.key} className="w-full">
                                                 <div className="flex items-center gap-1 text-black-60/60">
                                                     {item.label} ({formatNumber(item.count)})
                                                 </div>
                                             </Label>
-                                        </div>
+                                        </motion.div>
                                     ))}
                                 {filtersData?.ratingCounts
                                     .filter((a) => a.label === undefined)
-                                    .map((item) => (
-                                        <div key={item.key} className="flex items-center gap-2">
+                                    .map((item, i) => (
+                                        <motion.div
+                                            key={item.key}
+                                            className="flex items-center gap-2"
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            transition={{ duration: 0.3, delay: i * 0.05 + 0.2 }}
+                                        >
                                             <RadioGroupItem value={item.key} id={item.key} />
                                             <Label htmlFor={item.key} className="w-full grid grid-cols-2">
                                                 <RatingStars count={parseFloat(item.key)} />
@@ -204,21 +237,35 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
                                                     {formatNumber(item.count)})
                                                 </div>
                                             </Label>
-                                        </div>
+                                        </motion.div>
                                     ))}
                             </RadioGroup>
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
-            </div>
+            </motion.div>
             <Separator />
-            <div className="flex items-center justify-between px-6">
+
+            {/* Длительность видео */}
+            <motion.div
+                className="flex items-center justify-between px-6"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.3 }}
+            >
                 <Accordion type="single" collapsible defaultValue="video-duration" className="w-full">
                     <AccordionItem value="video-duration">
                         <AccordionTrigger className="font-semibold">Длительность видео</AccordionTrigger>
                         <AccordionContent className="space-y-2">
-                            {filtersData?.videoDurationCounts.map((item) => (
-                                <div key={item.key} className="flex items-center gap-2">
+                            {filtersData?.videoDurationCounts.map((item, i) => (
+                                <motion.div
+                                    key={item.key}
+                                    className="flex items-center gap-2"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    transition={{ duration: 0.3, delay: i * 0.05 }}
+                                >
                                     <Checkbox
                                         checked={state.categories.includes(item.key)}
                                         onCheckedChange={() =>
@@ -232,20 +279,34 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
                                     <Label className="w-full text-black-60/60" htmlFor={item.key}>
                                         {item.label} ({formatNumber(item.count)})
                                     </Label>
-                                </div>
+                                </motion.div>
                             ))}
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
-            </div>
+            </motion.div>
             <Separator />
-            <div className="flex items-center justify-between px-6">
+
+            {/* Категории */}
+            <motion.div
+                className="flex items-center justify-between px-6"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.4 }}
+            >
                 <Accordion type="single" collapsible defaultValue="categories" className="w-full">
                     <AccordionItem value="categories">
                         <AccordionTrigger className="font-semibold">Категории</AccordionTrigger>
                         <AccordionContent className="space-y-2">
-                            {filtersData?.categoriesCounts.map((item) => (
-                                <div key={item.key} className="flex items-center gap-2">
+                            {filtersData?.categoriesCounts.map((item, i) => (
+                                <motion.div
+                                    key={item.key}
+                                    className="flex items-center gap-2"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    transition={{ duration: 0.3, delay: i * 0.05 }}
+                                >
                                     <Checkbox
                                         checked={state.categories.includes(item.key)}
                                         onCheckedChange={() =>
@@ -259,20 +320,34 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
                                     <Label className="w-full text-black-60/60" htmlFor={item.key}>
                                         {item.label} ({formatNumber(item.count)})
                                     </Label>
-                                </div>
+                                </motion.div>
                             ))}
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
-            </div>
+            </motion.div>
             <Separator />
-            <div className="flex items-center justify-between px-6 pb-1">
+
+            {/* Уровень */}
+            <motion.div
+                className="flex items-center justify-between px-6 pb-1"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.5 }}
+            >
                 <Accordion type="single" collapsible defaultValue="level" className="w-full">
                     <AccordionItem value="level">
                         <AccordionTrigger className="font-semibold">Уровень</AccordionTrigger>
                         <AccordionContent className="space-y-2">
-                            {filtersData?.levelCounts.map((item) => (
-                                <div key={item.key} className="flex items-center gap-2">
+                            {filtersData?.levelCounts.map((item, i) => (
+                                <motion.div
+                                    key={item.key}
+                                    className="flex items-center gap-2"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    transition={{ duration: 0.3, delay: i * 0.05 }}
+                                >
                                     <Checkbox
                                         checked={state.categories.includes(item.key)}
                                         onCheckedChange={() =>
@@ -286,13 +361,13 @@ const CatalogFilters = ({}: CatalogFiltersProps) => {
                                     <Label className="w-full text-black-60/60" htmlFor={item.key}>
                                         {item.label} ({formatNumber(item.count)})
                                     </Label>
-                                </div>
+                                </motion.div>
                             ))}
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
 

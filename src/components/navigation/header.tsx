@@ -144,7 +144,10 @@ const Header = () => {
                                 </DropdownMenu>
                             ) : (
                                 <>
-                                    <Link href={'/sign-in'} className="lg:block hidden">
+                                    <Link
+                                        href={`/sign-in?from=${encodeURIComponent(pathname)}`}
+                                        className="lg:block hidden"
+                                    >
                                         <Button size="sm" variant="outline">
                                             <span className="font-bold">Войти</span>
                                         </Button>

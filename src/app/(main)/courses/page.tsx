@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from 'react';
 
+import { AnimatePresence, motion } from 'framer-motion';
+
 import CatalogFilters from '@/components/catalog/filters';
 import CourseCard from '@/components/course/card';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import CoursesApiClient from '@/server/courses';
 import { Course } from '@/types';
 
@@ -34,7 +37,7 @@ const CoursesPage = () => {
         <PageWrapper className="grid grid-cols-4 mb-20 gap-5">
             <CatalogFilters />
             <div className="col-span-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-6">
                     <h2 className="font-semibold">Все курсы</h2>
                     <Select>
                         <SelectTrigger className="w-[180px]">
@@ -47,22 +50,53 @@ const CoursesPage = () => {
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="grid grid-cols-3 gap-5">
-                    {courses ? (
-                        courses.length > 0 ? (
-                            courses.map((course, idx) => (
-                                // <div key={idx} className="w-[285px] h-[318px] text-center bg-emerald-200">
-                                //     Card
-                                // </div>
-                                <CourseCard course={course} key={course.id} />
-                            ))
+                <AnimatePresence>
+                    <motion.div
+                        className="grid grid-cols-3 gap-5"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        {courses ? (
+                            courses.length > 0 ? (
+                                courses.map((course, idx) => (
+                                    <motion.div
+                                        key={course.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        transition={{ duration: 0.5, ease: 'easeInOut', delay: idx * 0.1 }}
+                                    >
+                                        <CourseCard course={course} />
+                                    </motion.div>
+                                ))
+                            ) : (
+                                <div>No courses found</div>
+                            )
                         ) : (
-                            <div>No courses found</div>
-                        )
-                    ) : (
-                        <div>Loading...</div>
-                    )}
-                </div>
+                            Array.from({ length: 12 }).map((_, i) => (
+                                <motion.div
+                                    key={`skeleton-${i}`}
+                                    className="flex flex-col gap-1"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ duration: 0.5, ease: 'easeInOut', delay: i * 0.1 }}
+                                >
+                                    <Skeleton className="h-[162px] w-full rounded-[23px]" />
+                                    <Skeleton className="h-[24px] w-2/3" />
+                                    <Skeleton className="h-[24px] w-2/5" />
+                                    <Skeleton className="h-[20px] w-full" />
+                                    <Skeleton className="h-[20px] w-full" />
+                                    <Skeleton className="h-[20px] w-1/4" />
+                                    <Skeleton className="h-[20px] w-1/2" />
+                                    <Skeleton className="h-[26px] w-1/3" />
+                                </motion.div>
+                            ))
+                        )}
+                    </motion.div>
+                </AnimatePresence>
                 <div className="bg-purple-200 mt-15">Pagination here</div>
             </div>
         </PageWrapper>
