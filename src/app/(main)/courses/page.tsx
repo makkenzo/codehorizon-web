@@ -45,14 +45,14 @@ const CoursesPage = () => {
             <div className="col-span-3">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="font-semibold">Все курсы</h2>
-                    <Select>
+                    <Select onValueChange={(value) => dispatch({ type: 'SET_SORT_BY', payload: value })}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Упорядочить по" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="most-popular">Самые популярные</SelectItem>
-                            <SelectItem value="cheapest">Сначала дешевые</SelectItem>
-                            <SelectItem value="most-expensive">Сначала дорогие</SelectItem>
+                            <SelectItem value="popular">Самые популярные</SelectItem>
+                            <SelectItem value="price_asc">Сначала дешевые</SelectItem>
+                            <SelectItem value="price_desc">Сначала дорогие</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

@@ -35,6 +35,7 @@ export const mapFiltersToApiParams = (filters: FiltersState) => {
         maxDuration,
         category: filters.categories.length > 0 ? filters.categories.join(',') : undefined,
         difficulty: filters.level.length > 0 ? filters.level.map((l) => l.toUpperCase()) : undefined,
+        sortBy: filters.sortBy,
     };
 };
 

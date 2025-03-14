@@ -1,4 +1,10 @@
-export type FiltersActionType = 'SET_RATING' | 'TOGGLE_VIDEO_DURATION' | 'TOGGLE_CATEGORY' | 'TOGGLE_LEVEL' | 'RESET';
+export type FiltersActionType =
+    | 'SET_RATING'
+    | 'SET_SORT_BY'
+    | 'TOGGLE_VIDEO_DURATION'
+    | 'TOGGLE_CATEGORY'
+    | 'TOGGLE_LEVEL'
+    | 'RESET';
 
 export interface FiltersAction {
     type: FiltersActionType;
@@ -10,6 +16,7 @@ export interface FiltersState {
     videoDuration: string[];
     categories: string[];
     level: string[];
+    sortBy: string;
 }
 
 export const initialFiltersState: FiltersState = {
@@ -17,6 +24,7 @@ export const initialFiltersState: FiltersState = {
     videoDuration: [],
     categories: [],
     level: [],
+    sortBy: 'popular',
 };
 
 /**
@@ -50,6 +58,11 @@ export const filtersReducer = (state: FiltersState, action: FiltersAction): Filt
                 level: state.level.includes(action.payload as string)
                     ? state.level.filter((l) => l !== action.payload)
                     : [...state.level, action.payload as string],
+            };
+        case 'SET_SORT_BY':
+            return {
+                ...state,
+                sortBy: action.payload as string,
             };
         case 'RESET':
             return initialFiltersState;
