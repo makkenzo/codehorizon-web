@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 class ApiClient {
     private axiosInstance: AxiosInstance;
     private isRefreshing = false;
-    private refreshSubscribers: ((token: string) => void)[] = [];
+    private refreshSubscribers: (() => void)[] = [];
     private excludedResponsePaths = ['/auth/login', '/auth/register', '/auth/me'];
 
     constructor() {
@@ -31,12 +31,10 @@ class ApiClient {
                 if (error.response?.status === 401 && !originalRequest._retry) {
                     originalRequest._retry = true;
                     try {
-                        const newToken = await this.refreshToken();
-                        if (!newToken) {
-                            this.logout();
-                            return Promise.reject(error);
-                        }
-                        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                        await this.refreshToken();
+                        this.refreshSubscribers.forEach((callback) => callback());
+                        this.refreshSubscribers = [];
+
                         return this.axiosInstance(originalRequest);
                     } catch (refreshError) {
                         console.error('Не удалось обновить токен', refreshError);
@@ -49,7 +47,7 @@ class ApiClient {
         );
     }
 
-    private async refreshToken(): Promise<string | undefined> {
+    private async refreshToken(): Promise<void> {
         if (this.isRefreshing) {
             return new Promise((resolve) => {
                 this.refreshSubscribers.push(resolve);
@@ -59,12 +57,6 @@ class ApiClient {
         this.isRefreshing = true;
         try {
             const response = await this.axiosInstance.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`);
-            const newAccessToken = response.data.accessToken;
-
-            this.refreshSubscribers.forEach((callback) => callback(newAccessToken));
-            this.refreshSubscribers = [];
-
-            return newAccessToken;
         } catch (error) {
             this.logout();
         } finally {
