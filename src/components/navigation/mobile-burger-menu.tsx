@@ -1,14 +1,16 @@
 import { Fragment, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bell, Book, ChevronDown, Heart, Home, Menu, Settings, ShoppingBag, X } from 'lucide-react';
+import { Bell, Book, ChevronDown, ChevronUp, Heart, Home, Menu, Settings, ShoppingBag, X } from 'lucide-react';
 import { RiProfileFill, RiProfileLine, RiProgress5Line } from 'react-icons/ri';
 
 import Link from 'next/link';
 
+import { cn } from '@/lib/utils';
 import { Profile } from '@/models';
 import { NavItem } from '@/types';
 
+import { links } from '../catalog-dropdown';
 import { Button } from '../ui/button';
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
 
@@ -33,9 +35,9 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
         },
         {
             id: '3c4af7c0-5a5c-5432-9b2c-a6606a0df7be',
-            href: '/',
             label: 'Каталог',
             icon: <Book />,
+            href: '/courses',
         },
         {
             id: '2c5bf575-c80b-571f-a0e5-3a5a53e3e28a',
@@ -155,7 +157,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                                 ) : (
                                     <Button
                                         variant={item.variant || 'ghost'}
-                                        className={`w-full justify-start ${item.className}`}
+                                        className={`w-full justify-start group ${item.className}`}
                                         size="lg"
                                         onClick={() => item.subItems && toggleExpand(item.label)}
                                     >
@@ -164,7 +166,15 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                                                 {item.icon}
                                                 {item.label}
                                             </div>
-                                            {item.subItems && <ChevronDown size={16} />}
+                                            {item.subItems && (
+                                                <ChevronUp
+                                                    size={16}
+                                                    className={cn(
+                                                        'transition-transform duration-300',
+                                                        expanded[item.label] && 'rotate-180'
+                                                    )}
+                                                />
+                                            )}
                                         </div>
                                     </Button>
                                 )}
@@ -199,7 +209,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                                                 }}
                                             >
                                                 <Link
-                                                    href={subItem.href}
+                                                    href={subItem.href || '#'}
                                                     onClick={() => {
                                                         setOpen(false);
                                                         setExpanded({});

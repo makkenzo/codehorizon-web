@@ -8,17 +8,11 @@ export interface NavItem {
     id: string;
     href?: string;
     label: string;
-    icon: React.ReactNode;
+    description?: string;
+    icon?: React.ReactNode;
     variant?: 'ghost' | 'default';
     className?: string;
-    subItems?: {
-        id: string;
-        href: string;
-        label: string;
-        icon: React.ReactNode;
-        variant?: 'ghost' | 'default';
-        className?: string;
-    }[];
+    subItems?: NavItem[];
 }
 
 export interface ProfileNavItem {
