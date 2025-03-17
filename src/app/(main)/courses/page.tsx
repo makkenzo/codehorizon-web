@@ -1,25 +1,25 @@
 'use client';
 
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import debounce from 'lodash.debounce';
 
 import CatalogFilters from '@/components/catalog/filters';
 import CourseCard from '@/components/course/card';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FiltersState, filtersReducer, initialFiltersState } from '@/lib/reducers/filters-reducer';
 import { mapFiltersToApiParams } from '@/lib/utils';
 import CoursesApiClient from '@/server/courses';
+import { useCatalogFiltersStore } from '@/stores/catalog-filters/catalog-filters-store-provider';
+import { CatalogFiltersState } from '@/stores/catalog-filters/types';
 import { Course } from '@/types';
 
 const CoursesPage = () => {
-    const [state, dispatch] = useReducer(filtersReducer, initialFiltersState);
+    const { categories, level, rating, videoDuration, sortBy, setSortBy } = useCatalogFiltersStore((state) => state);
     const [courses, setCourses] = useState<Omit<Course, 'lessons'>[] | null>(null);
 
-    const fetchCourses = async (filters: FiltersState) => {
+    const fetchCourses = async (filters: CatalogFiltersState) => {
         try {
             const data = await new CoursesApiClient().getCourses(mapFiltersToApiParams(filters));
 
@@ -33,19 +33,17 @@ const CoursesPage = () => {
         }
     };
 
-    const debouncedFetchCourses = debounce(fetchCourses, 500);
-
     useEffect(() => {
-        fetchCourses(state);
-    }, [state]);
+        fetchCourses({ categories, level, rating, videoDuration, sortBy });
+    }, [categories, level, rating, videoDuration, sortBy]);
 
     return (
         <PageWrapper className="grid grid-cols-4 mb-20 gap-5">
-            <CatalogFilters state={state} dispatch={dispatch} />
+            <CatalogFilters />
             <div className="col-span-3">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="font-semibold">Все курсы</h2>
-                    <Select onValueChange={(value) => dispatch({ type: 'SET_SORT_BY', payload: value })}>
+                    <Select onValueChange={(value) => setSortBy(value)}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Упорядочить по" />
                         </SelectTrigger>

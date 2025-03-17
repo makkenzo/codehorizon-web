@@ -1,5 +1,4 @@
 import { createStore } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 import { Profile } from '@/models';
 

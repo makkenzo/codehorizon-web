@@ -13,14 +13,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
-import { FiltersAction, FiltersState } from '@/lib/reducers/filters-reducer';
 import { formatNumber } from '@/lib/utils';
+import { useCatalogFiltersStore } from '@/stores/catalog-filters/catalog-filters-store-provider';
 import { FiltersData } from '@/types';
-
-interface CatalogFiltersProps {
-    state: FiltersState;
-    dispatch: ActionDispatch<[action: FiltersAction]>;
-}
 
 const fetchFiltersData = async (): Promise<FiltersData> => {
     return new Promise<FiltersData>((resolve) => {
@@ -121,7 +116,20 @@ const fetchFiltersData = async (): Promise<FiltersData> => {
     });
 };
 
-const CatalogFilters = ({ state, dispatch }: CatalogFiltersProps) => {
+const CatalogFilters = () => {
+    const {
+        categories,
+        level,
+        rating,
+        videoDuration,
+        sortBy,
+        setSortBy,
+        reset,
+        setRating,
+        toggleCategory,
+        toggleLevel,
+        toggleVideoDuration,
+    } = useCatalogFiltersStore((state) => state);
     const [filtersData, setFiltersData] = useState<FiltersData | null>(null);
 
     useEffect(() => {
@@ -134,8 +142,8 @@ const CatalogFilters = ({ state, dispatch }: CatalogFiltersProps) => {
     }, 500);
 
     useEffect(() => {
-        updateFilters(state);
-    }, [state]);
+        updateFilters({ categories, level, rating, videoDuration, sortBy });
+    }, [categories, level, rating, videoDuration, sortBy]);
 
     return (
         <motion.div
@@ -152,7 +160,7 @@ const CatalogFilters = ({ state, dispatch }: CatalogFiltersProps) => {
                 transition={{ duration: 0.3, delay: 0.1 }}
             >
                 Фильтры
-                <Button variant="link" size="link" className="text-primary" onClick={() => dispatch({ type: 'RESET' })}>
+                <Button variant="link" size="link" className="text-primary" onClick={() => reset()}>
                     Сбросить
                 </Button>
             </motion.div>
@@ -169,15 +177,7 @@ const CatalogFilters = ({ state, dispatch }: CatalogFiltersProps) => {
                     <AccordionItem value="rating">
                         <AccordionTrigger className="font-semibold">Рейтинг</AccordionTrigger>
                         <AccordionContent>
-                            <RadioGroup
-                                value={state.rating.toString()}
-                                onValueChange={(val) =>
-                                    dispatch({
-                                        type: 'SET_RATING',
-                                        payload: val,
-                                    })
-                                }
-                            >
+                            <RadioGroup value={rating.toString()} onValueChange={(val) => setRating(val)}>
                                 {filtersData?.ratingCounts
                                     .filter((a) => a.label !== undefined)
                                     .map((item, i) => (
@@ -246,13 +246,8 @@ const CatalogFilters = ({ state, dispatch }: CatalogFiltersProps) => {
                                     transition={{ duration: 0.3, delay: i * 0.05 }}
                                 >
                                     <Checkbox
-                                        checked={state.videoDuration.includes(item.key)}
-                                        onCheckedChange={() =>
-                                            dispatch({
-                                                type: 'TOGGLE_VIDEO_DURATION',
-                                                payload: item.key,
-                                            })
-                                        }
+                                        checked={videoDuration.includes(item.key)}
+                                        onCheckedChange={() => toggleVideoDuration(item.key)}
                                         id={item.key}
                                     />
                                     <Label className="w-full text-black-60/60" htmlFor={item.key}>
@@ -287,13 +282,8 @@ const CatalogFilters = ({ state, dispatch }: CatalogFiltersProps) => {
                                     transition={{ duration: 0.3, delay: i * 0.05 }}
                                 >
                                     <Checkbox
-                                        checked={state.categories.includes(item.key)}
-                                        onCheckedChange={() =>
-                                            dispatch({
-                                                type: 'TOGGLE_CATEGORY',
-                                                payload: item.key,
-                                            })
-                                        }
+                                        checked={categories.includes(item.key)}
+                                        onCheckedChange={() => toggleCategory(item.key)}
                                         id={item.key}
                                     />
                                     <Label className="w-full text-black-60/60" htmlFor={item.key}>
@@ -328,13 +318,8 @@ const CatalogFilters = ({ state, dispatch }: CatalogFiltersProps) => {
                                     transition={{ duration: 0.3, delay: i * 0.05 }}
                                 >
                                     <Checkbox
-                                        checked={state.level.includes(item.key)}
-                                        onCheckedChange={() =>
-                                            dispatch({
-                                                type: 'TOGGLE_LEVEL',
-                                                payload: item.key,
-                                            })
-                                        }
+                                        checked={level.includes(item.key)}
+                                        onCheckedChange={() => toggleLevel(item.key)}
                                         id={item.key}
                                     />
                                     <Label className="w-full text-black-60/60" htmlFor={item.key}>

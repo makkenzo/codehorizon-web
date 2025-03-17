@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 
+import { CatalogFiltersStoreProvider } from './catalog-filters/catalog-filters-store-provider';
 import { ProfileStoreProvider } from './profile/profile-store-provider';
 import { UserStoreProvider } from './user/user-store-provider';
 
@@ -12,7 +13,9 @@ interface ZustandProviderProps {
 const ZustandProvider = ({ children }: ZustandProviderProps) => {
     return (
         <ProfileStoreProvider>
-            <UserStoreProvider>{children}</UserStoreProvider>
+            <UserStoreProvider>
+                <CatalogFiltersStoreProvider>{children}</CatalogFiltersStoreProvider>
+            </UserStoreProvider>
         </ProfileStoreProvider>
     );
 };

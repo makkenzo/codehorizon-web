@@ -1,8 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Filter } from 'lucide-react';
 import { FaUserSecret } from 'react-icons/fa6';
 import { HiShoppingCart } from 'react-icons/hi';
+import { IoFilter } from 'react-icons/io5';
 import { RiProgress5Line } from 'react-icons/ri';
 
 import Link from 'next/link';
@@ -83,9 +85,15 @@ const Header = () => {
                                     Стать ментором
                                 </Button>
                             </Link>
-                            <Button size="sm" variant="ghost" className="!px-2">
-                                <HiShoppingCart className="size-[20px]" />
-                            </Button>
+                            {pathname.includes('courses') ? (
+                                <Button size="sm" variant="ghost" className="!px-2">
+                                    <IoFilter className="size-[20px]" />
+                                </Button>
+                            ) : (
+                                <Button size="sm" variant="ghost" className="!px-2">
+                                    <HiShoppingCart className="size-[20px]" />
+                                </Button>
+                            )}
                             {isAuthenticated ? (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
