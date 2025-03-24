@@ -27,7 +27,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
             <Link href={`/courses/${course.id}`} className="w-fit hover:underline">
                 <h2 className="font-semibold w-fit line-clamp-1">{course.title}</h2>
             </Link>
-            <Link href={`/u/${course.authorId}`} className="w-fit hover:underline hover:text-primary">
+            <Link href={`/u/${course.authorUsername}`} className="w-fit hover:underline hover:text-primary">
                 <div className="flex items-center gap-1 pl-0.5">
                     <PiUserBold className="text-black-60/60" />
                     <span className="text-primary">{course.authorName}</span>

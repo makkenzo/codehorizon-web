@@ -21,6 +21,15 @@ class ProfileApiClient extends ApiClient {
             return response;
         } catch (error) {}
     }
+
+    async getUserProfile(userId: string) {
+        try {
+            const response = await this.get<Profile>(`/profiles/${userId}`)
+                .then((response) => response.data)
+                .catch((e) => console.error(e));
+            return response;
+        } catch (error) {}
+    }
 }
 
 export default ProfileApiClient;

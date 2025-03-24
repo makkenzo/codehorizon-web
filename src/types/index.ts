@@ -35,6 +35,7 @@ export interface Course {
     videoPreview?: string;
     authorId: string;
     authorName: string;
+    authorUsername: string;
     lessons: Lesson[];
     rating: number;
     price: number;
