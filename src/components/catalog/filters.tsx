@@ -5,6 +5,7 @@ import { ActionDispatch, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import debounce from 'lodash.debounce';
 import { FaGreaterThanEqual } from 'react-icons/fa6';
+import { IoFilter } from 'react-icons/io5';
 
 import RatingStars from '@/components/reusable/rating-stars';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -123,7 +124,6 @@ const CatalogFilters = () => {
         rating,
         videoDuration,
         sortBy,
-        setSortBy,
         reset,
         setRating,
         toggleCategory,
@@ -147,7 +147,7 @@ const CatalogFilters = () => {
 
     return (
         <motion.div
-            className="shadow-[0px_6px_20px_0px_rgba(0,0,0,0.05)] rounded-[6px] bg-white h-fit"
+            className="shadow-[0px_6px_20px_0px_rgba(0,0,0,0.05)] rounded-[6px] bg-white h-fit md:block hidden"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}

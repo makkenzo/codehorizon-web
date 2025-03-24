@@ -21,11 +21,11 @@ const CourseCard = ({ course }: CourseCardProps) => {
                     alt={course.title}
                     width={285}
                     height={161}
-                    className="h-[161px] object-cover rounded-[23px] bg-foreground/10 group-hover:rounded-md transition-all duration-200 ease-in-out group-hover:scale-95"
+                    className="h-[90px] md:h-[161px] object-cover rounded-sm md:rounded-[23px] bg-foreground/10 group-hover:rounded-md transition-all duration-200 ease-in-out group-hover:scale-95"
                 />
             </Link>
             <Link href={`/courses/${course.id}`} className="w-fit hover:underline">
-                <h2 className="font-semibold w-fit">{course.title}</h2>
+                <h2 className="font-semibold w-fit line-clamp-1">{course.title}</h2>
             </Link>
             <Link href={`/u/${course.authorId}`} className="w-fit hover:underline hover:text-primary">
                 <div className="flex items-center gap-1 pl-0.5">
@@ -33,7 +33,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
                     <span className="text-primary">{course.authorName}</span>
                 </div>
             </Link>
-            <p className="line-clamp-3">
+            <p className="line-clamp-2 md:line-clamp-3">
                 {course.description && course.description !== '' ? course.description : 'Курс не описан'}
             </p>
             <RatingStars count={course.rating} showEmpty />

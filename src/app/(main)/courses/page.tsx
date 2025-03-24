@@ -38,10 +38,10 @@ const CoursesPage = () => {
     }, [categories, level, rating, videoDuration, sortBy]);
 
     return (
-        <PageWrapper className="grid grid-cols-4 mb-20 gap-5">
+        <PageWrapper className="md:grid md:grid-cols-4 mb-20 max-md:mt-4 gap-5">
             <CatalogFilters />
-            <div className="col-span-3">
-                <div className="flex items-center justify-between mb-6">
+            <div className="md:col-span-3">
+                <div className="md:flex hidden items-center justify-between mb-6">
                     <h2 className="font-semibold">Все курсы</h2>
                     <Select onValueChange={(value) => setSortBy(value)}>
                         <SelectTrigger className="w-[180px]">
@@ -56,7 +56,7 @@ const CoursesPage = () => {
                 </div>
                 <AnimatePresence>
                     <motion.div
-                        className="grid grid-cols-3 gap-5"
+                        className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}

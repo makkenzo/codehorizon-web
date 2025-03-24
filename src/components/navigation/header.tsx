@@ -29,6 +29,8 @@ import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
 
 import CatalogDropdown from '../catalog-dropdown';
+import CatalogFilters from '../catalog/filters';
+import CatalogFiltersMobile from '../catalog/filters-mobile';
 import GlobalSearch from '../reusable/global-search';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Skeleton } from '../ui/skeleton';
@@ -86,9 +88,7 @@ const Header = () => {
                                 </Button>
                             </Link>
                             {pathname.includes('courses') ? (
-                                <Button size="sm" variant="ghost" className="!px-2">
-                                    <IoFilter className="size-[20px]" />
-                                </Button>
+                                <CatalogFiltersMobile />
                             ) : (
                                 <Button size="sm" variant="ghost" className="!px-2">
                                     <HiShoppingCart className="size-[20px]" />
