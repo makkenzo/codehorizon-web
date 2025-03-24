@@ -3,6 +3,8 @@ import { createStore } from 'zustand';
 import { CatalogFiltersState, CatalogFiltersStore } from './types';
 
 export const defaultInitState: CatalogFiltersState = {
+    page: 1,
+    totalPages: null,
     rating: 'all',
     videoDuration: [],
     categories: [],
@@ -13,6 +15,8 @@ export const defaultInitState: CatalogFiltersState = {
 export const createCatalogFiltersStore = (initState: CatalogFiltersState = defaultInitState) => {
     return createStore<CatalogFiltersStore>()((set) => ({
         ...initState,
+        setPage: (page: number) => set(() => ({ page })),
+        setTotalPages: (totalPages: number) => set(() => ({ totalPages })),
         setRating: (rating: string) => set(() => ({ rating: rating || 'all' })),
         toggleVideoDuration: (duration: string) =>
             set((state) => ({

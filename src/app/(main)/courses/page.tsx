@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import CatalogFilters from '@/components/catalog/filters';
 import CourseCard from '@/components/course/card';
+import MyPagination from '@/components/reusable/my-pagination';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,15 +17,17 @@ import { CatalogFiltersState } from '@/stores/catalog-filters/types';
 import { Course } from '@/types';
 
 const CoursesPage = () => {
-    const { categories, level, rating, videoDuration, sortBy, setSortBy } = useCatalogFiltersStore((state) => state);
+    const { categories, level, rating, videoDuration, sortBy, setSortBy, page, setPage, totalPages, setTotalPages } =
+        useCatalogFiltersStore((state) => state);
     const [courses, setCourses] = useState<Omit<Course, 'lessons'>[] | null>(null);
 
-    const fetchCourses = async (filters: CatalogFiltersState) => {
+    const fetchCourses = async (filters: Omit<CatalogFiltersState, 'totalPages'>) => {
         try {
             const data = await new CoursesApiClient().getCourses(mapFiltersToApiParams(filters));
 
             if (data) {
                 setCourses(data?.content);
+                setTotalPages(data?.totalPages);
             } else {
                 setCourses([]);
             }
@@ -34,8 +37,8 @@ const CoursesPage = () => {
     };
 
     useEffect(() => {
-        fetchCourses({ categories, level, rating, videoDuration, sortBy });
-    }, [categories, level, rating, videoDuration, sortBy]);
+        fetchCourses({ categories, level, rating, videoDuration, sortBy, page });
+    }, [categories, level, rating, videoDuration, sortBy, page]);
 
     return (
         <PageWrapper className="md:grid md:grid-cols-4 mb-20 max-md:mt-4 gap-5">
@@ -101,7 +104,13 @@ const CoursesPage = () => {
                         )}
                     </motion.div>
                 </AnimatePresence>
-                <div className="bg-purple-200 mt-15">Pagination here</div>
+                {totalPages ? (
+                    <MyPagination className="mt-15" currentPage={page} onPageChange={setPage} totalPages={totalPages} />
+                ) : (
+                    <div className="flex mt-15 justify-center">
+                        <Skeleton className="w-[458px] h-[37px]" />
+                    </div>
+                )}
             </div>
         </PageWrapper>
     );
