@@ -49,6 +49,17 @@ class CoursesApiClient extends ApiClient {
 
         return null;
     }
+
+    async getCourseBySlug(slug: string) {
+        try {
+            const response = await this.get<Course>(`/courses/${slug}`).then((res) => res.data);
+            console.log(response);
+
+            return response;
+        } catch (error) {
+            console.log('Ошибка получения юзера', error);
+        }
+    }
 }
 
 export default CoursesApiClient;

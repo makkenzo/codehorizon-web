@@ -30,6 +30,7 @@ export enum CourseDifficultyLevels {
 export interface Course {
     id: string;
     title: string;
+    slug: string;
     description: string;
     imagePreview?: string;
     videoPreview?: string;

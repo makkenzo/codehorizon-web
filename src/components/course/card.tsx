@@ -15,7 +15,7 @@ interface CourseCardProps {
 const CourseCard = ({ course }: CourseCardProps) => {
     return (
         <div className="w-full flex flex-col gap-1">
-            <Link href={`/courses/${course.id}`} className="group">
+            <Link href={`/courses/${course.slug}`} className="group">
                 <Image
                     src={course.imagePreview ?? '/image_not_available.webp'}
                     alt={course.title}
@@ -24,7 +24,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
                     className="h-[90px] md:h-[161px] object-cover rounded-sm md:rounded-[23px] bg-foreground/10 group-hover:rounded-md transition-all duration-200 ease-in-out group-hover:scale-95"
                 />
             </Link>
-            <Link href={`/courses/${course.id}`} className="w-fit hover:underline">
+            <Link href={`/courses/${course.slug}`} className="w-fit hover:underline">
                 <h2 className="font-semibold w-fit line-clamp-1">{course.title}</h2>
             </Link>
             <Link href={`/u/${course.authorUsername}`} className="w-fit hover:underline hover:text-primary">
