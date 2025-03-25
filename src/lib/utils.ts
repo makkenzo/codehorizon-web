@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-import { FiltersState } from './reducers/filters-reducer';
+import { CatalogFiltersState } from '@/stores/catalog-filters/types';
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -14,7 +14,7 @@ export const formatNumber = (num: number) => {
     return num;
 };
 
-export const mapFiltersToApiParams = (filters: FiltersState) => {
+export const mapFiltersToApiParams = (filters: CatalogFiltersState) => {
     const parseDuration = (duration: string) => {
         if (duration.includes('and-more')) {
             const match = duration.match(/(\d+)-and-more-hours/);

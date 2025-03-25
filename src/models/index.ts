@@ -14,6 +14,14 @@ export type User = {
     accountSettings: AccountSettings | null;
 };
 
+export type UserProfile = {
+    id: string;
+    username: string;
+    email: string;
+    isVerified: boolean;
+    profile: Omit<Profile, 'id' | 'userId'>;
+};
+
 export type Profile = {
     id: string;
     avatarUrl: string | null;
