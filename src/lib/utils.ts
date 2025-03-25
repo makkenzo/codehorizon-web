@@ -41,3 +41,8 @@ export const mapFiltersToApiParams = (filters: Omit<CatalogFiltersState, 'totalP
 };
 
 export const extractNumber = (value: string) => parseFloat(value.split('-')[0]);
+
+export const getPercentDifference = (initialValue: number, currentValue: number) => {
+    const diff = ((currentValue - initialValue) / initialValue) * 100;
+    return `${diff > 0 ? '+' : ''}${diff.toFixed(1)}%`;
+};

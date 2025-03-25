@@ -62,4 +62,3 @@ export const filtersReducer = (state: CatalogFiltersState, action: FiltersAction
             return state;
     }
 };
-

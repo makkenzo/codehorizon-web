@@ -41,4 +41,3 @@ const UserPage = async (props: UserPageProps) => {
 };
 
 export default UserPage;
-

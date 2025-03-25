@@ -323,4 +323,3 @@ const CatalogFiltersMobile = ({}: CatalogFiltersMobileProps) => {
 };
 
 export default CatalogFiltersMobile;
-

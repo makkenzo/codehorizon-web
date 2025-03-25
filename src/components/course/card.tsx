@@ -43,4 +43,3 @@ const CourseCard = ({ course }: CourseCardProps) => {
 };
 
 export default CourseCard;
-

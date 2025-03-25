@@ -90,4 +90,3 @@ const MyPagination = ({ className, currentPage, onPageChange, totalPages, showEl
 };
 
 export default MyPagination;
-

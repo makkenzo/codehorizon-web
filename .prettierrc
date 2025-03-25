@@ -8,7 +8,7 @@
     "arrowParens": "always",
     "jsxSingleQuote": false,
     "bracketSameLine": false,
-    "endOfLine": "crlf",
+    "endOfLine": "lf",
     "importOrder": [
         "^react$",
         "<THIRD_PARTY_MODULES>",

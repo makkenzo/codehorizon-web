@@ -20,4 +20,3 @@ const Price = ({ price, discount }: PriceProps) => {
 };
 
 export default Price;
-

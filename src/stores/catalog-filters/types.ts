@@ -30,4 +30,3 @@ export type CatalogFiltersActions = {
 };
 
 export type CatalogFiltersStore = CatalogFiltersState & CatalogFiltersActions;
-

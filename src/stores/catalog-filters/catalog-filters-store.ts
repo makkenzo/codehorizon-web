@@ -38,4 +38,3 @@ export const createCatalogFiltersStore = (initState: CatalogFiltersState = defau
         reset: () => set({ ...defaultInitState }),
     }));
 };
-
