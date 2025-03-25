@@ -13,7 +13,7 @@ class ProfileApiClient extends ApiClient {
         } catch (error) {}
     }
 
-    async updateProfile(profile: Omit<Profile, 'id' | 'userId'>) {
+    async updateProfile(profile: Omit<Profile, 'id' | 'userId' | 'avatarColor'>) {
         try {
             const response = await this.put<Profile>('/profiles/', profile)
                 .then((response) => response.data)
