@@ -27,18 +27,10 @@ class ProfileApiClient extends ApiClient {
             const response = await this.get<UserProfile>(`/users/${username}/profile`)
                 .then((response) => response.data)
                 .catch((e) => console.error(e));
+            console.log(response);
+
             return response;
         } catch (error) {}
-    }
-
-    async getDominantColor(avatarUrl: string | null) {
-        if (!avatarUrl) return;
-
-        const response = await fetch(
-            `http://marchenzo:3000/api/get-avatar-color?imageUrl=${encodeURIComponent(avatarUrl)}`
-        ).then((res) => res.json());
-
-        return response.color;
     }
 }
 

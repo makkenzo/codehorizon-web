@@ -25,6 +25,7 @@ export type UserProfile = {
 export type Profile = {
     id: string;
     avatarUrl: string | null;
+    avatarColor: string | null;
     userId: string;
     bio: string | null;
     firstName: string | null;

@@ -15,10 +15,13 @@ const UserPage = async (props: UserPageProps) => {
     if (!user) {
         throw new Error('User not found');
     }
-    const bgColor = await new ProfileApiClient().getDominantColor(user.profile.avatarUrl);
+
     return (
         <PageWrapper>
-            <div className="w-full h-[150px] relative rounded" style={{ backgroundColor: bgColor }}>
+            <div
+                className="w-full h-[150px] relative rounded"
+                style={{ backgroundColor: user.profile.avatarColor ?? '#3ECCB2' }}
+            >
                 <div className="absolute translate-y-1/3 left-1/6 flex flex-col gap-4">
                     <Avatar className="size-40 outline-4 outline-white">
                         {user.profile.avatarUrl && <AvatarImage src={user.profile.avatarUrl} />}
