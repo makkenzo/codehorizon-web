@@ -140,15 +140,6 @@ const CatalogFiltersMobile = ({}: CatalogFiltersMobileProps) => {
         fetchFiltersData().then((data) => setFiltersData(data));
     }, []);
 
-    const updateFilters = debounce((filters) => {
-        console.log('Sending filters to server:', filters);
-        // Здесь должен быть реальный API-запрос
-    }, 500);
-
-    useEffect(() => {
-        updateFilters({ categories, level, rating, videoDuration, sortBy });
-    }, [categories, level, rating, videoDuration, sortBy]);
-
     return (
         <Sheet>
             <SheetTrigger asChild>

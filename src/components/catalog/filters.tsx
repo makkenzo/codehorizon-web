@@ -136,15 +136,6 @@ const CatalogFilters = () => {
         fetchFiltersData().then((data) => setFiltersData(data));
     }, []);
 
-    const updateFilters = debounce((filters) => {
-        console.log('Sending filters to server:', filters);
-        // Здесь должен быть реальный API-запрос
-    }, 500);
-
-    useEffect(() => {
-        updateFilters({ categories, level, rating, videoDuration, sortBy });
-    }, [categories, level, rating, videoDuration, sortBy]);
-
     return (
         <motion.div
             className="shadow-[0px_6px_20px_0px_rgba(0,0,0,0.05)] rounded-[6px] bg-white h-fit md:block hidden"

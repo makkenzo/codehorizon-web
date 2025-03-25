@@ -27,7 +27,6 @@ class ProfileApiClient extends ApiClient {
             const response = await this.get<UserProfile>(`/users/${username}/profile`)
                 .then((response) => response.data)
                 .catch((e) => console.error(e));
-            console.log(response);
 
             return response;
         } catch (error) {}
