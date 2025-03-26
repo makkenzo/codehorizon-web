@@ -92,6 +92,9 @@ importers:
       next-video:
         specifier: ^2.2.0
         version: 2.2.0(@types/react-dom@19.0.4(@types/react@19.0.12))(@types/react@19.0.12)(next@15.2.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      player.style:
+        specifier: ^0.1.6
+        version: 0.1.6(react@19.0.0)
       postprocessing:
         specifier: ^6.37.1
         version: 6.37.1(three@0.173.0)

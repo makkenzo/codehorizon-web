@@ -48,6 +48,7 @@ export interface Course {
 export interface Lesson {
     id: string;
     title: string;
+    slug: string;
     content: string;
     codeExamples?: string[];
     tasks?: Task[];

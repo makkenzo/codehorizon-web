@@ -1,6 +1,6 @@
 import qs from 'qs';
 
-import { Course } from '@/types';
+import { Course, Lesson } from '@/types';
 
 import ApiClient from './api-client';
 
@@ -52,7 +52,13 @@ class CoursesApiClient extends ApiClient {
 
     async getCourseBySlug(slug: string) {
         try {
-            const response = await this.get<Course>(`/courses/${slug}`).then((res) => res.data);
+            const response = await this.get<
+                Omit<Course, 'lessons' | 'authorId'> & {
+                    lessons: Pick<Lesson, 'title' | 'slug'>[];
+                    authorUsername: string;
+                    authorName: string;
+                }
+            >(`/courses/${slug}`).then((res) => res.data);
 
             return response;
         } catch (error) {
