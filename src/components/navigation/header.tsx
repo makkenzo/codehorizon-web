@@ -1,10 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Filter } from 'lucide-react';
 import { FaUserSecret } from 'react-icons/fa6';
-import { HiShoppingCart } from 'react-icons/hi';
-import { IoFilter } from 'react-icons/io5';
 import { RiProgress5Line } from 'react-icons/ri';
 
 import Link from 'next/link';
@@ -29,7 +26,6 @@ import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
 
 import CatalogDropdown from '../catalog-dropdown';
-import CatalogFilters from '../catalog/filters';
 import CatalogFiltersMobile from '../catalog/filters-mobile';
 import GlobalSearch from '../reusable/global-search';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -87,13 +83,7 @@ const Header = () => {
                                     Стать ментором
                                 </Button>
                             </Link>
-                            {pathname.includes('courses') ? (
-                                <CatalogFiltersMobile />
-                            ) : (
-                                <Button size="sm" variant="ghost" className="!px-2">
-                                    <HiShoppingCart className="size-[20px]" />
-                                </Button>
-                            )}
+                            {pathname.includes('courses') ? <CatalogFiltersMobile /> : null}
                             {isAuthenticated ? (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -118,9 +108,9 @@ const Header = () => {
                                             <Link href="/me/profile">
                                                 <DropdownMenuItem>Профиль</DropdownMenuItem>
                                             </Link>
-                                            <DropdownMenuItem>
-                                                <span>Моя корзина</span>
-                                            </DropdownMenuItem>
+                                            <Link href="/me/courses">
+                                                <DropdownMenuItem>Мои курсы</DropdownMenuItem>
+                                            </Link>
                                             <DropdownMenuItem>
                                                 <span>Список желаемого</span>
                                             </DropdownMenuItem>

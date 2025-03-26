@@ -8,7 +8,6 @@ export type User = {
     roles: string[];
     courses: CourseProgress[];
     createdCourseIds: string[];
-    cartId: string | null;
     wishlistId: string | null;
     profileId: string | null;
     accountSettings: AccountSettings | null;

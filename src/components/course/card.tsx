@@ -2,6 +2,7 @@ import { PiUserBold } from 'react-icons/pi';
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import { Course } from '@/types';
 
@@ -10,9 +11,12 @@ import RatingStars from '../reusable/rating-stars';
 
 interface CourseCardProps {
     course: Omit<Course, 'lessons'>;
+    progress?: number;
 }
 
-const CourseCard = ({ course }: CourseCardProps) => {
+const CourseCard = ({ course, progress }: CourseCardProps) => {
+    const pathname = usePathname();
+
     return (
         <div className="w-full flex flex-col gap-1">
             <Link href={`/courses/${course.slug}`} className="group">
@@ -33,11 +37,20 @@ const CourseCard = ({ course }: CourseCardProps) => {
                     <span className="text-primary">{course.authorName}</span>
                 </div>
             </Link>
-            <p className="line-clamp-2 md:line-clamp-3">
-                {course.description && course.description !== '' ? course.description : 'Курс не описан'}
-            </p>
-            <RatingStars count={course.rating} showEmpty />
-            <Price discount={course.discount} price={course.price} />
+            {course.description && pathname !== '/me/courses' ? (
+                <p className="line-clamp-2 md:line-clamp-3">{course.description}</p>
+            ) : null}
+            {pathname !== '/me/courses' ? <RatingStars count={course.rating} showEmpty /> : null}
+            {course.price && pathname !== '/me/courses' ? (
+                <Price discount={course.discount} price={course.price} />
+            ) : null}
+            {typeof progress !== 'undefined' ? (
+                progress === 0 ? (
+                    <div className="text-black-60">Вы еще не начали этот курс</div>
+                ) : (
+                    <div className="text-black-60">{progress}% пройдено</div>
+                )
+            ) : null}
         </div>
     );
 };

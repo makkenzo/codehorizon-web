@@ -6,46 +6,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { cn } from '@/lib/utils';
-import { ProfileNavItem } from '@/types';
+import { HorizontalTabNavItem } from '@/types';
 
 import { Button } from './ui/button';
 
-interface ProfileHorizontalNavProps {}
+interface HorizontalTabNavProps {
+    title: string;
+    tabs: HorizontalTabNavItem[];
+}
 
-const profileNavLinks: ProfileNavItem[] = [
-    {
-        label: 'Профиль',
-        href: '/me/profile',
-        disabled: false,
-    },
-    {
-        label: 'Персонализация',
-        href: '/me/personalization',
-        disabled: true,
-    },
-    {
-        label: 'Аккаунт',
-        href: '/me/account',
-        disabled: true,
-    },
-    {
-        label: 'Способы оплаты',
-        href: '/me/payment-methods',
-        disabled: true,
-    },
-    {
-        label: 'Уведомления',
-        href: '/me/notifications',
-        disabled: true,
-    },
-    {
-        label: 'Конфиденциальность',
-        href: '/me/privacy',
-        disabled: true,
-    },
-];
-
-const ProfileHorizontalNav = ({}: ProfileHorizontalNavProps) => {
+const HorizontalTabNav = ({ title, tabs }: HorizontalTabNavProps) => {
     const pathname = usePathname();
 
     return (
@@ -56,10 +26,10 @@ const ProfileHorizontalNav = ({}: ProfileHorizontalNavProps) => {
                 transition={{ duration: 0.4, ease: 'easeInOut' }}
                 className="text-xl font-bold text-center"
             >
-                Личный кабинет
+                {title}
             </motion.h1>
             <div className="flex gap-4 items-center mx-auto">
-                {profileNavLinks.map((link, index) => (
+                {tabs.map((link, index) => (
                     <motion.div
                         key={link.href}
                         initial={{ opacity: 0, y: -10 }}
@@ -99,4 +69,4 @@ const ProfileHorizontalNav = ({}: ProfileHorizontalNavProps) => {
     );
 };
 
-export default ProfileHorizontalNav;
+export default HorizontalTabNav;

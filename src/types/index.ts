@@ -15,7 +15,7 @@ export interface NavItem {
     subItems?: NavItem[];
 }
 
-export interface ProfileNavItem {
+export interface HorizontalTabNavItem {
     label: string;
     href: string;
     disabled: boolean;

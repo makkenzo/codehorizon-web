@@ -65,6 +65,43 @@ class CoursesApiClient extends ApiClient {
             console.log('Ошибка получения юзера', error);
         }
     }
+
+    async getMyCourses(
+        params: {
+            page?: number;
+            size?: number;
+        } = {}
+    ) {
+        try {
+            const defaultParams = { size: 12, ...params };
+
+            const response = await this.get<{
+                content: { course: Omit<Course, 'lessons'>; progress: number }[];
+                pageNumber: number;
+                pageSize: number;
+                totalElements: number;
+                totalPages: number;
+                isLast: boolean;
+            }>('/users/me/courses', {
+                params: defaultParams,
+                paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
+            })
+                .then((res) => {
+                    return res.data;
+                })
+                .catch((error) => {
+                    console.log('Ошибка получения курсов пользователя', error.response?.status);
+                });
+
+            if (response) {
+                return response;
+            }
+        } catch (error) {
+            console.log('Ошибка получения курсов пользователя', error);
+        }
+
+        return null;
+    }
 }
 
 export default CoursesApiClient;
