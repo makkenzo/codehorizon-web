@@ -24,10 +24,9 @@ const CourseBuyButton = ({ courseId, courseSlug }: CourseBuyButtonProps) => {
     const { isAuthenticated } = useAuth();
     const user = useUserStore((state) => state.user);
     const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     if (!courseId) return null;
-
-    const router = useRouter();
 
     const handleCheckout = async () => {
         if (!isAuthenticated) {
