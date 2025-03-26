@@ -46,3 +46,9 @@ export const getPercentDifference = (initialValue: number, currentValue: number)
     const diff = ((currentValue - initialValue) / initialValue) * 100;
     return `${diff > 0 ? '+' : ''}${diff.toFixed(1)}%`;
 };
+
+export const formatDuration = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return hours > 0 ? `${hours} ч ${minutes} мин` : `${minutes} мин`;
+};

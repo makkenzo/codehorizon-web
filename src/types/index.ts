@@ -42,6 +42,7 @@ export interface Course {
     price: number;
     discount: number;
     difficulty: CourseDifficultyLevels;
+    videoLength?: number;
 }
 
 export interface Lesson {
