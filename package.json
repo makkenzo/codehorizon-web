@@ -24,6 +24,7 @@
         "@radix-ui/react-slot": "^1.1.2",
         "@react-three/fiber": "^9.1.0",
         "@react-three/postprocessing": "^3.0.4",
+        "@stripe/stripe-js": "^6.1.0",
         "@tailwindcss/postcss": "^4.0.15",
         "@types/qs": "^6.9.18",
         "@vercel/analytics": "^1.5.0",

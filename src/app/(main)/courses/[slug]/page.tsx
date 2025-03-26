@@ -9,6 +9,7 @@ import { MdChromeReaderMode } from 'react-icons/md';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import CourseBuyButton from '@/components/course-buy-button';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import Price from '@/components/reusable/price';
 import { Button } from '@/components/ui/button';
@@ -105,7 +106,7 @@ const CoursePage = async (props: CoursePageProps) => {
                             </div>
                         ) : null}
                         <div className="w-full flex flex-col gap-4 mt-8">
-                            <Button size="lg">Купить</Button>
+                            <CourseBuyButton key={course.id} courseId={course.id} courseSlug={course.slug} />
                             <Button variant="outline" size="lg">
                                 <FaRegHeart className="size-5" />В желаемое
                             </Button>
@@ -144,7 +145,7 @@ const CoursePage = async (props: CoursePageProps) => {
                                 <h2 className="bg-primary text-white p-1 font-semibold rounded-[4px] w-fit">
                                     {author.username}
                                 </h2>
-                                <h3 className="text-white">{course.authorName}</h3>
+                                <h3 className="text-white text-2xl">{course.authorName}</h3>
                             </div>
                         </Link>
                     </div>
