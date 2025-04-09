@@ -12,7 +12,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
         {
             label: 'Желаемое',
             href: '/me/courses?tab=wishlist',
-            disabled: true,
+            disabled: false,
         },
         {
             label: 'Пройденные',

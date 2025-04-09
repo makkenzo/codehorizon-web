@@ -91,3 +91,17 @@ export type FiltersData = {
         count: number;
     }[];
 };
+
+export type PagedResponse<T> = {
+    content: T[];
+    pageNumber: number;
+    pageSize: number;
+    totalElements: number;
+    totalPages: number;
+    isLast: boolean;
+};
+
+export type CourseProgress = {
+    course: Omit<Course, 'lessons'>;
+    progress: number;
+};

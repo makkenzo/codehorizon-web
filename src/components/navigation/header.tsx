@@ -111,9 +111,9 @@ const Header = () => {
                                             <Link href="/me/courses">
                                                 <DropdownMenuItem>Мои курсы</DropdownMenuItem>
                                             </Link>
-                                            <DropdownMenuItem>
-                                                <span>Список желаемого</span>
-                                            </DropdownMenuItem>
+                                            <Link href="/me/courses?tab=wishlist">
+                                                <DropdownMenuItem>Список желаемого</DropdownMenuItem>
+                                            </Link>
                                         </DropdownMenuGroup>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuGroup>

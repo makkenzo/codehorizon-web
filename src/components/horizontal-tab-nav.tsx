@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 import { cn } from '@/lib/utils';
 import { HorizontalTabNavItem } from '@/types';
@@ -17,6 +17,24 @@ interface HorizontalTabNavProps {
 
 const HorizontalTabNav = ({ title, tabs }: HorizontalTabNavProps) => {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const currentTab = searchParams.get('tab');
+
+    const checkIsActive = (tabHref: string): boolean => {
+        // Разбираем href таба на путь и параметры
+        const [linkPathname, linkQueryString] = tabHref.split('?');
+        const linkParams = new URLSearchParams(linkQueryString || '');
+        const linkTab = linkParams.get('tab');
+
+        // Таб активен, если:
+        // 1. Текущий pathname совпадает с pathname таба И
+        // 2. Значение параметра 'tab' в URL совпадает со значением 'tab' в href таба
+        //    (учитываем случай, когда 'tab' отсутствует и там, и там - это базовый таб)
+        const pathnameMatches = pathname === linkPathname;
+        const tabMatches = currentTab === linkTab; // Сравнивает null с null, 'wishlist' с 'wishlist' и т.д.
+
+        return pathnameMatches && tabMatches;
+    };
 
     return (
         <>
@@ -43,7 +61,7 @@ const HorizontalTabNav = ({ title, tabs }: HorizontalTabNavProps) => {
                                 variant="link"
                                 className={cn(
                                     'font-normal text-foreground underline-offset-[12px] decoration-2 decoration-primary',
-                                    pathname === link.href && 'underline'
+                                    checkIsActive(link.href) && 'underline'
                                 )}
                             >
                                 {link.label}
@@ -55,7 +73,7 @@ const HorizontalTabNav = ({ title, tabs }: HorizontalTabNavProps) => {
                                     variant="link"
                                     className={cn(
                                         'font-normal text-foreground underline-offset-[12px] decoration-2 decoration-primary',
-                                        pathname === link.href && 'underline'
+                                        checkIsActive(link.href) && 'underline'
                                     )}
                                 >
                                     {link.label}

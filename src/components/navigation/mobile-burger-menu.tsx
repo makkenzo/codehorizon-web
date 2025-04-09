@@ -47,7 +47,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
         },
         {
             id: '53ca9885-ba7a-5957-a305-7697cd654dda',
-            href: '/',
+            href: '/me/courses?tab=wishlist',
             label: 'Список желаемого',
             icon: <Heart />,
         },

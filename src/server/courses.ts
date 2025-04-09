@@ -1,10 +1,30 @@
 import qs from 'qs';
 
-import { Course, Lesson } from '@/types';
+import { Course, CourseProgress, Lesson, PagedResponse } from '@/types';
 
 import ApiClient from './api-client';
 
+type PagedCoursesResponse = {
+    content: { course: Omit<Course, 'lessons'>; progress: number }[];
+    pageNumber: number;
+    pageSize: number;
+    totalElements: number;
+    totalPages: number;
+    isLast: boolean;
+};
+
+type PagedWishlistResponse = {
+    content: Omit<Course, 'lessons'>[];
+    pageNumber: number;
+    pageSize: number;
+    totalElements: number;
+    totalPages: number;
+    isLast: boolean;
+};
+
 class CoursesApiClient extends ApiClient {
+    private readonly defaultPageSize = 12;
+
     async getCourses(
         params: {
             title?: string;
@@ -66,41 +86,33 @@ class CoursesApiClient extends ApiClient {
         }
     }
 
-    async getMyCourses(
-        params: {
-            page?: number;
-            size?: number;
-        } = {}
-    ) {
+    private async fetchPaginated<T>(
+        endpoint: string,
+        params: Record<string, any> = {}
+    ): Promise<PagedResponse<T> | null> {
         try {
-            const defaultParams = { size: 12, ...params };
-
-            const response = await this.get<{
-                content: { course: Omit<Course, 'lessons'>; progress: number }[];
-                pageNumber: number;
-                pageSize: number;
-                totalElements: number;
-                totalPages: number;
-                isLast: boolean;
-            }>('/users/me/courses', {
-                params: defaultParams,
+            const response = await this.get<PagedResponse<T>>(endpoint, {
+                params: { size: this.defaultPageSize, ...params },
                 paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
-            })
-                .then((res) => {
-                    return res.data;
-                })
-                .catch((error) => {
-                    console.log('Ошибка получения курсов пользователя', error.response?.status);
-                });
+            });
 
-            if (response) {
-                return response;
-            }
-        } catch (error) {
-            console.log('Ошибка получения курсов пользователя', error);
+            return response.data;
+        } catch (error: any) {
+            console.log(`Ошибка получения данных с ${endpoint}`, error?.response?.status || error);
+            return null;
         }
+    }
 
-        return null;
+    async getMyCourses(params: { page?: number; size?: number } = {}) {
+        return this.fetchPaginated<CourseProgress>('/users/me/courses', params);
+    }
+
+    async getMyWishlist(params: { page?: number; size?: number } = {}) {
+        return this.fetchPaginated<Omit<Course, 'lessons'>>('/users/me/wishlist', params);
+    }
+
+    async getMyCompletedCourses(params: { page?: number; size?: number } = {}) {
+        return this.fetchPaginated<CourseProgress>('/users/me/completed', params);
     }
 }
 
