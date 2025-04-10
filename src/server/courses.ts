@@ -23,8 +23,7 @@ class CoursesApiClient extends ApiClient {
         } = {}
     ) {
         try {
-            const defaultParams = { size: 12, ...params };
-
+            const queryParams = { size: this.defaultPageSize, ...params };
             const response = await this.get<{
                 content: Omit<Course, 'lessons'>[];
                 pageNumber: number;
@@ -33,24 +32,15 @@ class CoursesApiClient extends ApiClient {
                 totalPages: number;
                 isLast: boolean;
             }>('/courses', {
-                params: defaultParams,
+                params: queryParams,
                 paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
-            })
-                .then((res) => {
-                    return res.data;
-                })
-                .catch((error) => {
-                    console.log('Ошибка получения юзера', error.response?.status);
-                });
+            });
 
-            if (response) {
-                return response;
-            }
-        } catch (error) {
-            console.log('Ошибка получения юзера', error);
+            return response.data;
+        } catch (error: any) {
+            console.error('Ошибка получения курсов:', error?.response?.status || error);
+            return null;
         }
-
-        return null;
     }
 
     async getCourseBySlug(slug: string) {
@@ -61,11 +51,12 @@ class CoursesApiClient extends ApiClient {
                     authorUsername: string;
                     authorName: string;
                 }
-            >(`/courses/${slug}`).then((res) => res.data);
+            >(`/courses/${slug}`);
 
-            return response;
-        } catch (error) {
-            console.log('Ошибка получения юзера', error);
+            return response.data;
+        } catch (error: any) {
+            console.error(`Ошибка получения курса по slug "${slug}":`, error?.response?.status || error);
+            return null;
         }
     }
 
@@ -83,12 +74,10 @@ class CoursesApiClient extends ApiClient {
 
             return response.data;
         } catch (error: any) {
-            if (axios.isCancel(error)) {
-                throw error;
-            } else {
-                console.error(`Ошибка получения данных с ${endpoint}`, error?.response?.status || error);
-                return null;
-            }
+            if (axios.isCancel(error)) throw error;
+
+            console.error(`Ошибка получения данных с ${endpoint}:`, error?.response?.status || error);
+            return null;
         }
     }
 
@@ -124,11 +113,21 @@ class CoursesApiClient extends ApiClient {
         }
     }
 
-    async addToWishlist(courseId: string | number): Promise<void> {
+    async addToWishlist(courseId: string): Promise<void> {
         await this.post(`/users/me/wishlist/${courseId}`);
     }
-    async removeFromWishlist(courseId: string | number): Promise<void> {
+    async removeFromWishlist(courseId: string): Promise<void> {
         await this.delete(`/users/me/wishlist/${courseId}`);
+    }
+
+    async getCourseLessons(courseId: string): Promise<Lesson[]> {
+        try {
+            const response = await this.get<Lesson[]>(`/courses/${courseId}/lessons`);
+            return response.data;
+        } catch (error: any) {
+            console.error(`Ошибка при получении уроков курса ${courseId}:`, error?.response?.status || error);
+            return [];
+        }
     }
 }
 

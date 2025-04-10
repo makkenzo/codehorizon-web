@@ -1,7 +1,6 @@
 import Player from 'next-video/player';
 import MediaThemeMinimal from 'player.style/minimal/react';
 import { FaBook } from 'react-icons/fa';
-import { FaRegHeart } from 'react-icons/fa6';
 import { IoMdVolumeHigh } from 'react-icons/io';
 import { MdLiveTv } from 'react-icons/md';
 import { MdChromeReaderMode } from 'react-icons/md';
@@ -14,11 +13,9 @@ import CourseBuyButton from '@/components/course-buy-button';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import Price from '@/components/reusable/price';
 import WishlistButton from '@/components/reusable/wishlist-button';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { formatDuration, getPercentDifference } from '@/lib/utils';
-import { UserProfile } from '@/models';
 import CoursesApiClient from '@/server/courses';
 import ProfileApiClient from '@/server/profile';
 
@@ -35,7 +32,7 @@ const CoursePage = async (props: CoursePageProps) => {
 
     const course = await coursesApiClient.getCourseBySlug(slug).catch((error) => {
         console.error(`Ошибка при загрузке курса ${slug}:`, error);
-        return null; // Возвращаем null при ошибке
+        return null;
     });
 
     if (!course) {
@@ -45,13 +42,12 @@ const CoursePage = async (props: CoursePageProps) => {
 
     const authorPromise = profileApiClient.getUserProfile(course.authorUsername).catch((err) => {
         console.error(`Ошибка загрузки автора ${course.authorUsername}:`, err);
-        return null; // Возвращаем null при ошибке загрузки автора
+        return null;
     });
 
     const author = await authorPromise;
 
     if (!author) {
-        // Обработка случая, если автор не был найден или произошла ошибка при его загрузке
         console.warn(
             `Автор ${course.authorUsername} не найден или не удалось загрузить. Отображение страницы без автора.`
         );
