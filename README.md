@@ -68,7 +68,7 @@ pnpm dev
     <li>✅ Set up CI/CD using GitHub Actions.</li>
     <li>❌ Develop lesson and assignment functionality.</li>
     <li>❌ Implement role-based access control (student, author, admin).</li>
-    <li>❌ Integrate payment systems (Stripe, PayPal).</li>
+    <li>✅ Integrate payment systems (Stripe, PayPal).</li>
     <li>❌ Add ratings and review system.</li>
     <li>❌ Develop course analytics for authors.</li>
 </ul>
@@ -83,7 +83,6 @@ pnpm dev
 
 <h3>📅 Q3 2025</h3>
 <ul>
-    <li>❌ Develop a mobile application.</li>
     <li>❌ Implement interactive courses with a built-in code editor.</li>
     <li>❌ Improve SEO and page loading optimization.</li>
 </ul>
