@@ -1,26 +1,9 @@
+import axios from 'axios';
 import qs from 'qs';
 
 import { Course, CourseProgress, Lesson, PagedResponse } from '@/types';
 
 import ApiClient from './api-client';
-
-type PagedCoursesResponse = {
-    content: { course: Omit<Course, 'lessons'>; progress: number }[];
-    pageNumber: number;
-    pageSize: number;
-    totalElements: number;
-    totalPages: number;
-    isLast: boolean;
-};
-
-type PagedWishlistResponse = {
-    content: Omit<Course, 'lessons'>[];
-    pageNumber: number;
-    pageSize: number;
-    totalElements: number;
-    totalPages: number;
-    isLast: boolean;
-};
 
 class CoursesApiClient extends ApiClient {
     private readonly defaultPageSize = 12;
@@ -88,31 +71,37 @@ class CoursesApiClient extends ApiClient {
 
     private async fetchPaginated<T>(
         endpoint: string,
-        params: Record<string, any> = {}
+        params: Record<string, any> = {},
+        signal?: AbortSignal
     ): Promise<PagedResponse<T> | null> {
         try {
             const response = await this.get<PagedResponse<T>>(endpoint, {
                 params: { size: this.defaultPageSize, ...params },
                 paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
+                signal: signal,
             });
 
             return response.data;
         } catch (error: any) {
-            console.log(`Ошибка получения данных с ${endpoint}`, error?.response?.status || error);
-            return null;
+            if (axios.isCancel(error)) {
+                throw error;
+            } else {
+                console.error(`Ошибка получения данных с ${endpoint}`, error?.response?.status || error);
+                return null;
+            }
         }
     }
 
-    async getMyCourses(params: { page?: number; size?: number } = {}) {
-        return this.fetchPaginated<CourseProgress>('/users/me/courses', params);
+    async getMyCourses(params: { page?: number; size?: number } = {}, signal?: AbortSignal) {
+        return this.fetchPaginated<CourseProgress>('/users/me/courses', params, signal);
     }
 
-    async getMyWishlist(params: { page?: number; size?: number } = {}) {
-        return this.fetchPaginated<Omit<Course, 'lessons'>>('/users/me/wishlist', params);
+    async getMyWishlist(params: { page?: number; size?: number } = {}, signal?: AbortSignal) {
+        return this.fetchPaginated<Omit<Course, 'lessons'>>('/users/me/wishlist', params, signal);
     }
 
-    async getMyCompletedCourses(params: { page?: number; size?: number } = {}) {
-        return this.fetchPaginated<CourseProgress>('/users/me/completed', params);
+    async getMyCompletedCourses(params: { page?: number; size?: number } = {}, signal?: AbortSignal) {
+        return this.fetchPaginated<CourseProgress>('/users/me/completed', params, signal);
     }
 }
 

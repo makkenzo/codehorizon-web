@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useReducer } from 'react';
 
+import axios from 'axios';
 import { Loader2 } from 'lucide-react';
 
 import { useSearchParams } from 'next/navigation';
@@ -22,6 +23,8 @@ const CoursesContent = () => {
     const apiClient = new CoursesApiClient();
 
     useEffect(() => {
+        const controller = new AbortController();
+        const signal = controller.signal;
         const fetchCourses = async () => {
             dispatch({ type: 'START_LOADING' });
             const meta = tabMeta[currentTab as keyof typeof tabMeta] ?? tabMeta.default;
@@ -32,24 +35,32 @@ const CoursesContent = () => {
                 let normalizedData: CourseDisplayData[] = [];
 
                 if (currentTab === 'wishlist') {
-                    response = await apiClient.getMyWishlist();
+                    response = await apiClient.getMyWishlist({}, signal);
                     normalizedData = response?.content?.map((c) => ({ course: c })) ?? [];
                 } else if (currentTab === 'completed') {
-                    response = await apiClient.getMyCompletedCourses();
+                    response = await apiClient.getMyCompletedCourses({}, signal);
                     normalizedData = response?.content ?? [];
                 } else {
-                    response = await apiClient.getMyCourses();
+                    response = await apiClient.getMyCourses({}, signal);
                     normalizedData = response?.content ?? [];
                 }
 
-                dispatch({ type: 'SET_COURSES', payload: normalizedData });
+                if (!signal.aborted) {
+                    dispatch({ type: 'SET_COURSES', payload: normalizedData });
+                }
             } catch (err) {
-                console.error('Ошибка при загрузке курсов', err);
-                dispatch({ type: 'SET_ERROR', payload: 'Не удалось загрузить курсы. Попробуйте позже.' });
+                if (!axios.isCancel(err)) {
+                    console.error('Ошибка при загрузке курсов', err);
+                    dispatch({ type: 'SET_ERROR', payload: 'Не удалось загрузить курсы. Попробуйте позже.' });
+                }
             }
         };
 
         fetchCourses();
+
+        return () => {
+            controller.abort();
+        };
     }, [currentTab]);
 
     const { isLoading, error, courses, title, description } = state;
