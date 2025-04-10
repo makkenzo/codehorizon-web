@@ -103,6 +103,33 @@ class CoursesApiClient extends ApiClient {
     async getMyCompletedCourses(params: { page?: number; size?: number } = {}, signal?: AbortSignal) {
         return this.fetchPaginated<CourseProgress>('/users/me/completed', params, signal);
     }
+
+    async isCourseInWishlist(courseId: string): Promise<boolean> {
+        const endpoint = `/users/me/wishlist/status?courseId=${courseId}`;
+
+        try {
+            const response = await this.get<boolean>(endpoint);
+
+            return response.data;
+        } catch (error: any) {
+            if (axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403)) {
+                console.log('Пользователь не авторизован для проверки вишлиста');
+            } else if (axios.isAxiosError(error) && error.response?.status === 404) {
+                console.log(`Курс ${courseId} не найден в вишлисте или API не найдено.`);
+            } else {
+                console.error(`Ошибка при проверке вишлиста для курса ${courseId}:`, error);
+            }
+
+            return false;
+        }
+    }
+
+    async addToWishlist(courseId: string | number): Promise<void> {
+        await this.post(`/users/me/wishlist/${courseId}`);
+    }
+    async removeFromWishlist(courseId: string | number): Promise<void> {
+        await this.delete(`/users/me/wishlist/${courseId}`);
+    }
 }
 
 export default CoursesApiClient;

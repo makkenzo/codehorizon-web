@@ -8,14 +8,17 @@ import { MdChromeReaderMode } from 'react-icons/md';
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 import CourseBuyButton from '@/components/course-buy-button';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import Price from '@/components/reusable/price';
+import WishlistButton from '@/components/reusable/wishlist-button';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { formatDuration, getPercentDifference } from '@/lib/utils';
+import { UserProfile } from '@/models';
 import CoursesApiClient from '@/server/courses';
 import ProfileApiClient from '@/server/profile';
 
@@ -27,16 +30,31 @@ const CoursePage = async (props: CoursePageProps) => {
     const params = await props.params;
     const { slug } = params;
 
-    const course = await new CoursesApiClient().getCourseBySlug(slug);
+    const coursesApiClient = new CoursesApiClient();
+    const profileApiClient = new ProfileApiClient();
+
+    const course = await coursesApiClient.getCourseBySlug(slug).catch((error) => {
+        console.error(`Ошибка при загрузке курса ${slug}:`, error);
+        return null; // Возвращаем null при ошибке
+    });
 
     if (!course) {
-        throw new Error('Course not found');
+        console.warn(`Курс с slug ${slug} не найден`);
+        notFound();
     }
 
-    const author = await new ProfileApiClient().getUserProfile(course.authorUsername);
+    const authorPromise = profileApiClient.getUserProfile(course.authorUsername).catch((err) => {
+        console.error(`Ошибка загрузки автора ${course.authorUsername}:`, err);
+        return null; // Возвращаем null при ошибке загрузки автора
+    });
+
+    const author = await authorPromise;
 
     if (!author) {
-        throw new Error('Author not found');
+        // Обработка случая, если автор не был найден или произошла ошибка при его загрузке
+        console.warn(
+            `Автор ${course.authorUsername} не найден или не удалось загрузить. Отображение страницы без автора.`
+        );
     }
 
     return (
@@ -55,6 +73,8 @@ const CoursePage = async (props: CoursePageProps) => {
                     ) : course.imagePreview ? (
                         <div>image</div>
                     ) : null}
+
+                    <h1 className="text-[24px] font-semibold">{course.title}</h1>
 
                     <div className="flex flex-col gap-4">
                         <Label htmlFor="description" className="font-bold text-lg">
@@ -107,9 +127,7 @@ const CoursePage = async (props: CoursePageProps) => {
                         ) : null}
                         <div className="w-full flex flex-col gap-4 mt-8">
                             <CourseBuyButton key={course.id} courseId={course.id} courseSlug={course.slug} />
-                            <Button variant="outline" size="lg">
-                                <FaRegHeart className="size-5" />В желаемое
-                            </Button>
+                            <WishlistButton courseId={course.id} />
                         </div>
                         <div className="flex flex-col gap-3 text-black-60/60 mt-6">
                             <div className="flex items-center gap-4">
@@ -128,27 +146,29 @@ const CoursePage = async (props: CoursePageProps) => {
                             </div>
                         </div>
                     </div>
-                    <div className="relative w-full">
-                        <Link href={`/u/${author.username}`}>
-                            {author.profile.avatarUrl ? (
-                                <Image
-                                    src={author.profile.avatarUrl}
-                                    alt={author.username}
-                                    width={389}
-                                    height={438}
-                                    className="rounded-[18px] w-full"
-                                />
-                            ) : (
-                                <div className="rounded-[18px] w-full h-[438px] bg-primary"></div>
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t gap-2 from-black/88 to-black/0 rounded-[18px] px-5 pb-10 flex flex-col justify-end">
-                                <h2 className="bg-primary text-white p-1 font-semibold rounded-[4px] w-fit">
-                                    {author.username}
-                                </h2>
-                                <h3 className="text-white text-2xl">{course.authorName}</h3>
-                            </div>
-                        </Link>
-                    </div>
+                    {author ? (
+                        <div className="relative w-full">
+                            <Link href={`/u/${author.username}`}>
+                                {author.profile.avatarUrl ? (
+                                    <Image
+                                        src={author.profile.avatarUrl}
+                                        alt={author.username}
+                                        width={389}
+                                        height={438}
+                                        className="rounded-[18px] w-full"
+                                    />
+                                ) : (
+                                    <div className="rounded-[18px] w-full h-[438px] bg-primary"></div>
+                                )}
+                                <div className="absolute inset-0 bg-gradient-to-t gap-2 from-black/88 to-black/0 rounded-[18px] px-5 pb-10 flex flex-col justify-end">
+                                    <h2 className="bg-primary text-white p-1 font-semibold rounded-[4px] w-fit">
+                                        {author.username}
+                                    </h2>
+                                    <h3 className="text-white text-2xl">{course.authorName}</h3>
+                                </div>
+                            </Link>
+                        </div>
+                    ) : null}
                 </div>
             </div>
         </PageWrapper>
