@@ -113,6 +113,28 @@ class CoursesApiClient extends ApiClient {
         }
     }
 
+    async checkCourseAccess(courseId: string): Promise<boolean> {
+        const endpoint = `/users/me/courses/${courseId}/access`;
+        try {
+            await this.get<boolean>(endpoint).catch((error) => {});
+            return true;
+        } catch (error: any) {
+            if (axios.isAxiosError(error)) {
+                const status = error.response?.status;
+                if (status === 401 || status === 403) {
+                    console.log(`Доступ к курсу ${courseId} запрещен`);
+                } else if (status === 404) {
+                    console.log(`Запись о доступе к курсу ${courseId} не найдена`);
+                } else {
+                    console.error(`Неожиданная ошибка при проверке доступа к курсу ${courseId}:`, error);
+                }
+            } else {
+                console.error(`Неожиданная ошибка при проверке доступа к курсу ${courseId}:`, error);
+            }
+            return false;
+        }
+    }
+
     async addToWishlist(courseId: string): Promise<void> {
         await this.post(`/users/me/wishlist/${courseId}`);
     }

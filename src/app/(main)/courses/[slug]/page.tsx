@@ -18,6 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { formatDuration, getPercentDifference } from '@/lib/utils';
 import CoursesApiClient from '@/server/courses';
 import ProfileApiClient from '@/server/profile';
+import { Lesson } from '@/types';
 
 interface CoursePageProps {
     params: Promise<{ slug: string }>;
@@ -26,6 +27,8 @@ interface CoursePageProps {
 const CoursePage = async (props: CoursePageProps) => {
     const params = await props.params;
     const { slug } = params;
+
+    let lessons: Lesson[] | null = null;
 
     const coursesApiClient = new CoursesApiClient();
     const profileApiClient = new ProfileApiClient();
@@ -39,6 +42,10 @@ const CoursePage = async (props: CoursePageProps) => {
         console.warn(`Курс с slug ${slug} не найден`);
         notFound();
     }
+
+    const access = await coursesApiClient.checkCourseAccess(course.id).catch((error) => {
+        console.error(`Ошибка при проверке доступа к курсу ${course.id}:`, error);
+    });
 
     const authorPromise = profileApiClient.getUserProfile(course.authorUsername).catch((err) => {
         console.error(`Ошибка загрузки автора ${course.authorUsername}:`, err);
@@ -110,19 +117,26 @@ const CoursePage = async (props: CoursePageProps) => {
 
                 <div className="col-span-1 flex flex-col gap-6">
                     <div className="shadow-[0px_6px_20px_0px_rgba(0,0,0,0.05)] p-6 rounded-[6px] bg-white h-fit">
-                        <Price
-                            discount={course.discount}
-                            price={course.price}
-                            priceClassName="text-2xl"
-                            discountPriceClassName="text-xl ml-4"
-                        />
-                        {course.discount ? (
-                            <div className="bg-warning text-white font-bold w-fit p-1 rounded-[2px]">
-                                СКИДКА {getPercentDifference(course.price, course.price - course.discount)}
-                            </div>
+                        {access ? 'true' : 'false'}
+                        {!access ? (
+                            <>
+                                <Price
+                                    discount={course.discount}
+                                    price={course.price}
+                                    priceClassName="text-2xl"
+                                    discountPriceClassName="text-xl ml-4"
+                                />
+                                {course.discount ? (
+                                    <div className="bg-warning text-white font-bold w-fit p-1 rounded-[2px]">
+                                        СКИДКА {getPercentDifference(course.price, course.price - course.discount)}
+                                    </div>
+                                ) : null}
+                            </>
                         ) : null}
                         <div className="w-full flex flex-col gap-4 mt-8">
-                            <CourseBuyButton key={course.id} courseId={course.id} courseSlug={course.slug} />
+                            {!access ? (
+                                <CourseBuyButton key={course.id} courseId={course.id} courseSlug={course.slug} />
+                            ) : null}
                             <WishlistButton courseId={course.id} />
                         </div>
                         <div className="flex flex-col gap-3 text-black-60/60 mt-6">
