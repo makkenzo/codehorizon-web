@@ -116,7 +116,7 @@ class CoursesApiClient extends ApiClient {
     async checkCourseAccess(courseId: string): Promise<boolean> {
         const endpoint = `/users/me/courses/${courseId}/access`;
         try {
-            await this.get<boolean>(endpoint).catch((error) => {});
+            await this.get<boolean>(endpoint);
             return true;
         } catch (error: any) {
             if (axios.isAxiosError(error)) {

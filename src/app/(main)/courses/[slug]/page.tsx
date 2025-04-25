@@ -117,7 +117,6 @@ const CoursePage = async (props: CoursePageProps) => {
 
                 <div className="col-span-1 flex flex-col gap-6">
                     <div className="shadow-[0px_6px_20px_0px_rgba(0,0,0,0.05)] p-6 rounded-[6px] bg-white h-fit">
-                        {access ? 'true' : 'false'}
                         {!access ? (
                             <>
                                 <Price
