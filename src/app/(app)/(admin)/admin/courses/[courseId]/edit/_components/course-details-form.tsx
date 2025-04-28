@@ -30,13 +30,16 @@ const courseDetailsFormSchema = z.object({
 type CourseDetailsFormData = z.infer<typeof courseDetailsFormSchema>;
 
 interface CourseDetailsFormProps {
-    course: AdminCourseDetailDTO;
-    onSuccess: (updatedCourse: AdminCourseDetailDTO) => void;
+    course?: AdminCourseDetailDTO | null;
+
+    onSuccess: (resultCourse: AdminCourseDetailDTO) => void;
 }
 
 export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [authors, setAuthors] = useState<AdminUser[]>([]);
+
+    const isEditing = !!course;
 
     useEffect(() => {
         const fetchAuthors = async () => {
@@ -53,26 +56,27 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
 
     const form = useForm<CourseDetailsFormData>({
         resolver: zodResolver(courseDetailsFormSchema),
+
         defaultValues: {
-            title: course.title ?? '',
-            description: course.description ?? '',
-            price: course.price ?? 0,
-            discount: course.discount ?? 0,
-            difficulty: course.difficulty ?? CourseDifficultyLevels.BEGINNER,
-            category: course.category ?? '',
-            authorId: course.authorId ?? '',
+            title: course?.title ?? '',
+            description: course?.description ?? '',
+            price: course?.price ?? 0,
+            discount: course?.discount ?? 0,
+            difficulty: course?.difficulty ?? CourseDifficultyLevels.BEGINNER,
+            category: course?.category ?? '',
+            authorId: course?.authorId ?? '',
         },
     });
 
     useEffect(() => {
         form.reset({
-            title: course.title ?? '',
-            description: course.description ?? '',
-            price: course.price ?? 0,
-            discount: course.discount ?? 0,
-            difficulty: course.difficulty ?? CourseDifficultyLevels.BEGINNER,
-            category: course.category ?? '',
-            authorId: course.authorId ?? '',
+            title: course?.title ?? '',
+            description: course?.description ?? '',
+            price: course?.price ?? 0,
+            discount: course?.discount ?? 0,
+            difficulty: course?.difficulty ?? CourseDifficultyLevels.BEGINNER,
+            category: course?.category ?? '',
+            authorId: course?.authorId ?? '',
         });
     }, [course, form]);
 
@@ -83,16 +87,25 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                 ...values,
                 description: values.description || null,
                 category: values.category || null,
-                imagePreview: course.imagePreview,
-                videoPreview: course.videoPreview,
+
+                imagePreview: isEditing ? course?.imagePreview : null,
+                videoPreview: isEditing ? course?.videoPreview : null,
             };
-            const updatedCourseData = await adminApiClient.updateCourseAdmin(course.id, requestData);
-            toast.success(`Course "${values.title}" details updated.`);
-            onSuccess(updatedCourseData);
+
+            let resultCourse: AdminCourseDetailDTO;
+
+            if (isEditing && course) {
+                resultCourse = await adminApiClient.updateCourseAdmin(course.id, requestData);
+                toast.success(`Course "${values.title}" updated.`);
+            } else {
+                resultCourse = await adminApiClient.createCourseAdmin(requestData);
+                toast.success(`Course "${values.title}" created.`);
+            }
+            onSuccess(resultCourse);
         } catch (error: any) {
-            console.error(`Error updating course details:`, error);
+            console.error(`Error ${isEditing ? 'updating' : 'creating'} course:`, error);
             const errorMsg = error?.response?.data?.message || error.message || 'Unknown error';
-            toast.error(`Failed to update course: ${errorMsg}`);
+            toast.error(`Failed to ${isEditing ? 'save' : 'create'} course: ${errorMsg}`);
         } finally {
             setIsSubmitting(false);
         }
@@ -108,12 +121,13 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                         <FormItem>
                             <FormLabel>Title</FormLabel>
                             <FormControl>
-                                <Input {...field} disabled={isSubmitting} />
+                                <Input placeholder="e.g., Introduction to React" {...field} disabled={isSubmitting} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name="description"
@@ -122,6 +136,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                             <FormLabel>Description</FormLabel>
                             <FormControl>
                                 <Textarea
+                                    placeholder="Describe the course..."
                                     className="resize-y min-h-[100px]"
                                     {...field}
                                     value={field.value ?? ''}
@@ -132,7 +147,8 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                         </FormItem>
                     )}
                 />
-                <div className="grid grid-cols-2 gap-4">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
                         name="price"
@@ -140,7 +156,13 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                             <FormItem>
                                 <FormLabel>Price ($)</FormLabel>
                                 <FormControl>
-                                    <Input type="text" inputMode="decimal" {...field} disabled={isSubmitting} />
+                                    <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        placeholder="49.99"
+                                        {...field}
+                                        disabled={isSubmitting}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -156,6 +178,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                                     <Input
                                         type="text"
                                         inputMode="decimal"
+                                        placeholder="0.00"
                                         {...field}
                                         value={field.value ?? 0}
                                         disabled={isSubmitting}
@@ -166,6 +189,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                         )}
                     />
                 </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                         control={form.control}
@@ -180,7 +204,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                                 >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue />
+                                            <SelectValue placeholder="Select..." />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
@@ -202,7 +226,12 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                             <FormItem>
                                 <FormLabel>Category</FormLabel>
                                 <FormControl>
-                                    <Input {...field} value={field.value ?? ''} disabled={isSubmitting} />
+                                    <Input
+                                        placeholder="e.g., Web Development"
+                                        {...field}
+                                        value={field.value ?? ''}
+                                        disabled={isSubmitting}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -221,7 +250,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                                 >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue />
+                                            <SelectValue placeholder="Select..." />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
@@ -243,20 +272,35 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                         )}
                     />
                 </div>
-                <div className="space-y-2">
-                    <FormItem>
-                        <FormLabel>Image Preview URL</FormLabel>
-                        <Input value={course.imagePreview ?? 'Not set'} readOnly disabled />
-                    </FormItem>
-                    <FormItem>
-                        <FormLabel>Video Preview URL</FormLabel>
-                        <Input value={course.videoPreview ?? 'Not set'} readOnly disabled />
-                    </FormItem>
-                </div>
-                <div className="flex justify-end">
+
+                {isEditing && (
+                    <div className="space-y-2 rounded-md border p-4 bg-muted/50">
+                        <h3 className="text-sm font-medium mb-2">Preview Files</h3>
+                        <FormItem>
+                            <FormLabel className="text-xs">Image Preview URL</FormLabel>
+                            <Input
+                                value={course?.imagePreview ?? 'Not set'}
+                                readOnly
+                                disabled
+                                className="text-xs h-8"
+                            />
+                        </FormItem>
+                        <FormItem>
+                            <FormLabel className="text-xs">Video Preview URL</FormLabel>
+                            <Input
+                                value={course?.videoPreview ?? 'Not set'}
+                                readOnly
+                                disabled
+                                className="text-xs h-8"
+                            />
+                        </FormItem>
+                    </div>
+                )}
+
+                <div className="flex justify-end pt-4">
                     <Button type="submit" disabled={isSubmitting}>
                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Save Details
+                        {isEditing ? 'Save Course Details' : 'Create Course'}
                     </Button>
                 </div>
             </form>
