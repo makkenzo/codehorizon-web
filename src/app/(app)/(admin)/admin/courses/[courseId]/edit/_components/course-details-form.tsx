@@ -87,9 +87,8 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                 ...values,
                 description: values.description || null,
                 category: values.category || null,
-
-                imagePreview: isEditing ? course?.imagePreview : null,
-                videoPreview: isEditing ? course?.videoPreview : null,
+                imagePreview: course ? course.imagePreview : null,
+                videoPreview: course ? course.videoPreview : null,
             };
 
             let resultCourse: AdminCourseDetailDTO;
