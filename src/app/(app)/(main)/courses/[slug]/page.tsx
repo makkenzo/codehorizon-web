@@ -66,7 +66,9 @@ const CoursePage = async (props: CoursePageProps) => {
                         />
                     ) : course.imagePreview ? (
                         <div>image</div>
-                    ) : null}
+                    ) : (
+                        <p>null</p>
+                    )}
 
                     <h1 className="text-[24px] font-semibold">{course.title}</h1>
 
