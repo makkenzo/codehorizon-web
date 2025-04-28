@@ -22,30 +22,42 @@ export interface AdminUpdateUserRequest {
     isVerified?: boolean;
 }
 
+export interface AdminTaskDTO {
+    // Пример типа для Task
+    id: string;
+    description: string;
+    // ... другие поля Task
+}
+
+export interface AdminAttachmentDTO {
+    // Пример типа для Attachment
+    name: string;
+    url: string;
+}
+
+export interface AdminLessonDTO {
+    id: string;
+    title: string;
+    slug?: string | null;
+    content?: string | null;
+    codeExamples?: string[];
+    tasks?: AdminTaskDTO[];
+    attachments?: AdminAttachmentDTO[];
+    mainAttachment?: string | null;
+}
+
 export interface AdminCourseListItemDTO {
     id: string;
     title: string;
     slug: string;
+    authorId: string;
     authorUsername: string;
-    authorId?: string;
     price: number;
     discount: number;
     difficulty: CourseDifficultyLevels;
     category: string | null;
     lessonCount: number;
     description?: string;
-    imagePreview?: string | null;
-    videoPreview?: string | null;
-}
-
-export interface AdminCreateUpdateCourseRequestDTO {
-    title: string;
-    description?: string | null;
-    price: number;
-    discount?: number;
-    difficulty: CourseDifficultyLevels;
-    category?: string | null;
-    authorId: string;
     imagePreview?: string | null;
     videoPreview?: string | null;
 }
@@ -67,9 +79,23 @@ export interface AdminCourseDetailDTO {
     lessons: AdminLessonDTO[];
 }
 
-export interface AdminLessonDTO {
-    id: string;
+export interface AdminCreateUpdateCourseRequestDTO {
     title: string;
-    slug?: string | null;
+    description?: string | null;
+    price: number;
+    discount?: number;
+    difficulty: CourseDifficultyLevels;
+    category?: string | null;
+    authorId: string;
+    imagePreview?: string | null;
+    videoPreview?: string | null;
+}
+
+export interface AdminCreateUpdateLessonRequestDTO {
+    title: string;
     content?: string | null;
+    codeExamples?: string[];
+    tasks?: AdminTaskDTO[];
+    attachments?: AdminAttachmentDTO[];
+    mainAttachment?: string | null;
 }

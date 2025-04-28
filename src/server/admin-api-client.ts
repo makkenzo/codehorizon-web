@@ -2,6 +2,7 @@ import {
     AdminCourseDetailDTO,
     AdminCourseListItemDTO,
     AdminCreateUpdateCourseRequestDTO,
+    AdminCreateUpdateLessonRequestDTO,
     AdminUpdateUserRequest,
     AdminUser,
     PagedResponse,
@@ -10,50 +11,47 @@ import {
 import { apiClient } from './api-client';
 
 class AdminApiClient {
-    async getUsers(
-        page: number = 1,
-        size: number = 20,
-        sortBy?: string,
-        titleSearch?: string
-    ): Promise<PagedResponse<AdminUser>> {
+    async getUsers(page: number = 1, size: number = 10, sortBy?: string): Promise<PagedResponse<AdminUser>> {
         const params = new URLSearchParams();
         params.append('page', page.toString());
         params.append('size', size.toString());
-        if (sortBy) {
-            params.append('sortBy', sortBy);
-        }
-        if (titleSearch) {
-            params.append('titleSearch', titleSearch);
-        }
-
+        if (sortBy) params.append('sortBy', sortBy);
         try {
             const response = await apiClient.get<PagedResponse<AdminUser>>(`/admin/users?${params.toString()}`);
-
             return response.data;
         } catch (error: any) {
             console.error('Error fetching admin users:', error);
-
-            return { content: [], pageNumber: 0, pageSize: size, totalElements: 0, totalPages: 0, isLast: true };
+            throw error;
         }
     }
 
-    async getUser(userId: string): Promise<AdminUser | null> {
+    async getUser(userId: string): Promise<AdminUser> {
         try {
             const response = await apiClient.get<AdminUser>(`/admin/users/${userId}`);
             return response.data;
         } catch (error: any) {
             console.error(`Error fetching admin user ${userId}:`, error);
-            return null;
+            throw error;
         }
     }
 
-    async updateUser(userId: string, data: AdminUpdateUserRequest): Promise<AdminUser | null> {
+    async updateUser(userId: string, data: AdminUpdateUserRequest): Promise<AdminUser> {
         try {
             const response = await apiClient.put<AdminUser, AdminUpdateUserRequest>(`/admin/users/${userId}`, data);
             return response.data;
         } catch (error: any) {
             console.error(`Error updating admin user ${userId}:`, error);
-            return null;
+            throw error;
+        }
+    }
+
+    async getPotentialAuthors(): Promise<AdminUser[]> {
+        try {
+            const response = await this.getUsers(1, 1000);
+            return response.content;
+        } catch (error) {
+            console.error('Error fetching potential authors:', error);
+            return [];
         }
     }
 
@@ -64,17 +62,14 @@ class AdminApiClient {
         titleSearch?: string
     ): Promise<PagedResponse<AdminCourseListItemDTO>> {
         const params = new URLSearchParams();
-
         params.append('page', page.toString());
         params.append('size', size.toString());
         if (sortBy) params.append('sortBy', sortBy);
         if (titleSearch) params.append('titleSearch', titleSearch);
-
         try {
             const response = await apiClient.get<PagedResponse<AdminCourseListItemDTO>>(
                 `/admin/courses?${params.toString()}`
             );
-
             return response.data;
         } catch (error: any) {
             console.error('Error fetching admin courses:', error);
@@ -127,13 +122,42 @@ class AdminApiClient {
         }
     }
 
-    async getPotentialAuthors(): Promise<AdminUser[]> {
+    async addLessonAdmin(courseId: string, data: AdminCreateUpdateLessonRequestDTO): Promise<AdminCourseDetailDTO> {
         try {
-            const response = await this.getUsers(1, 1000);
-            return response.content;
-        } catch (error) {
-            console.error('Error fetching potential authors:', error);
-            return [];
+            const response = await apiClient.post<AdminCourseDetailDTO, AdminCreateUpdateLessonRequestDTO>(
+                `/admin/courses/${courseId}/lessons`,
+                data
+            );
+            return response.data;
+        } catch (error: any) {
+            console.error(`Error adding lesson to course ${courseId}:`, error);
+            throw error;
+        }
+    }
+
+    async updateLessonAdmin(
+        courseId: string,
+        lessonId: string,
+        data: AdminCreateUpdateLessonRequestDTO
+    ): Promise<AdminCourseDetailDTO> {
+        try {
+            const response = await apiClient.put<AdminCourseDetailDTO, AdminCreateUpdateLessonRequestDTO>(
+                `/admin/courses/${courseId}/lessons/${lessonId}`,
+                data
+            );
+            return response.data;
+        } catch (error: any) {
+            console.error(`Error updating lesson ${lessonId} in course ${courseId}:`, error);
+            throw error;
+        }
+    }
+
+    async deleteLessonAdmin(courseId: string, lessonId: string): Promise<void> {
+        try {
+            await apiClient.delete<void>(`/admin/courses/${courseId}/lessons/${lessonId}`);
+        } catch (error: any) {
+            console.error(`Error deleting lesson ${lessonId} from course ${courseId}:`, error);
+            throw error;
         }
     }
 }

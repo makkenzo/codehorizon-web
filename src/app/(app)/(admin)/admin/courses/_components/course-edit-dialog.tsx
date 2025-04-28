@@ -17,19 +17,13 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { adminApiClient } from '@/server/admin-api-client';
 import { CourseDifficultyLevels } from '@/types';
 import { AdminCourseListItemDTO, AdminCreateUpdateCourseRequestDTO, AdminUser } from '@/types/admin';
-
-interface AuthorOption {
-    id: string;
-    username: string;
-    email?: string;
-}
 
 const courseFormSchema = z.object({
     title: z.string().min(3, 'Title must be at least 3 characters'),

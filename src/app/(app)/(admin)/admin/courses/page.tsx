@@ -6,6 +6,7 @@ import { MoreHorizontal, Pencil, PlusCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import MyPagination from '@/components/reusable/my-pagination';
@@ -34,8 +35,6 @@ export default function AdminCoursesPage() {
 
     const [data, setData] = useState<PagedResponse<AdminCourseListItemDTO> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [editingCourse, setEditingCourse] = useState<AdminCourseListItemDTO | null>(null);
-    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
     const currentPage = parseInt(searchParams.get('page') || '1', 10);
     const pageSize = parseInt(searchParams.get('size') || '10', 10);
@@ -68,46 +67,7 @@ export default function AdminCoursesPage() {
     };
 
     const handleDialogSuccess = () => {
-        setEditingCourse(null);
-        setIsCreateDialogOpen(false);
         fetchData();
-    };
-
-    const handleCourseUpdate = (updatedCourse: AdminCourseListItemDTO) => {
-        setData((prevData) =>
-            prevData
-                ? {
-                      ...prevData,
-                      content: prevData.content.map((c) => (c.id === updatedCourse.id ? updatedCourse : c)),
-                  }
-                : null
-        );
-        setEditingCourse(null);
-        setIsCreateDialogOpen(false);
-    };
-
-    const handleCourseCreate = (newCourse: AdminCourseListItemDTO) => {
-        if (currentPage === 1) {
-            setData((prevData) =>
-                prevData
-                    ? {
-                          ...prevData,
-                          content: [newCourse, ...prevData.content],
-                          totalElements: prevData.totalElements + 1,
-                      }
-                    : {
-                          content: [newCourse],
-                          pageNumber: 0,
-                          pageSize: pageSize,
-                          totalElements: 1,
-                          totalPages: 1,
-                          isLast: true,
-                      }
-            );
-        } else {
-            fetchData();
-        }
-        setIsCreateDialogOpen(false);
     };
 
     const handleDeleteCourse = async (courseId: string, courseTitle: string) => {
@@ -158,10 +118,12 @@ export default function AdminCoursesPage() {
                     <CardTitle>Courses</CardTitle>
                     <CardDescription>Manage your courses. Add, edit, or delete courses.</CardDescription>
                 </div>
-                <Button size="sm" onClick={() => setIsCreateDialogOpen(true)}>
-                    <PlusCircle className="h-4 w-4 mr-2" />
-                    Add Course
-                </Button>
+                <Link href="/admin/courses/new">
+                    <Button size="sm">
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        Add Course
+                    </Button>
+                </Link>
             </CardHeader>
             <CardContent>
                 <Table>
@@ -193,12 +155,9 @@ export default function AdminCoursesPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell className="font-medium">
-                                        <span
-                                            className="hover:underline cursor-pointer"
-                                            onClick={() => setEditingCourse(course)}
-                                        >
+                                        <Link href={`/admin/courses/${course.id}/edit`} className="hover:underline">
                                             {course.title}
-                                        </span>
+                                        </Link>
                                         <div className="text-xs text-muted-foreground">{course.slug}</div>
                                     </TableCell>
                                     <TableCell>{course.authorUsername}</TableCell>
@@ -233,10 +192,7 @@ export default function AdminCoursesPage() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-56 px-4 py-2">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem
-                                                    onClick={() => setEditingCourse(course)}
-                                                    className="cursor-pointer"
-                                                >
+                                                <DropdownMenuItem className="cursor-pointer">
                                                     <Pencil className="mr-2 h-4 w-4" /> Edit
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
@@ -276,21 +232,6 @@ export default function AdminCoursesPage() {
                     />
                 )}
             </CardFooter>
-
-            {isCreateDialogOpen && (
-                <AdminCourseEditDialog
-                    onOpenChange={(open) => !open && setIsCreateDialogOpen(false)}
-                    onSuccess={handleDialogSuccess}
-                />
-            )}
-
-            {editingCourse && (
-                <AdminCourseEditDialog
-                    course={editingCourse}
-                    onOpenChange={(open) => !open && setEditingCourse(null)}
-                    onSuccess={handleDialogSuccess}
-                />
-            )}
         </Card>
     );
 }
