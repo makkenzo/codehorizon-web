@@ -27,7 +27,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="ru">
+        <html lang="ru" suppressHydrationWarning>
             <head>
                 <meta property="og:image" content="/opengraph-image.png" />
                 <meta property="og:image:type" content="image/png" />
@@ -36,7 +36,7 @@ export default function RootLayout({
                 <meta name="apple-mobile-web-app-title" content="CodeHorizon" />
             </head>
             <body className={`antialiased`}>
-                <ZustandProvider>{children}</ZustandProvider> <Analytics />
+                {children} <Analytics />
             </body>
         </html>
     );
