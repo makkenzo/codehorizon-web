@@ -82,7 +82,9 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Edit User: {user.username}</DialogTitle>
-                    <DialogDescription>Modify user details and roles. Click save when you're done.</DialogDescription>
+                    <DialogDescription>
+                        Modify user details and roles. Click save when you&apos;re done.
+                    </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-4">
@@ -93,7 +95,7 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
                                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                     <div className="space-y-0.5">
                                         <FormLabel className="text-base">Verified</FormLabel>
-                                        <FormDescription>Is the user's email verified?</FormDescription>
+                                        <FormDescription>Is the user&apos;s email verified?</FormDescription>
                                     </div>
                                     <FormControl>
                                         <Checkbox

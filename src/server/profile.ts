@@ -10,7 +10,7 @@ class ProfileApiClient extends ApiClient {
                 .catch((e) => console.error(e));
 
             return response;
-        } catch (error) {}
+        } catch (_) {}
     }
 
     async updateProfile(profile: Omit<Profile, 'id' | 'userId' | 'avatarColor'>) {
@@ -19,7 +19,7 @@ class ProfileApiClient extends ApiClient {
                 .then((response) => response.data)
                 .catch((e) => console.error(e));
             return response;
-        } catch (error) {}
+        } catch (_) {}
     }
 
     async getUserProfile(username: string) {
@@ -29,7 +29,7 @@ class ProfileApiClient extends ApiClient {
                 .catch((e) => console.error(e));
 
             return response;
-        } catch (error) {}
+        } catch (_) {}
     }
 }
 
