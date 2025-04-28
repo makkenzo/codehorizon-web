@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Textarea } from '@/components/ui/textarea';
 import { adminApiClient } from '@/server/admin-api-client';
 import { AdminCourseDetailDTO, AdminCreateUpdateLessonRequestDTO, AdminLessonDTO } from '@/types/admin';
@@ -116,7 +117,6 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                     </FormItem>
                                 )}
                             />
-
                             <FormField
                                 control={form.control}
                                 name="content"
@@ -124,15 +124,11 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                     <FormItem>
                                         <FormLabel>Content</FormLabel>
                                         <FormControl>
-                                            <>
-                                                <Textarea
-                                                    placeholder="Lesson content (Markdown or HTML is recommended)..."
-                                                    className="resize-y min-h-[300px] font-mono text-sm"
-                                                    {...field}
-                                                    value={field.value ?? ''}
-                                                    disabled={isSubmitting}
-                                                />
-                                            </>
+                                            <RichTextEditor
+                                                value={field.value ?? ''}
+                                                onChange={field.onChange}
+                                                disabled={isSubmitting}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
