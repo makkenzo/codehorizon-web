@@ -1,8 +1,10 @@
 import {
+    AdminChartDataDTO,
     AdminCourseDetailDTO,
     AdminCourseListItemDTO,
     AdminCreateUpdateCourseRequestDTO,
     AdminCreateUpdateLessonRequestDTO,
+    AdminDashboardStatsDTO,
     AdminUpdateUserRequest,
     AdminUser,
     PagedResponse,
@@ -157,6 +159,26 @@ class AdminApiClient {
             await apiClient.delete<void>(`/admin/courses/${courseId}/lessons/${lessonId}`);
         } catch (error: any) {
             console.error(`Error deleting lesson ${lessonId} from course ${courseId}:`, error);
+            throw error;
+        }
+    }
+
+    async getDashboardStats(): Promise<AdminDashboardStatsDTO> {
+        try {
+            const response = await apiClient.get<AdminDashboardStatsDTO>(`/admin/dashboard/stats`);
+            return response.data;
+        } catch (error: any) {
+            console.error('Error fetching dashboard stats:', error);
+            throw error;
+        }
+    }
+
+    async getDashboardCharts(): Promise<AdminChartDataDTO> {
+        try {
+            const response = await apiClient.get<AdminChartDataDTO>(`/admin/dashboard/charts`);
+            return response.data;
+        } catch (error: any) {
+            console.error('Error fetching dashboard charts:', error);
             throw error;
         }
     }

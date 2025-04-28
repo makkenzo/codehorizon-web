@@ -99,3 +99,34 @@ export interface AdminCreateUpdateLessonRequestDTO {
     attachments?: AdminAttachmentDTO[];
     mainAttachment?: string | null;
 }
+
+export interface AdminDashboardStatsDTO {
+    totalUsers: number;
+    newUsersToday: number;
+    totalCourses: number;
+    totalRevenue: number;
+    activeSessions: number;
+}
+
+export interface TimeSeriesDataPointDTO {
+    date: string;
+    value: number;
+}
+
+export interface CategoryDistributionDTO {
+    category: string;
+    courseCount: number;
+    fill: string;
+}
+
+export interface CoursePopularityDTO {
+    courseTitle: string;
+    studentCount: number;
+}
+
+export interface AdminChartDataDTO {
+    userRegistrations: TimeSeriesDataPointDTO[];
+    revenueData: TimeSeriesDataPointDTO[];
+    categoryDistribution: CategoryDistributionDTO[];
+    topCoursesByStudents: CoursePopularityDTO[];
+}
