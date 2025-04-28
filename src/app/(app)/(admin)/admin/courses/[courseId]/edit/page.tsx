@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Loader2, PlusCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,15 +17,11 @@ import CourseDetailsForm from './_components/course-details-form';
 import LessonEditDialog from './_components/lesson-edit-dialog';
 import LessonList from './_components/lesson-list';
 
-interface EditCoursePageProps {
-    params: {
-        courseId: string;
-    };
-}
-
-export default function EditCoursePage({ params }: EditCoursePageProps) {
-    const { courseId } = params;
+export default function EditCoursePage() {
     const router = useRouter();
+    const params = useParams();
+    const courseId = Array.isArray(params.courseId) ? params.courseId[0] : params.courseId;
+
     const [courseData, setCourseData] = useState<AdminCourseDetailDTO | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('details');
@@ -33,6 +29,13 @@ export default function EditCoursePage({ params }: EditCoursePageProps) {
     const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
 
     const fetchCourse = useCallback(async () => {
+        if (!courseId) {
+            toast.error('Course ID is missing.');
+            setIsLoading(false);
+            setCourseData(null);
+            return;
+        }
+
         try {
             const data = await adminApiClient.getCourseAdmin(courseId);
             setCourseData(data);
@@ -47,6 +50,9 @@ export default function EditCoursePage({ params }: EditCoursePageProps) {
         if (courseId) {
             setIsLoading(true);
             fetchCourse().finally(() => setIsLoading(false));
+        } else {
+            setIsLoading(false);
+            console.error('EditCoursePage: courseId is missing in params.');
         }
     }, [courseId, fetchCourse]);
 
@@ -67,6 +73,7 @@ export default function EditCoursePage({ params }: EditCoursePageProps) {
     };
 
     const handleDeleteLesson = async (lessonId: string, lessonTitle: string) => {
+        if (!courseId) return;
         if (confirm(`Are you sure you want to delete lesson "${lessonTitle}"?`)) {
             try {
                 await adminApiClient.deleteLessonAdmin(courseId, lessonId);
@@ -87,7 +94,7 @@ export default function EditCoursePage({ params }: EditCoursePageProps) {
         );
     }
 
-    if (!courseData) {
+    if (!courseData && !isLoading) {
         return (
             <Card>
                 <CardHeader>
@@ -102,6 +109,8 @@ export default function EditCoursePage({ params }: EditCoursePageProps) {
             </Card>
         );
     }
+
+    if (!courseData) return null;
 
     return (
         <>
@@ -151,7 +160,7 @@ export default function EditCoursePage({ params }: EditCoursePageProps) {
                 </TabsContent>
             </Tabs>
 
-            {isLessonDialogOpen && (
+            {isLessonDialogOpen && courseId && (
                 <LessonEditDialog
                     courseId={courseId}
                     lesson={editingLesson}

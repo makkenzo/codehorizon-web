@@ -24,7 +24,7 @@ import { adminApiClient } from '@/server/admin-api-client';
 import { AdminCourseDetailDTO, AdminCreateUpdateLessonRequestDTO, AdminLessonDTO } from '@/types/admin';
 
 const lessonFormSchema = z.object({
-    title: z.string().min(3, 'Title must be at least 3 characters'),
+    title: z.string().min(3, 'Lesson title must be at least 3 characters'),
     content: z.string().optional().or(z.literal('')),
 });
 
@@ -64,7 +64,7 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                 content: values.content || null,
             };
 
-            let updatedCourse: AdminCourseDetailDTO | null = null;
+            let updatedCourse: AdminCourseDetailDTO;
 
             if (isEditing && lesson) {
                 updatedCourse = await adminApiClient.updateLessonAdmin(courseId, lesson.id, requestData);
@@ -74,13 +74,11 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                 toast.success(`Lesson "${values.title}" added.`);
             }
 
-            if (updatedCourse) {
-                onSuccess(updatedCourse);
-            }
+            onSuccess(updatedCourse);
         } catch (error: any) {
             console.error(`Error ${isEditing ? 'updating' : 'adding'} lesson:`, error);
             const errorMsg = error?.response?.data?.message || error.message || 'Unknown error';
-            toast.error(`Failed to ${isEditing ? 'update' : 'add'} lesson: ${errorMsg}`);
+            toast.error(`Failed to ${isEditing ? 'save' : 'add'} lesson: ${errorMsg}`);
         } finally {
             setIsSubmitting(false);
         }
@@ -88,84 +86,71 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
 
     return (
         <Dialog open={true} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-3xl">
-                {' '}
-                {/* Еще шире для контента урока */}
+            <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle>{isEditing ? `Edit Lesson: ${lesson?.title}` : 'Add New Lesson'}</DialogTitle>
                     <DialogDescription>
-                        {isEditing ? 'Modify the lesson details.' : 'Fill in the details for the new lesson.'}
+                        {isEditing
+                            ? 'Modify the lesson content and details.'
+                            : 'Fill in the details for the new lesson.'}
                     </DialogDescription>
                 </DialogHeader>
-                <Form {...form}>
-                    <div className="max-h-[65vh] overflow-y-auto pr-6 pl-1 -mr-6">
-                        {' '}
-                        {/* Больше высоты */}
+
+                <div className="flex-1 overflow-y-auto pr-6 pl-1 -mr-6 custom-scrollbar">
+                    <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pb-4">
-                            {/* Title */}
                             <FormField
                                 control={form.control}
                                 name="title"
                                 render={({ field }) => (
                                     <FormItem>
-                                        {' '}
-                                        <FormLabel>Lesson Title</FormLabel>{' '}
+                                        <FormLabel>Lesson Title</FormLabel>
                                         <FormControl>
-                                            {' '}
                                             <Input
-                                                placeholder="e.g., Introduction"
+                                                placeholder="e.g., Setting up your environment"
                                                 {...field}
                                                 disabled={isSubmitting}
-                                            />{' '}
-                                        </FormControl>{' '}
-                                        <FormMessage />{' '}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
 
-                            {/* Content (Textarea, но лучше Rich Text Editor) */}
                             <FormField
                                 control={form.control}
                                 name="content"
                                 render={({ field }) => (
                                     <FormItem>
-                                        {' '}
-                                        <FormLabel>Lesson Content</FormLabel>{' '}
+                                        <FormLabel>Content</FormLabel>
                                         <FormControl>
-                                            {/* TODO: Заменить на Rich Text Editor (например, Tiptap, Lexical) */}
-                                            <Textarea
-                                                placeholder="Lesson content (Markdown or HTML)..."
-                                                className="resize-y min-h-[200px]"
-                                                {...field}
-                                                value={field.value ?? ''}
-                                                disabled={isSubmitting}
-                                            />
-                                        </FormControl>{' '}
-                                        <FormMessage />{' '}
+                                            <>
+                                                <Textarea
+                                                    placeholder="Lesson content (Markdown or HTML is recommended)..."
+                                                    className="resize-y min-h-[300px] font-mono text-sm"
+                                                    {...field}
+                                                    value={field.value ?? ''}
+                                                    disabled={isSubmitting}
+                                                />
+                                            </>
+                                        </FormControl>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
-
-                            {/* TODO: Добавить поля для Code Examples, Tasks, Attachments */}
-                            {/* Например, секция для добавления/редактирования задач */}
-                            {/* <div className="space-y-2 rounded-lg border p-4"> ... Tasks UI ... </div> */}
                         </form>
-                    </div>
-                    <DialogFooter className="pt-4 border-t mt-4">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => onOpenChange(false)}
-                            disabled={isSubmitting}
-                        >
-                            Cancel
-                        </Button>
-                        <Button type="button" onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
-                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {isEditing ? 'Save Lesson' : 'Add Lesson'}
-                        </Button>
-                    </DialogFooter>
-                </Form>
+                    </Form>
+                </div>
+
+                <DialogFooter className="flex-shrink-0 pt-4 border-t">
+                    <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+                        Cancel
+                    </Button>
+                    <Button type="button" onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
+                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {isEditing ? 'Save Lesson' : 'Add Lesson'}
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );

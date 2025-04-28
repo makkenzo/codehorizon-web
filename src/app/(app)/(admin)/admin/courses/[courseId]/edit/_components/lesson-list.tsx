@@ -54,7 +54,7 @@ export default function LessonList({ lessons, onEditLesson, onDeleteLesson }: Le
                                         <MoreVertical className="h-4 w-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
+                                <DropdownMenuContent align="end" className="w-56 px-4 py-2">
                                     <DropdownMenuLabel>Lesson Actions</DropdownMenuLabel>
                                     <DropdownMenuItem onClick={() => onEditLesson(lesson)} className="cursor-pointer">
                                         <Pencil className="mr-2 h-4 w-4" /> Edit
