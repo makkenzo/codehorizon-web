@@ -80,6 +80,8 @@
         --white-90: 0 0% 97.65%;
         --black-60: 0 0% 10.59%;
         --surface-dark: 0 0% 10.59%;
+        --admin-bg-start: 210 40% 98%;
+        --admin-bg-end: 210 40% 94%;
     }
 
     .dark {
@@ -111,6 +113,8 @@
 
         --white-90: 0 0% 97.65%;
         --black-60: 0 0% 10.59%;
+        --admin-bg-start: 220 15% 15%;
+        --admin-bg-end: 220 15% 10%;
     }
 }
 
@@ -224,6 +228,9 @@
 
     --breakpoint-3xl: 120rem;
     --breakpoint-4xl: 140rem;
+
+    --color-admin-bg-start: var(--admin-bg-start);
+    --color-admin-bg-end: var(--admin-bg-end);
 }
 
 @layer base {
@@ -239,4 +246,10 @@
     --font-sans: 'Gilroy', sans-serif;
     --font-heading: 'Gilroy', sans-serif;
     --font-body: 'Gilroy', sans-serif;
+}
+
+@layer utilities {
+    .admin-gradient-bg {
+        @apply bg-gradient-to-br from-[hsl(var(--admin-bg-start))] to-[hsl(var(--admin-bg-end))];
+    }
 }
