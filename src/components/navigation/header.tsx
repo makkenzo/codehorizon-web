@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 
 import { motion } from 'framer-motion';
-import { ShieldCheck } from 'lucide-react';
 import { FaUserSecret } from 'react-icons/fa6';
 import { RiProgress5Line } from 'react-icons/ri';
 
