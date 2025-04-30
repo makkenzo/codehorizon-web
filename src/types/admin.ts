@@ -105,7 +105,7 @@ export interface AdminDashboardStatsDTO {
     newUsersToday: number;
     totalCourses: number;
     totalRevenue: number;
-    activeSessions: number;
+    completedCoursesCount: number;
 }
 
 export interface TimeSeriesDataPointDTO {

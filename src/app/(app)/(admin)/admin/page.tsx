@@ -156,14 +156,14 @@ export default function AdminDashboardPage() {
 
                 <Card x-chunk="dashboard-01-chunk-3">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Active Now</CardTitle>
+                        <CardTitle className="text-sm font-medium">Completed courses</CardTitle>
                         <Activity className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         {isLoading ? (
                             <Skeleton className="h-8 w-16 mt-1" />
                         ) : (
-                            <div className="text-2xl font-bold">{stats?.activeSessions ?? '-'}</div>
+                            <div className="text-2xl font-bold">{stats?.completedCoursesCount ?? '-'}</div>
                         )}
                     </CardContent>
                 </Card>
