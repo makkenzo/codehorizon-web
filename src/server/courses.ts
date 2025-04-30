@@ -179,6 +179,21 @@ class CoursesApiClient extends ApiClient {
             throw error;
         }
     }
+
+    async getUserCourseProgress(courseId: string): Promise<CourseProgress | null> {
+        const endpoint = `/courses/${courseId}/progress`;
+        try {
+            const response = await this.get<CourseProgress>(endpoint);
+            return response.data;
+        } catch (error: any) {
+            if (axios.isAxiosError(error) && error.response?.status === 404) {
+                console.log(`Прогресс для курса ${courseId} не найден.`);
+                return null;
+            }
+            console.error(`Ошибка при получении прогресса для курса ${courseId}:`, error);
+            throw error;
+        }
+    }
 }
 
 export default CoursesApiClient;

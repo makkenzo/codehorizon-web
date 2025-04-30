@@ -33,11 +33,19 @@ hljs.registerLanguage('bash', bash);
 hljs.registerLanguage('plaintext', plaintext);
 
 export default function LessonPage() {
-    const { currentLesson, course } = useCourseLearnContext();
+    const { currentLesson, course, courseProgress, updateCourseProgress } = useCourseLearnContext();
     const [isCompleted, setIsCompleted] = useState(false);
     const [isCompletePending, startCompleteTransition] = useTransition();
 
     const apiClient = new CoursesApiClient();
+
+    useEffect(() => {
+        if (currentLesson && courseProgress) {
+            setIsCompleted(courseProgress.completedLessons?.includes(currentLesson.id) ?? false);
+        } else {
+            setIsCompleted(false);
+        }
+    }, [currentLesson, courseProgress]);
 
     useEffect(() => {
         if (currentLesson) {
@@ -46,16 +54,6 @@ export default function LessonPage() {
             });
         }
     }, [currentLesson]);
-
-    useEffect(() => {
-        if (currentLesson && course) {
-            setIsCompleted(false);
-        }
-
-        return () => {
-            setIsCompleted(false);
-        };
-    }, [currentLesson, course]);
 
     const parseCodeBlock = (codeBlock: string): { language: string | null; code: string } => {
         const match = codeBlock.match(/^```(\w*)\n([\s\S]*?)\n```$/);
@@ -73,16 +71,17 @@ export default function LessonPage() {
 
         startCompleteTransition(async () => {
             try {
-                const updatedProgress = await apiClient.markLessonAsComplete(course.id, currentLesson.id);
-                if (updatedProgress) {
+                const updatedProgressData = await apiClient.markLessonAsComplete(course.id, currentLesson.id);
+                if (updatedProgressData) {
                     setIsCompleted(true);
+                    updateCourseProgress(updatedProgressData);
                     toast.success(`Урок "${currentLesson.title}" отмечен как пройденный!`);
+                    console.log('Новый прогресс:', updatedProgressData.progress);
                 } else {
                     toast.error('Не удалось обновить прогресс.');
                 }
             } catch (error: any) {
                 console.error('Ошибка при отметке урока:', error);
-
                 const errorMsg = error?.response?.data?.message || 'Не удалось отметить урок как пройденный.';
                 toast.error(errorMsg);
             }
@@ -99,6 +98,8 @@ export default function LessonPage() {
             </div>
         );
     }
+
+    const currentProgressPercent = courseProgress?.progress ?? 0;
 
     const attachmentUrl = currentLesson?.mainAttachment?.trim();
     const videoMatchResult = attachmentUrl ? attachmentUrl.match(/\.(mp4|webm|ogg)$/i) : null;

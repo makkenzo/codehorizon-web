@@ -111,4 +111,5 @@ export type PagedResponse<T> = {
 export type CourseProgress = {
     course: Omit<Course, 'lessons'>;
     progress: number;
+    completedLessons: string[];
 };

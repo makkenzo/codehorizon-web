@@ -13,7 +13,7 @@ import { CourseLearnProvider } from '@/contexts/course-learn-context';
 import { cn } from '@/lib/utils';
 import { ProtectedRoute } from '@/providers/protected-route';
 import CoursesApiClient from '@/server/courses';
-import { Course } from '@/types';
+import { Course, CourseProgress } from '@/types';
 
 const LessonSidebar = ({ course, currentLessonSlug }: { course: Course; currentLessonSlug: string }) => {
     return (
@@ -49,11 +49,15 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
     const [isLoading, setIsLoading] = useState(true);
     const [hasAccess, setHasAccess] = useState<boolean | null>(null);
 
+    const [progressData, setProgressData] = useState<CourseProgress | null>(null);
+    const [isFetchingProgress, setIsFetchingProgress] = useState(true);
+
     const apiClient = new CoursesApiClient();
 
     useEffect(() => {
         const checkAccessAndFetchData = async () => {
             setIsLoading(true);
+            setIsFetchingProgress(true);
             setHasAccess(null);
 
             if (!courseSlug) {
@@ -64,6 +68,7 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
             }
 
             let courseId = '';
+            let accessGranted = false;
 
             try {
                 const courseInfo = await apiClient.getCourseBySlug(courseSlug);
@@ -75,8 +80,33 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
                 }
                 courseId = courseInfo.id;
 
-                const accessGranted = await apiClient.checkCourseAccess(courseId);
-                setHasAccess(accessGranted);
+                const [accessResult, progressResult] = await Promise.allSettled([
+                    apiClient.checkCourseAccess(courseId),
+                    apiClient.getUserCourseProgress(courseId),
+                ]);
+
+                if (accessResult.status === 'fulfilled') {
+                    accessGranted = accessResult.value;
+                    setHasAccess(accessGranted);
+                } else {
+                    console.error('Access check failed:', accessResult.reason);
+                    setHasAccess(false);
+                    toast.error('Ошибка проверки доступа.');
+                    router.push(`/sign-in?from=/courses/${courseSlug}/learn/${lessonSlug}`);
+                    setIsLoading(false);
+                    setIsFetchingProgress(false);
+                    return;
+                }
+
+                if (progressResult.status === 'fulfilled') {
+                    setProgressData(progressResult.value);
+                } else {
+                    console.error('Failed to fetch progress:', progressResult.reason);
+
+                    toast.warning('Не удалось загрузить ваш прогресс по курсу.');
+                    setProgressData(null);
+                }
+                setIsFetchingProgress(false);
 
                 if (accessGranted) {
                     const fullCourse = await apiClient.getCourseLearnContent(courseId);
@@ -94,10 +124,10 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
                         setCourseData(fullCourse);
                     } else {
                         toast.error('Не удалось загрузить данные курса.');
+                        setHasAccess(false);
                     }
                 } else {
                     toast.error('У вас нет доступа к этому курсу.');
-
                     router.push(`/courses/${courseSlug}`);
                 }
             } catch (error: any) {
@@ -116,9 +146,11 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
         };
 
         checkAccessAndFetchData();
-    }, [courseSlug, lessonSlug, router]);
+    }, [courseSlug, lessonSlug]);
 
-    if (isLoading || hasAccess === null) {
+    const showLoader = isLoading || isFetchingProgress || hasAccess === null;
+
+    if (showLoader) {
         return (
             <div className="flex h-[calc(100vh-var(--header-height))] w-full items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -148,7 +180,7 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
         <ProtectedRoute>
             <div className="flex h-[calc(100vh-var(--header-height))]">
                 <LessonSidebar course={courseData} currentLessonSlug={lessonSlug} />
-                <CourseLearnProvider course={courseData} currentLesson={currentLesson}>
+                <CourseLearnProvider course={courseData} currentLesson={currentLesson} initialProgress={progressData}>
                     <main className="flex-1 overflow-y-auto p-6 bg-background">{children}</main>
                 </CourseLearnProvider>
             </div>
