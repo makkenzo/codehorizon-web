@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { ReactNode, useEffect, useState, useTransition } from 'react';
 
 import hljs from 'highlight.js';
 import bash from 'highlight.js/lib/languages/bash';
@@ -169,24 +169,60 @@ export default function LessonPage() {
             {currentLesson.mainAttachment && (
                 <>
                     <h2 className="not-prose text-xl font-semibold mt-6 mb-3">Основной материал урока</h2>
-                    {isVideo ? (
-                        <div className="not-prose my-4 aspect-video max-w-3xl mx-auto">
-                            <Player
-                                src={currentLesson.mainAttachment}
-                                theme={MediaThemeMinimal}
-                                style={{
-                                    '--media-secondary-color': '#3eccb2',
-                                    '--media-primary-color': '#faf2f0',
-                                }}
-                            />
-                        </div>
-                    ) : (
-                        <div className="not-prose">
-                            <AttachmentLink
-                                attachment={{ name: 'Открыть основной материал', url: currentLesson.mainAttachment }}
-                            />
-                        </div>
-                    )}
+                    <div className="not-prose my-4">
+                        {((): ReactNode => {
+                            const url = currentLesson.mainAttachment!;
+                            const extension = url.split('.').pop()?.toLocaleLowerCase();
+
+                            if (['mp4', 'webm', 'mov', 'ogg'].includes(extension || '')) {
+                                return (
+                                    <div className="aspect-video max-w-3xl mx-auto rounded-lg overflow-hidden shadow-md">
+                                        <Player
+                                            src={url}
+                                            theme={MediaThemeMinimal}
+                                            style={{
+                                                '--media-secondary-color': '#3eccb2',
+                                                '--media-primary-color': '#faf2f0',
+                                            }}
+                                        />
+                                    </div>
+                                );
+                            }
+
+                            if (['mp3', 'wav', 'ogg'].includes(extension || '')) {
+                                return (
+                                    <audio controls src={url} className="w-full">
+                                        Ваш браузер не поддерживает аудио элемент.
+                                        <a href={url}>Скачать аудио</a>
+                                    </audio>
+                                );
+                            }
+
+                            if (extension === 'pdf') {
+                                return (
+                                    <div>
+                                        <p className="text-sm text-muted-foreground mb-2">
+                                            Предпросмотр PDF (может не работать в некоторых браузерах):
+                                        </p>
+                                        {/* <iframe src={url} width="100%" height="500px" className="border rounded-md"></iframe> */}
+                                        <AttachmentLink attachment={{ name: `Просмотреть/Скачать PDF`, url: url }} />
+                                    </div>
+                                );
+                            }
+
+                            if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(extension || '')) {
+                                return (
+                                    <img
+                                        src={url}
+                                        alt="Основной материал урока"
+                                        className="max-w-full h-auto rounded-md shadow-md"
+                                    />
+                                );
+                            }
+
+                            return <AttachmentLink attachment={{ name: `Скачать основной материал`, url: url }} />;
+                        })()}
+                    </div>
                 </>
             )}
         </div>

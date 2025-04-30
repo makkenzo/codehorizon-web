@@ -61,11 +61,19 @@ export interface Attachment {
     url: string;
 }
 
+export enum TaskType {
+    TEXT_INPUT = 'TEXT_INPUT',
+    CODE_INPUT = 'CODE_INPUT',
+    MULTIPLE_CHOICE = 'MULTIPLE_CHOICE',
+}
+
 export interface Task {
     id: string;
-    question: string;
-    options: string[];
-    correctAnswer: string;
+    description: string;
+    solution?: string | null;
+    tests?: string[] | null;
+    taskType: TaskType;
+    options?: string[] | null;
 }
 
 export interface Review {
