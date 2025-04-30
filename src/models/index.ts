@@ -13,14 +13,6 @@ export type User = {
     accountSettings: AccountSettings | null;
 };
 
-export type UserProfile = {
-    id: string;
-    username: string;
-    email: string;
-    isVerified: boolean;
-    profile: Omit<Profile, 'id' | 'userId'>;
-};
-
 export type Profile = {
     id: string;
     avatarUrl: string | null;
@@ -53,4 +45,21 @@ export type AccountSettings = {
         twoFactorEnabled: boolean;
         loginAlerts: boolean;
     };
+};
+
+export interface PublicCourseInfo {
+    id: string;
+    title: string;
+    slug: string;
+    imagePreview?: string | null;
+    progress?: number | null;
+}
+
+export type UserProfile = {
+    id: string;
+    username: string;
+    profile: Omit<Profile, 'id' | 'userId'>;
+    coursesInProgress?: PublicCourseInfo[] | null;
+    completedCoursesCount: number;
+    createdCourses?: PublicCourseInfo[] | null;
 };

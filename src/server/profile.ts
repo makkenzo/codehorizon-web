@@ -22,14 +22,19 @@ class ProfileApiClient extends ApiClient {
         } catch (_) {}
     }
 
-    async getUserProfile(username: string) {
+    async getUserProfile(username: string): Promise<UserProfile | undefined> {
         try {
             const response = await this.get<UserProfile>(`/users/${username}/profile`)
                 .then((response) => response.data)
-                .catch((e) => console.error(e));
+                .catch((e) => {
+                    console.error(`Ошибка загрузки профиля ${username}:`, e?.response?.status || e);
+                    return undefined;
+                });
 
             return response;
-        } catch (_) {}
+        } catch (_) {
+            return undefined;
+        }
     }
 }
 
