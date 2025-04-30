@@ -16,6 +16,8 @@ import 'player.style/minimal';
 import MediaThemeMinimal from 'player.style/minimal/react';
 import { toast } from 'sonner';
 
+import { useParams, useRouter } from 'next/navigation';
+
 import AttachmentLink from '@/components/course/attachment-link';
 import TaskDisplay from '@/components/course/task-display';
 import { Button } from '@/components/ui/button';
@@ -36,6 +38,9 @@ export default function LessonPage() {
     const { currentLesson, course, courseProgress, updateCourseProgress } = useCourseLearnContext();
     const [isCompleted, setIsCompleted] = useState(false);
     const [isCompletePending, startCompleteTransition] = useTransition();
+    const router = useRouter();
+    const params = useParams();
+    const courseSlug = params.slug as string;
 
     const apiClient = new CoursesApiClient();
 
@@ -76,7 +81,19 @@ export default function LessonPage() {
                     setIsCompleted(true);
                     updateCourseProgress(updatedProgressData);
                     toast.success(`Урок "${currentLesson.title}" отмечен как пройденный!`);
-                    console.log('Новый прогресс:', updatedProgressData.progress);
+
+                    const currentIndex = course.lessons.findIndex((lesson) => lesson.id === currentLesson.id);
+                    const nextLesson = course.lessons[currentIndex + 1];
+
+                    if (nextLesson) {
+                        const nextLessonUrl = `/courses/${courseSlug}/learn/${nextLesson.slug}`;
+
+                        setTimeout(() => {
+                            router.push(nextLessonUrl);
+                        }, 800);
+                    } else {
+                        toast.info('🎉 Поздравляем! Вы завершили курс!');
+                    }
                 } else {
                     toast.error('Не удалось обновить прогресс.');
                 }
@@ -119,7 +136,7 @@ export default function LessonPage() {
                     ) : isCompleted ? (
                         <CheckCircle2 className="mr-2 h-4 w-4 text-success" />
                     ) : null}
-                    {isCompleted ? 'Урок пройден' : 'Отметить как пройденное'}
+                    {isCompleted ? 'Урок пройден' : 'Отметить и продолжить'}
                 </Button>
             </div>
 
