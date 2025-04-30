@@ -1,6 +1,9 @@
 'use client';
 
+import { useMemo } from 'react';
+
 import { motion } from 'framer-motion';
+import { ShieldCheck } from 'lucide-react';
 import { FaUserSecret } from 'react-icons/fa6';
 import { RiProgress5Line } from 'react-icons/ri';
 
@@ -39,6 +42,10 @@ const Header = () => {
     const { profile, clearProfile } = useProfileStore((state) => state);
 
     const { user, clearUser } = useUserStore((state) => state);
+
+    const isAdmin = useMemo(() => {
+        return user?.roles?.includes('ADMIN') ?? false;
+    }, [user]);
 
     return (
         <div className={cn('w-full', pathname !== '/' && 'bg-white')}>
@@ -115,6 +122,18 @@ const Header = () => {
                                                 <DropdownMenuItem>Список желаемого</DropdownMenuItem>
                                             </Link>
                                         </DropdownMenuGroup>
+                                        {isAdmin && (
+                                            <>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuGroup>
+                                                    <Link href="/admin">
+                                                        <DropdownMenuItem className="text-accent focus:text-accent">
+                                                            Админ-панель
+                                                        </DropdownMenuItem>
+                                                    </Link>
+                                                </DropdownMenuGroup>
+                                            </>
+                                        )}
                                         <DropdownMenuSeparator />
                                         <DropdownMenuGroup>
                                             <DropdownMenuItem>
