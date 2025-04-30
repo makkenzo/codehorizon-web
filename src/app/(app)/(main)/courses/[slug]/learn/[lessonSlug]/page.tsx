@@ -116,12 +116,6 @@ export default function LessonPage() {
         );
     }
 
-    const currentProgressPercent = courseProgress?.progress ?? 0;
-
-    const attachmentUrl = currentLesson?.mainAttachment?.trim();
-    const videoMatchResult = attachmentUrl ? attachmentUrl.match(/\.(mp4|webm|ogg)$/i) : null;
-    const isVideo = !!videoMatchResult;
-
     return (
         <div className="prose dark:prose-invert max-w-none relative">
             <div className="absolute top-0 right-0 not-prose">
