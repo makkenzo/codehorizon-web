@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useState, useTransition } from 'react';
 
+import { isAxiosError } from 'axios';
 import hljs from 'highlight.js';
 import bash from 'highlight.js/lib/languages/bash';
 import css from 'highlight.js/lib/languages/css';
@@ -97,9 +98,18 @@ export default function LessonPage() {
                 } else {
                     toast.error('Не удалось обновить прогресс.');
                 }
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error('Ошибка при отметке урока:', error);
-                const errorMsg = error?.response?.data?.message || 'Не удалось отметить урок как пройденный.';
+
+                let errorMsg = 'Не удалось отметить урок как пройденный.';
+
+                if (isAxiosError(error)) {
+                    errorMsg =
+                        error?.response?.data?.message || error.message || 'Не удалось отметить урок как пройденный.';
+                } else if (error instanceof Error) {
+                    errorMsg = error.message;
+                }
+
                 toast.error(errorMsg);
             }
         });

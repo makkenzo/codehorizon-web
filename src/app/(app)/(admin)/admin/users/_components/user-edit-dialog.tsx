@@ -18,7 +18,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { adminApiClient } from '@/server/admin-api-client';
 import { AdminUpdateUserRequest, AdminUser } from '@/types/admin';
 

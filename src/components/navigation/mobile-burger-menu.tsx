@@ -1,7 +1,7 @@
 import { Fragment, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bell, Book, ChevronDown, ChevronUp, Heart, Home, Menu, Settings, ShoppingBag, X } from 'lucide-react';
+import { Bell, Book, ChevronUp, Heart, Home, Menu, Settings, ShoppingBag, X } from 'lucide-react';
 import { RiProfileFill, RiProfileLine, RiProgress5Line } from 'react-icons/ri';
 
 import Link from 'next/link';
@@ -10,9 +10,8 @@ import { cn } from '@/lib/utils';
 import { Profile } from '@/models';
 import { NavItem } from '@/types';
 
-import { links } from '../catalog-dropdown';
 import { Button } from '../ui/button';
-import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
 
 interface MobileBurgerMenuProps {
     profile?: Profile;

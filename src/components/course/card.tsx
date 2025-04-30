@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { Course, CourseDifficultyLevels } from '@/types';
+import { CourseDifficultyLevels } from '@/types';
 
 import Price from '../reusable/price';
 import RatingStars from '../reusable/rating-stars';

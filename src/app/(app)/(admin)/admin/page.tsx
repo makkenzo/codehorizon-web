@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { isAxiosError } from 'axios';
 import { Activity, BookOpen, DollarSign, Users } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, Line, LineChart, Pie, PieChart, XAxis, YAxis } from 'recharts';
 import { toast } from 'sonner';
@@ -59,9 +60,18 @@ export default function AdminDashboardPage() {
                     });
                     setCategoryChartConfig(newConfig);
                 }
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error('Failed to load dashboard data:', error);
-                toast.error(`Failed to load dashboard data: ${error.message || 'Unknown error'}`);
+
+                let errorMsg = 'Unknown error';
+
+                if (isAxiosError(error)) {
+                    errorMsg = error?.response?.data?.message || error.message || 'Unknown error';
+                } else if (error instanceof Error) {
+                    errorMsg = error.message;
+                }
+
+                toast.error(`Failed to load dashboard data: ${errorMsg}`);
             } finally {
                 setIsLoading(false);
             }

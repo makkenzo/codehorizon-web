@@ -56,8 +56,8 @@ class ApiClient {
 
         this.isRefreshing = true;
         try {
-            const response = await this.axiosInstance.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`);
-        } catch (error) {
+            await this.axiosInstance.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`);
+        } catch (_) {
             this.logout();
         } finally {
             this.isRefreshing = false;

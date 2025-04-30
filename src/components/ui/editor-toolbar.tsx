@@ -4,7 +4,6 @@ import { type Editor } from '@tiptap/react';
 import {
     Bold,
     Code,
-    Code2,
     Heading1,
     Heading2,
     Heading3,

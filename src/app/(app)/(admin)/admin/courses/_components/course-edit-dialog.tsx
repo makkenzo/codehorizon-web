@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { isAxiosError } from 'axios';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -55,9 +56,18 @@ export default function AdminCourseEditDialog({ course, onOpenChange, onSuccess 
             try {
                 const authorList = await adminApiClient.getPotentialAuthors();
                 setAuthors(authorList);
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error('Failed to fetch authors:', error);
-                toast.error(`Could not load authors list: ${error.message || 'Unknown error'}`);
+
+                let errorMsg = 'Unknown error';
+
+                if (isAxiosError(error)) {
+                    errorMsg = error?.response?.data?.message || error.message || 'Unknown error';
+                } else if (error instanceof Error) {
+                    errorMsg = error.message;
+                }
+
+                toast.error(`Could not load authors list: ${errorMsg}`);
             }
         };
         fetchAuthors();
@@ -109,9 +119,17 @@ export default function AdminCourseEditDialog({ course, onOpenChange, onSuccess 
             }
 
             onSuccess();
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(`Error ${isEditing ? 'updating' : 'creating'} course:`, error);
-            const errorMsg = error?.response?.data?.message || error.message || 'Unknown error';
+
+            let errorMsg = 'Unknown error';
+
+            if (isAxiosError(error)) {
+                errorMsg = error?.response?.data?.message || error.message || 'Unknown error';
+            } else if (error instanceof Error) {
+                errorMsg = error.message;
+            }
+
             toast.error(`Failed to ${isEditing ? 'update' : 'create'} course: ${errorMsg}`);
         } finally {
             setIsSubmitting(false);

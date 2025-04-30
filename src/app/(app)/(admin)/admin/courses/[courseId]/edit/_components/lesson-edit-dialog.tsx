@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { isAxiosError } from 'axios';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -20,7 +21,6 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
-import { Textarea } from '@/components/ui/textarea';
 import { adminApiClient } from '@/server/admin-api-client';
 import { AdminCourseDetailDTO, AdminCreateUpdateLessonRequestDTO, AdminLessonDTO } from '@/types/admin';
 
@@ -76,9 +76,17 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
             }
 
             onSuccess(updatedCourse);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(`Error ${isEditing ? 'updating' : 'adding'} lesson:`, error);
-            const errorMsg = error?.response?.data?.message || error.message || 'Unknown error';
+
+            let errorMsg = 'Unknown error';
+
+            if (isAxiosError(error)) {
+                errorMsg = error?.response?.data?.message || error.message || 'Unknown error';
+            } else if (error instanceof Error) {
+                errorMsg = error.message;
+            }
+
             toast.error(`Failed to ${isEditing ? 'save' : 'add'} lesson: ${errorMsg}`);
         } finally {
             setIsSubmitting(false);

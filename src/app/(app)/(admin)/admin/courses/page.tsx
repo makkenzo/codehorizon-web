@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { isAxiosError } from 'axios';
 import { MoreHorizontal, Pencil, PlusCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -26,8 +27,6 @@ import { formatNumber } from '@/lib/utils';
 import { adminApiClient } from '@/server/admin-api-client';
 import { AdminCourseListItemDTO, PagedResponse } from '@/types/admin';
 
-import AdminCourseEditDialog from './_components/course-edit-dialog';
-
 export default function AdminCoursesPage() {
     const router = useRouter();
     const pathname = usePathname();
@@ -45,9 +44,18 @@ export default function AdminCoursesPage() {
             try {
                 const result = await adminApiClient.getCoursesAdmin(page, size);
                 setData(result);
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error('Failed to fetch courses:', error);
-                toast.error(`Failed to fetch courses: ${error.message || 'Unknown error'}`);
+
+                let errorMsg = 'Unknown error';
+
+                if (isAxiosError(error)) {
+                    errorMsg = error?.response?.data?.message || error.message || 'Unknown error';
+                } else if (error instanceof Error) {
+                    errorMsg = error.message;
+                }
+
+                toast.error(`Failed to fetch courses: ${errorMsg}`);
                 setData(null);
             } finally {
                 setIsLoading(false);
@@ -66,19 +74,24 @@ export default function AdminCoursesPage() {
         router.push(`${pathname}?${params.toString()}`);
     };
 
-    const handleDialogSuccess = () => {
-        fetchData();
-    };
-
     const handleDeleteCourse = async (courseId: string, courseTitle: string) => {
         if (confirm(`Are you sure you want to delete course "${courseTitle}"? This action cannot be undone.`)) {
             try {
                 await adminApiClient.deleteCourseAdmin(courseId);
                 toast.success(`Course "${courseTitle}" deleted.`);
                 fetchData();
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error(`Failed to delete course ${courseId}:`, error);
-                toast.error(`Failed to delete course: ${error.message || 'Unknown error'}`);
+
+                let errorMsg = 'Unknown error';
+
+                if (isAxiosError(error)) {
+                    errorMsg = error?.response?.data?.message || error.message || 'Unknown error';
+                } else if (error instanceof Error) {
+                    errorMsg = error.message;
+                }
+
+                toast.error(`Failed to delete course: ${errorMsg}`);
             }
         }
     };

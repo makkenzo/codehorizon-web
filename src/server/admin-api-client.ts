@@ -21,7 +21,7 @@ class AdminApiClient {
         try {
             const response = await apiClient.get<PagedResponse<AdminUser>>(`/admin/users?${params.toString()}`);
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error fetching admin users:', error);
             throw error;
         }
@@ -31,7 +31,7 @@ class AdminApiClient {
         try {
             const response = await apiClient.get<AdminUser>(`/admin/users/${userId}`);
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(`Error fetching admin user ${userId}:`, error);
             throw error;
         }
@@ -41,7 +41,7 @@ class AdminApiClient {
         try {
             const response = await apiClient.put<AdminUser, AdminUpdateUserRequest>(`/admin/users/${userId}`, data);
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(`Error updating admin user ${userId}:`, error);
             throw error;
         }
@@ -73,7 +73,7 @@ class AdminApiClient {
                 `/admin/courses?${params.toString()}`
             );
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error fetching admin courses:', error);
             throw error;
         }
@@ -83,7 +83,7 @@ class AdminApiClient {
         try {
             const response = await apiClient.get<AdminCourseDetailDTO>(`/admin/courses/${courseId}`);
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(`Error fetching admin course ${courseId}:`, error);
             throw error;
         }
@@ -96,7 +96,7 @@ class AdminApiClient {
                 data
             );
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(`Error creating admin course:`, error);
             throw error;
         }
@@ -109,7 +109,7 @@ class AdminApiClient {
                 data
             );
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(`Error updating admin course ${courseId}:`, error);
             throw error;
         }
@@ -118,7 +118,7 @@ class AdminApiClient {
     async deleteCourseAdmin(courseId: string): Promise<void> {
         try {
             await apiClient.delete<void>(`/admin/courses/${courseId}`);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(`Error deleting admin course ${courseId}:`, error);
             throw error;
         }
@@ -131,7 +131,7 @@ class AdminApiClient {
                 data
             );
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(`Error adding lesson to course ${courseId}:`, error);
             throw error;
         }
@@ -148,7 +148,7 @@ class AdminApiClient {
                 data
             );
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(`Error updating lesson ${lessonId} in course ${courseId}:`, error);
             throw error;
         }
@@ -157,7 +157,7 @@ class AdminApiClient {
     async deleteLessonAdmin(courseId: string, lessonId: string): Promise<void> {
         try {
             await apiClient.delete<void>(`/admin/courses/${courseId}/lessons/${lessonId}`);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(`Error deleting lesson ${lessonId} from course ${courseId}:`, error);
             throw error;
         }
@@ -167,7 +167,7 @@ class AdminApiClient {
         try {
             const response = await apiClient.get<AdminDashboardStatsDTO>(`/admin/dashboard/stats`);
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error fetching dashboard stats:', error);
             throw error;
         }
@@ -177,7 +177,7 @@ class AdminApiClient {
         try {
             const response = await apiClient.get<AdminChartDataDTO>(`/admin/dashboard/charts`);
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error fetching dashboard charts:', error);
             throw error;
         }

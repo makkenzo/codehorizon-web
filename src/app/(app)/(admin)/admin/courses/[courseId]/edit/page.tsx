@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { isAxiosError } from 'axios';
 import { Loader2, PlusCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -39,9 +40,18 @@ export default function EditCoursePage() {
         try {
             const data = await adminApiClient.getCourseAdmin(courseId);
             setCourseData(data);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Failed to fetch course details:', error);
-            toast.error(`Failed to load course: ${error.message || 'Unknown error'}`);
+
+            let errorMsg = 'Unknown error';
+
+            if (isAxiosError(error)) {
+                errorMsg = error?.response?.data?.message || error.message || 'Unknown error';
+            } else if (error instanceof Error) {
+                errorMsg = error.message;
+            }
+
+            toast.error(`Failed to load course: ${errorMsg}`);
             setCourseData(null);
         }
     }, [courseId]);
@@ -79,9 +89,18 @@ export default function EditCoursePage() {
                 await adminApiClient.deleteLessonAdmin(courseId, lessonId);
                 toast.success(`Lesson "${lessonTitle}" deleted.`);
                 fetchCourse();
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error(`Failed to delete lesson ${lessonId}:`, error);
-                toast.error(`Failed to delete lesson: ${error.message || 'Unknown error'}`);
+
+                let errorMsg = 'Unknown error';
+
+                if (isAxiosError(error)) {
+                    errorMsg = error?.response?.data?.message || error.message || 'Unknown error';
+                } else if (error instanceof Error) {
+                    errorMsg = error.message;
+                }
+
+                toast.error(`Failed to delete lesson: ${errorMsg}`);
             }
         }
     };

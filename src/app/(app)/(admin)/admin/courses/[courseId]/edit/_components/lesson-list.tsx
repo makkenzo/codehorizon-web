@@ -39,7 +39,7 @@ export default function LessonList({ lessons, onEditLesson, onDeleteLesson }: Le
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {lessons.map((lesson, index) => (
+                    {lessons.map((lesson) => (
                         <TableRow key={lesson.id} className="hover:bg-muted/50 transition-colors">
                             <TableCell className="font-medium truncate max-w-xs">{lesson.title}</TableCell>
                             <TableCell className="text-muted-foreground truncate max-w-[150px]">

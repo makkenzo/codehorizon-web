@@ -1,4 +1,4 @@
-import { RiHome4Fill, RiHomeFill } from 'react-icons/ri';
+import { RiHome4Fill } from 'react-icons/ri';
 
 import Link from 'next/link';
 

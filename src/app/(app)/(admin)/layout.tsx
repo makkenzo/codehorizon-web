@@ -2,38 +2,21 @@
 
 import { ReactNode, useEffect, useState } from 'react';
 
-import {
-    Bell,
-    BookOpen,
-    Home,
-    LayoutDashboard,
-    Loader2,
-    LogOut,
-    Menu,
-    Package2,
-    Search,
-    Settings,
-    ShoppingCart,
-    Users,
-} from 'lucide-react';
-import { FaUserSecret } from 'react-icons/fa6';
+import { BookOpen, Home, LayoutDashboard, Loader2, LogOut, Menu, Package2, Settings, Users } from 'lucide-react';
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { User } from '@/models';

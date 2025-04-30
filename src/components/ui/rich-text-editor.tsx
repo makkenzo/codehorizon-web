@@ -3,7 +3,7 @@
 import React from 'react';
 
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { EditorContent, EditorProvider, JSONContent, useEditor } from '@tiptap/react';
+import { EditorContent, JSONContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { createLowlight } from 'lowlight';
 
@@ -16,20 +16,12 @@ interface RichTextEditorProps {
     onChange: (richText: string) => void;
     disabled?: boolean;
     className?: string;
-    toolbarClassName?: string;
     editorClassName?: string;
 }
 
 const lowlight = createLowlight();
 
-export function RichTextEditor({
-    value,
-    onChange,
-    disabled = false,
-    className,
-    toolbarClassName,
-    editorClassName,
-}: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, disabled = false, className, editorClassName }: RichTextEditorProps) {
     let initialContent: JSONContent | string;
     try {
         const parsedJson = JSON.parse(value);
@@ -39,7 +31,7 @@ export function RichTextEditor({
         } else {
             initialContent = value;
         }
-    } catch (e) {
+    } catch (_) {
         initialContent = value;
     }
 

@@ -2,7 +2,6 @@ import { IoMdDoneAll } from 'react-icons/io';
 
 import Link from 'next/link';
 
-import PageWrapper from '@/components/reusable/page-wrapper';
 import { Button } from '@/components/ui/button';
 
 const SuccessPage = () => {

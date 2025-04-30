@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
-import debounce from 'lodash.debounce';
 import { FaGreaterThanEqual } from 'react-icons/fa6';
 import { IoFilter } from 'react-icons/io5';
 
@@ -19,8 +18,6 @@ import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Separator } from '../ui/separator';
-
-interface CatalogFiltersMobileProps {}
 
 const fetchFiltersData = async (): Promise<FiltersData> => {
     return new Promise<FiltersData>((resolve) => {
@@ -121,19 +118,9 @@ const fetchFiltersData = async (): Promise<FiltersData> => {
     });
 };
 
-const CatalogFiltersMobile = ({}: CatalogFiltersMobileProps) => {
-    const {
-        categories,
-        level,
-        rating,
-        videoDuration,
-        sortBy,
-        reset,
-        setRating,
-        toggleCategory,
-        toggleLevel,
-        toggleVideoDuration,
-    } = useCatalogFiltersStore((state) => state);
+const CatalogFiltersMobile = () => {
+    const { categories, level, rating, videoDuration, setRating, toggleCategory, toggleLevel, toggleVideoDuration } =
+        useCatalogFiltersStore((state) => state);
     const [filtersData, setFiltersData] = useState<FiltersData | null>(null);
 
     useEffect(() => {

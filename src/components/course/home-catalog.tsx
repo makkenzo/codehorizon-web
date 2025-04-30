@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 
-import { fadeInVariants, heroFadeInVariants } from '@/lib/constants';
+import { heroFadeInVariants } from '@/lib/constants';
 
 import CategoryRowSelect from './category-row-select';
 import CoursesInProgress from './courses-in-progress';

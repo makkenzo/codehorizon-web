@@ -61,7 +61,7 @@ const SignInPageContent = () => {
         setErrorMessage(null);
 
         try {
-            const response = await new AuthApiClient().login(values.login, values.password);
+            await new AuthApiClient().login(values.login, values.password);
             setStatus('success');
 
             const redirectUrl = searchParams.get('from') || '/';

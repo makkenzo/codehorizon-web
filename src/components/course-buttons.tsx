@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from 'react';
 
 import { loadStripe } from '@stripe/stripe-js';
+import { isAxiosError } from 'axios';
 import { FaRegHeart } from 'react-icons/fa6';
 import { toast } from 'sonner';
 
@@ -94,13 +95,21 @@ const CourseButtons = ({ course }: CourseButtonsProps) => {
                     toast.success('Курс добавлен в желаемое');
                     setIsInWishlist(true);
                 }
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error(`Ошибка ${action} курса (${course.id}) в желаемое:`, error);
 
-                toast.error(
-                    error.response?.data?.message ||
-                        `Не удалось ${action.replace('ия', 'ить')} курс ${action === 'удаления' ? 'из' : 'в'} желаемое`
-                );
+                let errorMsg = `Не удалось ${action.replace('ия', 'ить')} курс ${action === 'удаления' ? 'из' : 'в'} желаемое`;
+
+                if (isAxiosError(error)) {
+                    errorMsg =
+                        error?.response?.data?.message ||
+                        error.message ||
+                        `Не удалось ${action.replace('ия', 'ить')} курс ${action === 'удаления' ? 'из' : 'в'} желаемое`;
+                } else if (error instanceof Error) {
+                    errorMsg = error.message;
+                }
+
+                toast.error(errorMsg);
             }
         });
     };

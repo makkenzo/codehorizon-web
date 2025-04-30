@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import qs from 'qs';
 
 import { Course, CourseProgress, Lesson, PagedResponse } from '@/types';
@@ -37,8 +37,16 @@ class CoursesApiClient extends ApiClient {
             });
 
             return response.data;
-        } catch (error: any) {
-            console.error('Ошибка получения курсов:', error?.response?.status || error);
+        } catch (error: unknown) {
+            let errorMsg = 'Не удалось получить курсы';
+
+            if (isAxiosError(error)) {
+                errorMsg = error?.response?.data?.message || error.message || 'Не удалось получить курсы';
+            } else if (error instanceof Error) {
+                errorMsg = error.message;
+            }
+
+            console.error(errorMsg);
             return null;
         }
     }
@@ -54,8 +62,16 @@ class CoursesApiClient extends ApiClient {
             >(`/courses/${slug}`);
 
             return response.data;
-        } catch (error: any) {
-            console.error(`Ошибка получения курса по slug "${slug}":`, error?.response?.status || error);
+        } catch (error: unknown) {
+            let errorMsg = 'Не удалось получить курс по slug';
+
+            if (isAxiosError(error)) {
+                errorMsg = error?.response?.data?.message || error.message || 'Не удалось получить курс по slug';
+            } else if (error instanceof Error) {
+                errorMsg = error.message;
+            }
+
+            console.error(errorMsg);
             return null;
         }
     }
@@ -73,10 +89,19 @@ class CoursesApiClient extends ApiClient {
             });
 
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             if (axios.isCancel(error)) throw error;
 
-            console.error(`Ошибка получения данных с ${endpoint}:`, error?.response?.status || error);
+            let errorMsg = 'Не удалось получить данные';
+
+            if (isAxiosError(error)) {
+                errorMsg = error?.response?.data?.message || error.message || 'Не удалось получить данные';
+            } else if (error instanceof Error) {
+                errorMsg = error.message;
+            }
+
+            console.error(errorMsg);
+
             return null;
         }
     }
@@ -100,7 +125,7 @@ class CoursesApiClient extends ApiClient {
             const response = await this.get<boolean>(endpoint);
 
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             if (axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403)) {
                 console.log('Пользователь не авторизован для проверки вишлиста');
             } else if (axios.isAxiosError(error) && error.response?.status === 404) {
@@ -118,7 +143,7 @@ class CoursesApiClient extends ApiClient {
         try {
             await this.get<boolean>(endpoint);
             return true;
-        } catch (error: any) {
+        } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
                 const status = error.response?.status;
                 if (status === 401 || status === 403) {
@@ -146,8 +171,16 @@ class CoursesApiClient extends ApiClient {
         try {
             const response = await this.get<Lesson[]>(`/courses/${courseId}/lessons`);
             return response.data;
-        } catch (error: any) {
-            console.error(`Ошибка при получении уроков курса ${courseId}:`, error?.response?.status || error);
+        } catch (error: unknown) {
+            let errorMsg = 'Не удалось получить уроки курса';
+
+            if (isAxiosError(error)) {
+                errorMsg = error?.response?.data?.message || error.message || 'Не удалось получить уроки курса';
+            } else if (error instanceof Error) {
+                errorMsg = error.message;
+            }
+
+            console.error(errorMsg);
             return [];
         }
     }
@@ -156,11 +189,18 @@ class CoursesApiClient extends ApiClient {
         try {
             const response = await this.get<Course>(`/courses/${courseId}/learn-content`);
             return response.data;
-        } catch (error: any) {
-            console.error(
-                `Ошибка получения контента курса ${courseId} для обучения:`,
-                error?.response?.status || error
-            );
+        } catch (error: unknown) {
+            let errorMsg = 'Не удалось получить контент курса для обучения';
+
+            if (isAxiosError(error)) {
+                errorMsg =
+                    error?.response?.data?.message || error.message || 'Не удалось получить контент курса для обучения';
+            } else if (error instanceof Error) {
+                errorMsg = error.message;
+            }
+
+            console.error(errorMsg);
+
             throw error;
         }
     }
@@ -170,11 +210,19 @@ class CoursesApiClient extends ApiClient {
         try {
             const response = await this.post<CourseProgress>(endpoint);
             return response.data;
-        } catch (error: any) {
-            console.error(
-                `Ошибка при отметке урока ${lessonId} в курсе ${courseId}:`,
-                error?.response?.status || error
-            );
+        } catch (error: unknown) {
+            let errorMsg = 'Не удалось отметить урок в курсе как пройденный';
+
+            if (isAxiosError(error)) {
+                errorMsg =
+                    error?.response?.data?.message ||
+                    error.message ||
+                    'Не удалось отметить урок в курсе как пройденный';
+            } else if (error instanceof Error) {
+                errorMsg = error.message;
+            }
+
+            console.error(errorMsg);
 
             throw error;
         }
@@ -185,7 +233,7 @@ class CoursesApiClient extends ApiClient {
         try {
             const response = await this.get<CourseProgress>(endpoint);
             return response.data;
-        } catch (error: any) {
+        } catch (error: unknown) {
             if (axios.isAxiosError(error) && error.response?.status === 404) {
                 console.log(`Прогресс для курса ${courseId} не найден.`);
                 return null;

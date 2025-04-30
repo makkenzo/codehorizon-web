@@ -6,7 +6,6 @@ import CourseCard from '@/components/course/card';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ProfileApiClient from '@/server/profile';
-import { CourseDifficultyLevels } from '@/types';
 
 interface UserPageProps {
     params: Promise<{ username: string }>;

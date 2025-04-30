@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { isAxiosError } from 'axios';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -130,15 +131,25 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
                     toast.error('У вас нет доступа к этому курсу.');
                     router.push(`/courses/${courseSlug}`);
                 }
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error('Error checking access or fetching course data:', error);
-                if (error.response?.status === 401 || error.response?.status === 403) {
-                    toast.error('Необходимо войти или приобрести курс для доступа.');
 
-                    router.push(`/sign-in?from=/courses/${courseSlug}/learn/${lessonSlug}`);
-                } else {
-                    toast.error('Произошла ошибка при загрузке данных.');
+                let errorMsg = 'Не удалось загрузить данные курса.';
+
+                if (isAxiosError(error)) {
+                    errorMsg = error?.response?.data?.message || error.message || 'Не удалось загрузить данные курса.';
+
+                    if (error.response?.status === 401 || error.response?.status === 403) {
+                        toast.error('Необходимо войти или приобрести курс для доступа.');
+
+                        router.push(`/sign-in?from=/courses/${courseSlug}/learn/${lessonSlug}`);
+                    } else {
+                        toast.error('Произошла ошибка при загрузке данных.');
+                    }
+                } else if (error instanceof Error) {
+                    errorMsg = error.message;
                 }
+
                 setHasAccess(false);
             } finally {
                 setIsLoading(false);

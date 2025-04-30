@@ -2,7 +2,6 @@ import { Analytics } from '@vercel/analytics/react';
 import type { Metadata } from 'next';
 
 import { createMetadata } from '@/lib/metadata';
-import ZustandProvider from '@/stores/zustand-provider';
 
 import './globals.css';
 

@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 import { Profile } from '@/models';
 import ProfileApiClient from '@/server/profile';
 import S3ApiClient from '@/server/s3';
@@ -162,7 +161,7 @@ const ProfileForm = ({}) => {
                     key="avatarUrl"
                     control={form.control}
                     name="avatarUrl"
-                    render={({ field }) => (
+                    render={({}) => (
                         <FormItem>
                             <FormControl>
                                 <motion.div className="relative mx-auto" variants={formVariants} custom={0}>

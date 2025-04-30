@@ -1,11 +1,9 @@
 'use client';
 
-import { ActionDispatch, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
-import debounce from 'lodash.debounce';
 import { FaGreaterThanEqual } from 'react-icons/fa6';
-import { IoFilter } from 'react-icons/io5';
 
 import RatingStars from '@/components/reusable/rating-stars';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -123,7 +121,7 @@ const CatalogFilters = () => {
         level,
         rating,
         videoDuration,
-        sortBy,
+
         reset,
         setRating,
         toggleCategory,
