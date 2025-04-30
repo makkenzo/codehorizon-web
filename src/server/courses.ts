@@ -151,6 +151,34 @@ class CoursesApiClient extends ApiClient {
             return [];
         }
     }
+
+    async getCourseLearnContent(courseId: string): Promise<Course | null> {
+        try {
+            const response = await this.get<Course>(`/courses/${courseId}/learn-content`);
+            return response.data;
+        } catch (error: any) {
+            console.error(
+                `Ошибка получения контента курса ${courseId} для обучения:`,
+                error?.response?.status || error
+            );
+            throw error;
+        }
+    }
+
+    async markLessonAsComplete(courseId: string, lessonId: string): Promise<CourseProgress | null> {
+        const endpoint = `/courses/${courseId}/lessons/${lessonId}/complete`;
+        try {
+            const response = await this.post<CourseProgress>(endpoint);
+            return response.data;
+        } catch (error: any) {
+            console.error(
+                `Ошибка при отметке урока ${lessonId} в курсе ${courseId}:`,
+                error?.response?.status || error
+            );
+
+            throw error;
+        }
+    }
 }
 
 export default CoursesApiClient;

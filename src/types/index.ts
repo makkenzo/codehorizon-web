@@ -52,6 +52,13 @@ export interface Lesson {
     content: string;
     codeExamples?: string[];
     tasks?: Task[];
+    attachments?: Attachment[];
+    mainAttachment?: string;
+}
+
+export interface Attachment {
+    name: string;
+    url: string;
 }
 
 export interface Task {
