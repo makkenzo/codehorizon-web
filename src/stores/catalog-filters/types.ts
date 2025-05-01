@@ -6,6 +6,9 @@ export type FiltersActionType =
     | 'TOGGLE_VIDEO_DURATION'
     | 'TOGGLE_CATEGORY'
     | 'TOGGLE_LEVEL'
+    | 'SET_CATEGORIES'
+    | 'SET_LEVELS'
+    | 'SET_VIDEO_DURATIONS'
     | 'RESET';
 
 export type CatalogFiltersState = {
@@ -26,6 +29,9 @@ export type CatalogFiltersActions = {
     toggleCategory: (category: string) => void;
     toggleLevel: (level: string) => void;
     setSortBy: (sortBy: string) => void;
+    setCategories: (categories: string[]) => void;
+    setLevels: (levels: string[]) => void;
+    setVideoDurations: (durations: string[]) => void;
     reset: () => void;
 };
 

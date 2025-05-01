@@ -69,7 +69,7 @@ pnpm dev
     <li>❌ Develop lesson and assignment functionality.</li>
     <li>❌ Implement role-based access control (student, author, admin).</li>
     <li>✅ Integrate payment systems (Stripe, PayPal).</li>
-    <li>❌ Add ratings and review system.</li>
+    <li>✅ Add ratings and review system.</li>
     <li>❌ Develop course analytics for authors.</li>
 </ul>
 

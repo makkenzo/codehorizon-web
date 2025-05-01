@@ -35,6 +35,9 @@ export const createCatalogFiltersStore = (initState: CatalogFiltersState = defau
                 level: state.level.includes(level) ? state.level.filter((l) => l !== level) : [...state.level, level],
             })),
         setSortBy: (sortBy: string) => set(() => ({ sortBy })),
+        setCategories: (categories: string[]) => set(() => ({ categories, page: 1 })),
+        setLevels: (levels: string[]) => set(() => ({ level: levels, page: 1 })),
+        setVideoDurations: (durations: string[]) => set(() => ({ videoDuration: durations, page: 1 })),
         reset: () => set({ ...defaultInitState }),
     }));
 };
