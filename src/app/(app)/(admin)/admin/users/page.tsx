@@ -20,7 +20,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { adminApiClient } from '@/server/admin-api-client';
-import { AdminUser, PagedResponse } from '@/types/admin';
+import { PagedResponse } from '@/types';
+import { AdminUser } from '@/types/admin';
 
 import AdminUserEditDialog from './_components/user-edit-dialog';
 
