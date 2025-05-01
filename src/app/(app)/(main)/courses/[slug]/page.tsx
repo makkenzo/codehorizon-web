@@ -57,23 +57,26 @@ const CoursePage = async (props: CoursePageProps) => {
     }
 
     const featureSectionData = {
-        badgeText: 'Ключевые темы',
-        title: `Что вы изучите в курсе "${course.title}"`,
-        subtitle: `Глубокое погружение в ${course.category || 'данную область'}`,
-        description: `Этот курс структурирован так, чтобы вы получили прочные знания от основ до продвинутых техник в ${course.title}.`,
-        features: [
-            // Эти данные должны приходить с бэкенда или быть специфичны для страницы
-            { title: 'Основы', description: 'Понимание базовых концепций и синтаксиса.' },
-            { title: 'Продвинутые Техники', description: 'Изучение сложных паттернов и подходов.' },
-            { title: 'Практика', description: 'Реальные примеры и упражнения для закрепления.' },
-        ],
-        benefitTitle: 'От новичка до уверенного специалиста',
-        benefitDescription: 'Структурированный подход и практические задания помогут вам быстро освоить материал.',
-        // testimonial: { ... } // Добавить, если есть
+        badgeText: course.featuresBadge,
+        title: course.featuresTitle,
+        subtitle: course.featuresSubtitle,
+        description: course.featuresDescription,
+        features: course.features,
+        benefitTitle: course.benefitTitle,
+        benefitDescription: course.benefitDescription,
+        testimonial: course.testimonial,
     };
 
-    const initialReviewsData = await reviewsApiClient.getReviews(course.id, 0, 5).catch(() => null);
+    const hasCourseDescription = !!course.description;
+    const hasFeatureContent =
+        !!featureSectionData.description ||
+        featureSectionData.features ||
+        !!featureSectionData.benefitTitle ||
+        !!featureSectionData.benefitDescription ||
+        !!featureSectionData.testimonial;
+    const shouldShowAboutSection = hasCourseDescription || hasFeatureContent;
 
+    const initialReviewsData = await reviewsApiClient.getReviews(course.id, 0, 5).catch(() => null);
     const ratingDistribution = await reviewsApiClient.getRatingDistribution(course.id).catch(() => null);
 
     return (
@@ -97,14 +100,18 @@ const CoursePage = async (props: CoursePageProps) => {
 
                     <h1 className="text-[24px] font-semibold">{course.title}</h1>
 
-                    <div className="flex flex-col gap-4">
-                        <Label htmlFor="description" className="font-bold text-lg">
-                            О курсе
-                        </Label>
-                        <p className="text-black-60/60">{course.description}</p>
-                    </div>
+                    {shouldShowAboutSection ? (
+                        <>
+                            <div className="flex flex-col gap-4">
+                                <Label htmlFor="description" className="font-bold text-lg">
+                                    О курсе
+                                </Label>
+                                {course.description ? <p className="text-black-60/60">{course.description}</p> : null}
+                            </div>
 
-                    <CourseFeatureSection {...featureSectionData} />
+                            <CourseFeatureSection {...featureSectionData} />
+                        </>
+                    ) : null}
 
                     <Separator />
 

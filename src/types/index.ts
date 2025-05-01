@@ -27,6 +27,19 @@ export enum CourseDifficultyLevels {
     ADVANCED = 'ADVANCED',
 }
 
+export interface FeatureItem {
+    title: string;
+    description: string;
+}
+
+export interface Testimonial {
+    quote: string;
+    authorName: string;
+    authorTitle: string;
+    avatarSrc?: string | null;
+    avatarFallback: string;
+}
+
 export interface Course {
     id: string;
     title: string;
@@ -44,6 +57,19 @@ export interface Course {
     category?: string;
     difficulty: CourseDifficultyLevels;
     videoLength?: number;
+    featuresBadge?: string | null;
+    featuresTitle?: string | null;
+    featuresSubtitle?: string | null;
+    featuresDescription?: string | null;
+    features?: FeatureItem[] | null;
+    benefitTitle?: string | null;
+    benefitDescription?: string | null;
+    testimonial?: Testimonial | null;
+}
+
+export interface LessonWithoutContent {
+    slug: string;
+    title: string;
 }
 
 export interface Lesson {
