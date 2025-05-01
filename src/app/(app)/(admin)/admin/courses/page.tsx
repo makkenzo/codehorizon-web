@@ -25,7 +25,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatNumber } from '@/lib/utils';
 import { adminApiClient } from '@/server/admin-api-client';
-import { AdminCourseListItemDTO, PagedResponse } from '@/types/admin';
+import { PagedResponse } from '@/types';
+import { AdminCourseListItemDTO } from '@/types/admin';
 
 export default function AdminCoursesPage() {
     const router = useRouter();
