@@ -148,3 +148,8 @@ export type CourseProgress = {
     progress: number;
     completedLessons: string[];
 };
+
+export type UserCourseDTO = {
+    course: Omit<Course, 'lessons'>;
+    progress: number;
+};

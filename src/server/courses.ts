@@ -8,6 +8,16 @@ import ApiClient from './api-client';
 class CoursesApiClient extends ApiClient {
     private readonly defaultPageSize = 12;
 
+    async getCategories(): Promise<string[] | null> {
+        try {
+            const response = await this.get<string[]>('/courses/categories');
+            return response.data;
+        } catch (error) {
+            console.error('Ошибка получения категорий:', error);
+            return null;
+        }
+    }
+
     async getCourses(
         params: {
             title?: string;
