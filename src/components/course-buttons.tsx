@@ -22,10 +22,11 @@ import { Button } from './ui/button';
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface CourseButtonsProps {
-    course: Omit<Course, 'lessons' | 'authorId'> & {
-        lessons: Pick<Lesson, 'title' | 'slug'>[];
-        authorUsername: string;
-        authorName: string;
+    course: {
+        id: string;
+        slug: string;
+        price: number;
+        discount: number;
     };
 }
 

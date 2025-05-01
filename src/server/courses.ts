@@ -142,6 +142,7 @@ class CoursesApiClient extends ApiClient {
         const endpoint = `/users/me/courses/${courseId}/access`;
         try {
             await this.get<boolean>(endpoint);
+
             return true;
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {

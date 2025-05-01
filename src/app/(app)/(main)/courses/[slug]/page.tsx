@@ -16,6 +16,9 @@ import { Separator } from '@/components/ui/separator';
 import { formatDuration } from '@/lib/utils';
 import CoursesApiClient from '@/server/courses';
 import ProfileApiClient from '@/server/profile';
+import ReviewsApiClient from '@/server/reviews';
+
+import CourseClientPage from './course-client-page';
 
 interface CoursePageProps {
     params: Promise<{ slug: string }>;
@@ -27,6 +30,7 @@ const CoursePage = async (props: CoursePageProps) => {
 
     const coursesApiClient = new CoursesApiClient();
     const profileApiClient = new ProfileApiClient();
+    const reviewsApiClient = new ReviewsApiClient();
 
     const course = await coursesApiClient.getCourseBySlug(slug).catch((error) => {
         console.error(`Ошибка при загрузке курса ${slug}:`, error);
@@ -50,6 +54,8 @@ const CoursePage = async (props: CoursePageProps) => {
             `Автор ${course.authorUsername} не найден или не удалось загрузить. Отображение страницы без автора.`
         );
     }
+
+    const initialReviewsData = await reviewsApiClient.getReviews(course.id, 0, 5).catch(() => null);
 
     return (
         <PageWrapper className="mb-16">
@@ -100,12 +106,13 @@ const CoursePage = async (props: CoursePageProps) => {
 
                     <Separator />
 
-                    <div className="flex flex-col gap-4">
-                        <Label htmlFor="reviews" className="font-bold text-lg">
-                            Отзывы
-                        </Label>
-                        <p className="text-black-60/60">Coming soon..</p>
-                    </div>
+                    <CourseClientPage
+                        courseId={course.id}
+                        courseSlug={course.slug}
+                        initialReviewsData={initialReviewsData}
+                        coursePrice={course.price}
+                        courseDiscount={course.discount}
+                    />
                 </div>
 
                 <div className="col-span-1 flex flex-col gap-6">
