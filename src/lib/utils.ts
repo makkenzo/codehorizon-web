@@ -15,6 +15,8 @@ export const formatNumber = (num: number) => {
 };
 
 export const mapFiltersToApiParams = (filters: Omit<CatalogFiltersState, 'totalPages'>) => {
+    console.log(filters);
+
     const parseDuration = (duration: string) => {
         if (duration.includes('and-more')) {
             const match = duration.match(/(\d+)-and-more-hours/);

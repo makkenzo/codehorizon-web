@@ -111,29 +111,6 @@ export interface Review {
     courseId: string;
 }
 
-export type FiltersData = {
-    ratingCounts: {
-        key: string;
-        label?: string;
-        count: number;
-    }[];
-    videoDurationCounts: {
-        key: string;
-        label: string;
-        count: number;
-    }[];
-    categoriesCounts: {
-        key: string;
-        label: string;
-        count: number;
-    }[];
-    levelCounts: {
-        key: string;
-        label: string;
-        count: number;
-    }[];
-};
-
 export type PagedResponse<T> = {
     content: T[];
     pageNumber: number;
