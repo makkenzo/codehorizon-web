@@ -1,4 +1,5 @@
 import { Profile, UserProfile } from '@/models';
+import { PopularAuthorDTO } from '@/types';
 
 import ApiClient from './api-client';
 
@@ -34,6 +35,16 @@ class ProfileApiClient extends ApiClient {
             return response;
         } catch (_) {
             return undefined;
+        }
+    }
+
+    async getPopularAuthors(limit: number = 5): Promise<PopularAuthorDTO[] | null> {
+        try {
+            const response = await this.get<PopularAuthorDTO[]>(`/users/popular-authors?limit=${limit}`);
+            return response.data;
+        } catch (error) {
+            console.error('Ошибка получения популярных авторов:', error);
+            return null;
         }
     }
 }

@@ -153,3 +153,13 @@ export type UserCourseDTO = {
     course: Omit<Course, 'lessons'>;
     progress: number;
 };
+
+export interface PopularAuthorDTO {
+    userId: string;
+    username: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    avatarUrl?: string | null;
+    avatarColor?: string | null;
+    courseCount: number;
+}
