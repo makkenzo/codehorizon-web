@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from 'react';
 
 import { loadStripe } from '@stripe/stripe-js';
 import { isAxiosError } from 'axios';
+import { BookOpen } from 'lucide-react';
 import { FaRegHeart } from 'react-icons/fa6';
 import { toast } from 'sonner';
 
@@ -18,6 +19,7 @@ import { Course, Lesson } from '@/types';
 
 import Price from './reusable/price';
 import { Button } from './ui/button';
+import { Skeleton } from './ui/skeleton';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -27,6 +29,7 @@ interface CourseButtonsProps {
         slug: string;
         price: number;
         discount: number;
+        lessons: Pick<Lesson, 'title' | 'slug'>[];
     };
 }
 
@@ -38,7 +41,7 @@ const CourseButtons = ({ course }: CourseButtonsProps) => {
 
     const [isInWishlist, setIsInWishlist] = useState(false);
     const [isPending, startTransition] = useTransition();
-    const [access, setAccess] = useState(false);
+    const [access, setAccess] = useState<boolean | null>(null);
 
     const apiClient = new CoursesApiClient();
 
@@ -115,7 +118,32 @@ const CourseButtons = ({ course }: CourseButtonsProps) => {
         });
     };
 
-    if (access) return null;
+    if (access === null) {
+        return (
+            <div className="space-y-4">
+                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+            </div>
+        );
+    }
+
+    const handleGoToLearning = () => {
+        const firstLessonSlug = course.lessons?.[0]?.slug;
+        if (firstLessonSlug) {
+            router.push(`/courses/${course.slug}/learn/${firstLessonSlug}`);
+        } else {
+            toast.error('В этом курсе пока нет уроков.');
+        }
+    };
+
+    if (access) {
+        return (
+            <Button size="lg" className="w-full" onClick={handleGoToLearning}>
+                <BookOpen className="mr-2 h-5 w-5" /> Перейти к изучению
+            </Button>
+        );
+    }
 
     return (
         <>

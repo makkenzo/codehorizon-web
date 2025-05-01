@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import CourseButtons from '@/components/course-buttons';
+import CourseFeatureSection from '@/components/course/course-feature-section';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -55,11 +56,29 @@ const CoursePage = async (props: CoursePageProps) => {
         );
     }
 
+    const featureSectionData = {
+        badgeText: 'Ключевые темы',
+        title: `Что вы изучите в курсе "${course.title}"`,
+        subtitle: `Глубокое погружение в ${course.category || 'данную область'}`,
+        description: `Этот курс структурирован так, чтобы вы получили прочные знания от основ до продвинутых техник в ${course.title}.`,
+        features: [
+            // Эти данные должны приходить с бэкенда или быть специфичны для страницы
+            { title: 'Основы', description: 'Понимание базовых концепций и синтаксиса.' },
+            { title: 'Продвинутые Техники', description: 'Изучение сложных паттернов и подходов.' },
+            { title: 'Практика', description: 'Реальные примеры и упражнения для закрепления.' },
+        ],
+        benefitTitle: 'От новичка до уверенного специалиста',
+        benefitDescription: 'Структурированный подход и практические задания помогут вам быстро освоить материал.',
+        // testimonial: { ... } // Добавить, если есть
+    };
+
     const initialReviewsData = await reviewsApiClient.getReviews(course.id, 0, 5).catch(() => null);
+
+    const ratingDistribution = await reviewsApiClient.getRatingDistribution(course.id).catch(() => null);
 
     return (
         <PageWrapper className="mb-16">
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div className="col-span-2 flex flex-col gap-4">
                     {course.videoPreview ? (
                         <Player
@@ -85,6 +104,8 @@ const CoursePage = async (props: CoursePageProps) => {
                         <p className="text-black-60/60">{course.description}</p>
                     </div>
 
+                    <CourseFeatureSection {...featureSectionData} />
+
                     <Separator />
 
                     <div className="flex flex-col gap-4">
@@ -108,56 +129,65 @@ const CoursePage = async (props: CoursePageProps) => {
 
                     <CourseClientPage
                         courseId={course.id}
-                        courseSlug={course.slug}
                         initialReviewsData={initialReviewsData}
-                        coursePrice={course.price}
-                        courseDiscount={course.discount}
+                        courseRating={course.rating}
+                        ratingDistribution={ratingDistribution}
                     />
                 </div>
 
-                <div className="col-span-1 flex flex-col gap-6">
-                    <div className="shadow-[0px_6px_20px_0px_rgba(0,0,0,0.05)] p-6 rounded-[6px] bg-white h-fit">
-                        <CourseButtons course={course} />
-                        <div className="flex flex-col gap-3 text-black-60/60 mt-6">
-                            <div className="flex items-center gap-4">
-                                <MdChromeReaderMode className="size-[22px]" />
-                                {course.lessons.length} Уроков
-                            </div>
-                            {course.videoLength && course.videoLength > 0 ? (
+                <div className="col-span-1 relative md:order-1 -order-1 w-full">
+                    <div className="flex flex-col gap-6 sticky top-10">
+                        <div className="shadow-[0px_6px_20px_0px_rgba(0,0,0,0.05)] p-6 rounded-[6px] bg-white h-fit">
+                            <CourseButtons
+                                course={{
+                                    discount: course.discount,
+                                    id: course.id,
+                                    price: course.price,
+                                    slug: course.slug,
+                                    lessons: course.lessons,
+                                }}
+                            />
+                            <div className="flex flex-col gap-3 text-black-60/60 mt-6">
                                 <div className="flex items-center gap-4">
-                                    <MdLiveTv className="size-[22px]" />
-                                    {formatDuration(course.videoLength)}
+                                    <MdChromeReaderMode className="size-[22px]" />
+                                    {course.lessons.length} Уроков
                                 </div>
-                            ) : null}
-                            <div className="flex items-center gap-4">
-                                <IoMdVolumeHigh className="size-[22px]" />
-                                English
+                                {course.videoLength && course.videoLength > 0 ? (
+                                    <div className="flex items-center gap-4">
+                                        <MdLiveTv className="size-[22px]" />
+                                        {formatDuration(course.videoLength)}
+                                    </div>
+                                ) : null}
+                                <div className="flex items-center gap-4">
+                                    <IoMdVolumeHigh className="size-[22px]" />
+                                    English
+                                </div>
                             </div>
                         </div>
+                        {author ? (
+                            <div className="relative w-full">
+                                <Link href={`/u/${author.username}`}>
+                                    {author.profile.avatarUrl ? (
+                                        <Image
+                                            src={author.profile.avatarUrl}
+                                            alt={author.username}
+                                            width={389}
+                                            height={438}
+                                            className="rounded-[18px] w-full"
+                                        />
+                                    ) : (
+                                        <div className="rounded-[18px] w-full h-[438px] bg-primary"></div>
+                                    )}
+                                    <div className="absolute inset-0 bg-gradient-to-t gap-2 from-black/88 to-black/0 rounded-[18px] px-5 pb-10 flex flex-col justify-end">
+                                        <h2 className="bg-primary text-white p-1 font-semibold rounded-[4px] w-fit">
+                                            {author.username}
+                                        </h2>
+                                        <h3 className="text-white text-2xl">{course.authorName}</h3>
+                                    </div>
+                                </Link>
+                            </div>
+                        ) : null}
                     </div>
-                    {author ? (
-                        <div className="relative w-full">
-                            <Link href={`/u/${author.username}`}>
-                                {author.profile.avatarUrl ? (
-                                    <Image
-                                        src={author.profile.avatarUrl}
-                                        alt={author.username}
-                                        width={389}
-                                        height={438}
-                                        className="rounded-[18px] w-full"
-                                    />
-                                ) : (
-                                    <div className="rounded-[18px] w-full h-[438px] bg-primary"></div>
-                                )}
-                                <div className="absolute inset-0 bg-gradient-to-t gap-2 from-black/88 to-black/0 rounded-[18px] px-5 pb-10 flex flex-col justify-end">
-                                    <h2 className="bg-primary text-white p-1 font-semibold rounded-[4px] w-fit">
-                                        {author.username}
-                                    </h2>
-                                    <h3 className="text-white text-2xl">{course.authorName}</h3>
-                                </div>
-                            </Link>
-                        </div>
-                    ) : null}
                 </div>
             </div>
         </PageWrapper>

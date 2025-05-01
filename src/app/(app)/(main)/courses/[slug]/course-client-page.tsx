@@ -2,35 +2,34 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import CourseButtons from '@/components/course-buttons';
+import { Star } from 'lucide-react';
+
 import ReviewForm from '@/components/course/review-form';
 import ReviewList from '@/components/course/review-list';
 import MyPagination from '@/components/reusable/my-pagination';
+import RatingStars from '@/components/reusable/rating-stars';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/providers/auth-provider';
 import CoursesApiClient from '@/server/courses';
 import ReviewsApiClient from '@/server/reviews';
-import { useUserStore } from '@/stores/user/user-store-provider';
 import { PagedResponse } from '@/types';
-import { ReviewDTO } from '@/types/review';
+import { RatingDistributionDTO, ReviewDTO } from '@/types/review';
 
 interface CourseClientPageProps {
     courseId: string;
-    courseSlug: string;
     initialReviewsData: PagedResponse<ReviewDTO> | null;
-    coursePrice: number;
-    courseDiscount: number;
+    courseRating: number;
+    ratingDistribution: RatingDistributionDTO[] | null;
 }
 
 export default function CourseClientPage({
     courseId,
-    courseSlug,
     initialReviewsData,
-    coursePrice,
-    courseDiscount,
+    courseRating,
+    ratingDistribution,
 }: CourseClientPageProps) {
     const { isAuthenticated } = useAuth();
 
@@ -122,35 +121,53 @@ export default function CourseClientPage({
 
     return (
         <>
-            <div className="md:hidden mb-6">
-                <div className="shadow border rounded-lg bg-card p-4">
-                    <CourseButtons
-                        course={{ id: courseId, slug: courseSlug, price: coursePrice, discount: courseDiscount }}
-                    />
-                </div>
-            </div>
-
-            <div className="flex flex-col gap-4">
-                <Label htmlFor="reviews" className="font-semibold text-lg">
-                    Отзывы ({reviewsData?.totalElements ?? '-'})
-                </Label>
-
-                {isCheckingPrerequisites ? (
-                    <Skeleton className="h-10 w-48 mb-4" />
-                ) : isAuthenticated && hasCourseAccess ? (
-                    <div className="mb-4">
-                        {currentUserReview === undefined ? (
-                            <Skeleton className="h-10 w-48" />
-                        ) : currentUserReview ? (
-                            <Button variant="outline" onClick={() => setIsReviewFormOpen(true)}>
-                                Редактировать мой отзыв
-                            </Button>
-                        ) : (
-                            <Button onClick={() => setIsReviewFormOpen(true)}>Написать отзыв</Button>
-                        )}
+            <section className="bg-background py-2">
+                <div className="mb-8 flex items-center justify-between">
+                    <h2 className="text-3xl font-bold text-foreground">Отзывы</h2>
+                    <div className="flex items-center space-x-2">
+                        <RatingStars count={courseRating} />
+                        <span className="text-sm font-medium text-muted-foreground">({courseRating})</span>
+                        <span className="text-sm font-medium text-primary hover:text-primary/80">
+                            отзывов: {reviewsData?.totalElements}
+                        </span>
                     </div>
-                ) : null}
-
+                </div>
+                <div className="grid gap-8 md:grid-cols-3 mb-8">
+                    <div className="md:col-span-1">
+                        <p className="mb-4 text-2xl font-bold text-foreground">{courseRating} из 5</p>
+                        {isCheckingPrerequisites ? (
+                            <Skeleton className="h-10 w-48 mb-4" />
+                        ) : isAuthenticated && hasCourseAccess ? (
+                            <div className="mb-4">
+                                {currentUserReview === undefined ? (
+                                    <Skeleton className="h-10 w-48" />
+                                ) : currentUserReview ? (
+                                    <Button variant="outline" onClick={() => setIsReviewFormOpen(true)}>
+                                        Редактировать мой отзыв
+                                    </Button>
+                                ) : (
+                                    <Button onClick={() => setIsReviewFormOpen(true)}>Написать отзыв</Button>
+                                )}
+                            </div>
+                        ) : null}
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                        {ratingDistribution &&
+                            [5, 4, 3, 2, 1].map((stars) => (
+                                <div key={stars} className="flex items-center">
+                                    <span className="w-8 text-sm font-medium text-foreground">{stars}</span>
+                                    <Star className="mr-2 h-4 w-4 text-yellow-300" />
+                                    <Progress
+                                        value={ratingDistribution?.find((b) => b.rating === stars)?.percentage}
+                                        className="h-2 w-full max-w-[200px] bg-muted"
+                                    />
+                                    <a href="#" className="ml-4 text-sm font-medium text-primary hover:underline">
+                                        {ratingDistribution?.find((b) => b.rating === stars)?.count} озывов
+                                    </a>
+                                </div>
+                            ))}
+                    </div>
+                </div>
                 {reviewsLoading && (
                     <div className="space-y-4">
                         {[...Array(3)].map((_, i) => (
@@ -203,7 +220,7 @@ export default function CourseClientPage({
                         />
                     )}
                 </Dialog>
-            </div>
+            </section>
         </>
     );
 }

@@ -22,3 +22,9 @@ export interface ReviewDTO {
     createdAt: string;
     updatedAt: string;
 }
+
+export interface RatingDistributionDTO {
+    rating: number;
+    count: number;
+    percentage: number;
+}

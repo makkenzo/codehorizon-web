@@ -1,7 +1,7 @@
 import { isAxiosError } from 'axios';
 
 import { PagedResponse } from '@/types';
-import { CreateReviewRequestDTO, ReviewDTO, UpdateReviewRequestDTO } from '@/types/review';
+import { CreateReviewRequestDTO, RatingDistributionDTO, ReviewDTO, UpdateReviewRequestDTO } from '@/types/review';
 
 import ApiClient from './api-client';
 
@@ -60,6 +60,16 @@ class ReviewsApiClient extends ApiClient {
                 return null;
             }
             console.error(`Ошибка получения моего отзыва для курса ${courseId}:`, error);
+            return null;
+        }
+    }
+
+    async getRatingDistribution(courseId: string): Promise<RatingDistributionDTO[] | null> {
+        try {
+            const response = await this.get<RatingDistributionDTO[]>(`/courses/${courseId}/reviews/distribution`);
+            return response.data;
+        } catch (error: unknown) {
+            console.error(`Ошибка получения рейтинговой дистрибутива для курса ${courseId}:`, error);
             return null;
         }
     }
