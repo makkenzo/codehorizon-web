@@ -80,7 +80,7 @@ export default function CourseFeatureSection({
             {testimonial && (
                 <Card className="border-l-4 border-l-primary bg-card shadow-none">
                     <CardContent className="p-6">
-                        <blockquote className="mb-4 italic text-foreground">"{testimonial.quote}"</blockquote>
+                        <blockquote className="mb-4 italic text-foreground">&quot;{testimonial.quote}&quot;</blockquote>
                         <div className="flex items-center gap-3">
                             <Avatar className="size-10">
                                 {testimonial.avatarSrc && <AvatarImage src={testimonial.avatarSrc} />}
