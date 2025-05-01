@@ -1,3 +1,4 @@
+import { PagedResponse } from '@/types';
 import {
     AdminChartDataDTO,
     AdminCourseDetailDTO,
@@ -7,7 +8,6 @@ import {
     AdminDashboardStatsDTO,
     AdminUpdateUserRequest,
     AdminUser,
-    PagedResponse,
 } from '@/types/admin';
 
 import { apiClient } from './api-client';
