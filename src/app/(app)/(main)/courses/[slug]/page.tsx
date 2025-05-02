@@ -83,20 +83,25 @@ const CoursePage = async (props: CoursePageProps) => {
         <PageWrapper className="mb-16">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div className="col-span-2 flex flex-col gap-4">
-                    {course.videoPreview ? (
-                        <Player
-                            src={course.videoPreview}
-                            theme={MediaThemeMinimal}
-                            style={{
-                                '--media-secondary-color': '#3eccb2',
-                                '--media-primary-color': '#faf2f0',
-                            }}
-                        />
-                    ) : course.imagePreview ? (
-                        <div>image</div>
-                    ) : (
-                        <p>null</p>
-                    )}
+                    <div className="relative aspect-video">
+                        {course.videoPreview ? (
+                            <Player
+                                src={course.videoPreview}
+                                theme={MediaThemeMinimal}
+                                style={{
+                                    '--media-secondary-color': '#3eccb2',
+                                    '--media-primary-color': '#faf2f0',
+                                }}
+                            />
+                        ) : course.imagePreview ? (
+                            <Image
+                                src={course.imagePreview}
+                                alt="Course Image"
+                                fill
+                                className="object-cover rounded-lg"
+                            />
+                        ) : null}
+                    </div>
 
                     <h1 className="text-[24px] font-semibold">{course.title}</h1>
 
