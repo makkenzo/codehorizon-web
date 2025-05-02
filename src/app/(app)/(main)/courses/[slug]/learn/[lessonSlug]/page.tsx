@@ -16,6 +16,7 @@ import Player from 'next-video/player';
 import 'player.style/minimal';
 import MediaThemeMinimal from 'player.style/minimal/react';
 import { toast } from 'sonner';
+import { shallow } from 'zustand/shallow';
 
 import { useParams, useRouter } from 'next/navigation';
 
@@ -43,6 +44,7 @@ type TaskCompletionStatus = {
 
 export default function LessonPage() {
     const { course, courseProgress, updateCourseProgress } = useCourseLearnContext();
+
     const { user } = useUserStore((state) => state);
     const [isLessonMarkedCompleted, setIsLessonMarkedCompleted] = useState(false);
     const [isCompletePending, startCompleteTransition] = useTransition();
@@ -57,22 +59,26 @@ export default function LessonPage() {
 
     const apiClient = new CoursesApiClient();
 
-    const initializeLesson = useLessonTasksStore((state) => state.initializeLesson);
-    const getAllTasksCompleted = useLessonTasksStore((state) => state.getAllTasksCompleted);
-    const clearLessonState = useLessonTasksStore((state) => state.clearLessonState);
-
     const lessonKey = useMemo(() => {
         if (!user?.id || !course?.id || !currentLesson?.id) return null;
         return `lesson_${user.id}_${course.id}_${currentLesson.id}`;
     }, [user?.id, course?.id, currentLesson?.id]);
 
-    const allTasksCompleted = useMemo(() => {
-        if (!lessonKey) return !currentLesson?.tasks || currentLesson.tasks.length === 0;
-        return getAllTasksCompleted(lessonKey);
-    }, [lessonKey, getAllTasksCompleted, currentLesson?.tasks]);
+    const { currentLessonTasks, getAllTasksCompleted, initializeLesson, clearLessonState } = useLessonTasksStore(
+        (state) => {
+            const tasks = lessonKey ? state.lessons[lessonKey]?.tasks : undefined;
+            return {
+                currentLessonTasks: tasks,
+                getAllTasksCompleted: state.getAllTasksCompleted,
+                initializeLesson: state.initializeLesson,
+                clearLessonState: state.clearLessonState,
+            };
+        },
+        shallow
+    );
 
     useEffect(() => {
-        if (lessonKey && currentLesson?.tasks) {
+        if (lessonKey && currentLesson?.tasks && !currentLessonTasks) {
             initializeLesson(lessonKey, currentLesson.tasks);
         }
 
@@ -81,7 +87,7 @@ export default function LessonPage() {
         } else {
             setIsLessonMarkedCompleted(false);
         }
-    }, [lessonKey, currentLesson, courseProgress, initializeLesson]);
+    }, [lessonKey, currentLesson, courseProgress, initializeLesson, currentLessonTasks]);
 
     useEffect(() => {
         if (currentLesson && courseProgress) {
@@ -98,6 +104,14 @@ export default function LessonPage() {
             });
         }
     }, [currentLesson]);
+
+    const allTasksCompleted = useMemo(() => {
+        if (!currentLessonTasks || Object.keys(currentLessonTasks).length === 0) {
+            return !currentLesson?.tasks || currentLesson.tasks.length === 0;
+        }
+
+        return Object.values(currentLessonTasks).every((task) => task.checkStatus === true);
+    }, [currentLessonTasks, currentLesson?.tasks]);
 
     const parseCodeBlock = (codeBlock: string): { language: string | null; code: string } => {
         const match = codeBlock.match(/^```(\w*)\n([\s\S]*?)\n```$/);

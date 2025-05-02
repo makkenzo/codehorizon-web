@@ -18,6 +18,7 @@ export interface LessonTasksState {
               }
             | undefined;
     };
+    congratsShownForCourses: string[];
 }
 
 export interface LessonTasksActions {
@@ -27,6 +28,8 @@ export interface LessonTasksActions {
     getTaskState: (lessonKey: string, taskId: string) => TaskState | undefined;
     getAllTasksCompleted: (lessonKey: string) => boolean;
     clearLessonState: (lessonKey: string) => void;
+    congratsShownForCourses: string[];
+    markCongratsAsShown: (courseId: string) => void;
     clearAllTasksState: () => void;
 }
 

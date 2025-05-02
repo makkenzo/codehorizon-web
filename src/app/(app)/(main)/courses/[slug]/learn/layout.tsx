@@ -3,81 +3,25 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { isAxiosError } from 'axios';
-import { CheckCircle2, ChevronLeft, Loader2 } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, Loader2, PartyPopper } from 'lucide-react';
 import { toast } from 'sonner';
+import { shallow } from 'zustand/shallow';
 
 import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 
+import CourseCompletionActions from '@/components/course/completion-actions';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CourseLearnProvider, useCourseLearnContext } from '@/contexts/course-learn-context';
-import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { CourseLearnProvider } from '@/contexts/course-learn-context';
 import { ProtectedRoute } from '@/providers/protected-route';
 import CoursesApiClient from '@/server/courses';
+import { useLessonTasksStore } from '@/stores/tasks/tasks-store-provider';
 import { Course, CourseProgress } from '@/types';
 
-interface LessonSidebarProps {
-    course: Course;
-}
-
-const LessonSidebar = ({ course }: LessonSidebarProps) => {
-    const pathname = usePathname();
-    const { courseProgress } = useCourseLearnContext();
-    const completedLessons = courseProgress?.completedLessons ?? [];
-
-    return (
-        <aside className="w-64 h-full border-r border-border p-4 overflow-y-auto shrink-0 md:block hidden bg-card">
-            <Link href={`/courses/${course.slug}`} className="mb-4 block">
-                <Button variant="outline" size="sm" className="w-full justify-start text-xs">
-                    <ChevronLeft className="mr-1 h-3 w-3" />К обзору курса
-                </Button>
-            </Link>
-
-            <h2 className="text-base font-semibold mb-3 px-2 truncate" title={course.title}>
-                {course.title}
-            </h2>
-
-            <nav className="flex flex-col gap-1">
-                {course.lessons.length > 0 &&
-                    course.lessons.map((lesson) => {
-                        const isCompleted = completedLessons.includes(lesson.id);
-                        const lessonPath = `/courses/${course.slug}/learn/${lesson.slug}`;
-                        const isActive = pathname === lessonPath;
-
-                        return (
-                            <Link
-                                key={lesson.slug}
-                                href={lessonPath}
-                                className={cn(
-                                    'text-sm p-2 rounded-md hover:bg-muted flex items-center justify-between gap-2 group',
-                                    isActive
-                                        ? 'bg-muted/40 font-medium text-primary'
-                                        : 'text-muted-foreground hover:text-foreground',
-                                    isCompleted && !isActive && 'text-foreground/60'
-                                )}
-                                title={lesson.title}
-                            >
-                                <span className="truncate flex-1">{lesson.title}</span>
-                                {isCompleted && (
-                                    <CheckCircle2
-                                        className={cn(
-                                            'h-4 w-4 text-success shrink-0 opacity-70',
-                                            isActive && 'text-primary opacity-100'
-                                        )}
-                                    />
-                                )}
-                            </Link>
-                        );
-                    })}
-                {course.lessons.length === 0 && (
-                    <p className="text-xs text-muted-foreground px-2 py-4 text-center">В этом курсе пока нет уроков.</p>
-                )}
-            </nav>
-        </aside>
-    );
-};
+import LessonSidebar from './_components/lesson-sidebar';
 
 export default function CourseLearnLayout({ children }: { children: React.ReactNode }) {
     const params = useParams();
@@ -89,6 +33,15 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
     const [layoutIsLoading, setLayoutIsLoading] = useState(true);
     const [hasAccess, setHasAccess] = useState<boolean | null>(null);
     const [progressData, setProgressData] = useState<CourseProgress | null>(null);
+    const [isCourseCompleted, setIsCourseCompleted] = useState(false);
+
+    const { congratsShownForCourses, markCongratsAsShown } = useLessonTasksStore(
+        (state) => ({
+            congratsShownForCourses: state.congratsShownForCourses,
+            markCongratsAsShown: state.markCongratsAsShown,
+        }),
+        shallow
+    );
 
     const apiClient = new CoursesApiClient();
 
@@ -209,6 +162,46 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
         return progressData.progress ?? 0;
     }, [progressData, totalLessons]);
 
+    useEffect(() => {
+        if (!layoutIsLoading && courseData && progressData && !isCourseCompleted) {
+            const allLessonsExist = totalLessons > 0;
+            const allLessonsCompleted = allLessonsExist && completedLessonCount >= totalLessons;
+
+            const progressIs100 = typeof progressData.progress === 'number' && progressData.progress >= 100;
+
+            if (progressIs100 || allLessonsCompleted) {
+                console.log('КУРС ЗАВЕРШЕН!');
+                setIsCourseCompleted(true);
+            }
+        } else if (
+            isCourseCompleted &&
+            progressData &&
+            typeof progressData.progress === 'number' &&
+            progressData.progress < 100
+        ) {
+            const courseId = courseData?.id;
+            if (courseId) {
+                markCongratsAsShown(courseId);
+            }
+            setIsCourseCompleted(false);
+        }
+    }, [progressData, courseData, totalLessons, completedLessonCount, layoutIsLoading, isCourseCompleted]);
+
+    useEffect(() => {
+        const courseId = courseData?.id;
+        if (courseId && isCourseCompleted && !congratsShownForCourses.includes(courseId)) {
+            toast.success('🎉 Поздравляем! Вы успешно завершили курс!', {
+                duration: 10000,
+                action: {
+                    label: 'К моим курсам',
+                    onClick: () => router.push('/me/courses'),
+                },
+            });
+
+            markCongratsAsShown(courseId);
+        }
+    }, [isCourseCompleted, congratsShownForCourses, courseData?.id, markCongratsAsShown, router]);
+
     if (layoutIsLoading) {
         return (
             <div className="h-full w-full flex flex-col items-center justify-center gap-4 p-4 text-center">
@@ -253,6 +246,18 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
                             </Link>
                         </div>
                         <div className="flex items-center gap-4 shrink-0">
+                            {isCourseCompleted && !layoutIsLoading && (
+                                <TooltipProvider delayDuration={150}>
+                                    <Tooltip>
+                                        <TooltipTrigger>
+                                            <CheckCircle2 className="h-5 w-5 text-success animate-pulse" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Курс пройден!</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            )}
                             {progressData === null && !layoutIsLoading ? (
                                 <Skeleton className="h-4 w-24 rounded" />
                             ) : totalLessons > 0 ? (
@@ -267,9 +272,13 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
                             )}
                         </div>
                     </header>
+
                     <div className="flex flex-1 overflow-hidden">
-                        <LessonSidebar course={courseData} />
-                        <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-background">{children}</main>
+                        <LessonSidebar course={courseData} isCourseCompleted={isCourseCompleted} />
+                        <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-background">
+                            {isCourseCompleted && <CourseCompletionActions courseSlug={courseSlug} />}
+                            {children}
+                        </main>
                     </div>
                 </div>
             </CourseLearnProvider>

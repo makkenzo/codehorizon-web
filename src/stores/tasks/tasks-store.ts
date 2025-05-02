@@ -1,12 +1,11 @@
 import { createStore } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { AdminTaskDTO } from '@/types/admin';
-
 import { LessonTasksState, LessonTasksStore, TaskState } from './types';
 
 export const defaultTasksState: LessonTasksState = {
     lessons: {},
+    congratsShownForCourses: [],
 };
 
 export const createLessonTasksStore = (initState: LessonTasksState = defaultTasksState) => {
@@ -14,6 +13,7 @@ export const createLessonTasksStore = (initState: LessonTasksState = defaultTask
         persist(
             (set, get) => ({
                 ...initState,
+
                 initializeLesson: (lessonKey, tasks) =>
                     set((state) => {
                         if (!state.lessons[lessonKey]) {
@@ -102,11 +102,23 @@ export const createLessonTasksStore = (initState: LessonTasksState = defaultTask
                         delete newLessons[lessonKey];
                         return { lessons: newLessons };
                     }),
+                congratsShownForCourses: initState.congratsShownForCourses ?? [],
+                markCongratsAsShown: (courseId) =>
+                    set((state) => {
+                        if (!state.congratsShownForCourses.includes(courseId)) {
+                            return { congratsShownForCourses: [...state.congratsShownForCourses, courseId] };
+                        }
+                        return state;
+                    }),
                 clearAllTasksState: () => set({ lessons: {} }),
             }),
             {
                 name: 'lesson-tasks-progress',
                 storage: createJSONStorage(() => localStorage),
+                partialize: (state) => ({
+                    lessons: state.lessons,
+                    congratsShownForCourses: state.congratsShownForCourses,
+                }),
             }
         )
     );
