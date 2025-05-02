@@ -553,7 +553,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                 <Accordion type="multiple" className="w-full border-t pt-6">
                     <AccordionItem value="features-section" className="border-b-0">
                         <AccordionTrigger className="text-lg font-medium hover:no-underline">
-                            Секция "Ключевые темы"
+                            Секция &quot;Ключевые темы&quot;
                         </AccordionTrigger>
                         <AccordionContent className="pt-4 space-y-6">
                             <FormField
@@ -638,7 +638,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                     </AccordionItem>
                     <AccordionItem value="benefits-section" className="border-b-0">
                         <AccordionTrigger className="text-lg font-medium hover:no-underline">
-                            Секция "Преимущества"
+                            Секция &quot;Преимущества&quot;
                         </AccordionTrigger>
                         <AccordionContent className="pt-4 space-y-6">
                             <FormField
@@ -682,7 +682,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                     </AccordionItem>
                     <AccordionItem value="testimonial-section" className="border-b-0">
                         <AccordionTrigger className="text-lg font-medium hover:no-underline">
-                            Секция "Отзыв"
+                            Секция &quot;Отзыв&quot;
                         </AccordionTrigger>
                         <AccordionContent className="pt-4">
                             <TestimonialEditor control={form.control} disabled={isSubmitting} />
