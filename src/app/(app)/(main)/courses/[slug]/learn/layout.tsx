@@ -12,7 +12,7 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CourseLearnProvider } from '@/contexts/course-learn-context';
+import { CourseLearnProvider, useCourseLearnContext } from '@/contexts/course-learn-context';
 import { cn } from '@/lib/utils';
 import { ProtectedRoute } from '@/providers/protected-route';
 import CoursesApiClient from '@/server/courses';
@@ -20,11 +20,13 @@ import { Course, CourseProgress } from '@/types';
 
 interface LessonSidebarProps {
     course: Course;
-    currentLessonSlug: string;
-    completedLessons: string[];
 }
 
-const LessonSidebar = ({ course, currentLessonSlug, completedLessons }: LessonSidebarProps) => {
+const LessonSidebar = ({ course }: LessonSidebarProps) => {
+    const pathname = usePathname();
+    const { courseProgress } = useCourseLearnContext();
+    const completedLessons = courseProgress?.completedLessons ?? [];
+
     return (
         <aside className="w-64 h-full border-r border-border p-4 overflow-y-auto shrink-0 md:block hidden bg-card">
             <Link href={`/courses/${course.slug}`} className="mb-4 block">
@@ -38,35 +40,37 @@ const LessonSidebar = ({ course, currentLessonSlug, completedLessons }: LessonSi
             </h2>
 
             <nav className="flex flex-col gap-1">
-                {course.lessons.map((lesson) => {
-                    const isCompleted = completedLessons.includes(lesson.id);
-                    const isActive = currentLessonSlug === lesson.slug;
+                {course.lessons.length > 0 &&
+                    course.lessons.map((lesson) => {
+                        const isCompleted = completedLessons.includes(lesson.id);
+                        const lessonPath = `/courses/${course.slug}/learn/${lesson.slug}`;
+                        const isActive = pathname === lessonPath;
 
-                    return (
-                        <Link
-                            key={lesson.slug}
-                            href={`/courses/${course.slug}/learn/${lesson.slug}`}
-                            className={cn(
-                                'text-sm p-2 rounded-md hover:bg-muted flex items-center justify-between gap-2 group',
-                                isActive
-                                    ? 'bg-muted/40 font-medium text-primary'
-                                    : 'text-muted-foreground hover:text-foreground',
-                                isCompleted && !isActive && 'text-foreground/60'
-                            )}
-                            title={lesson.title}
-                        >
-                            <span className="truncate flex-1">{lesson.title}</span>
-                            {isCompleted && (
-                                <CheckCircle2
-                                    className={cn(
-                                        'h-4 w-4 text-success shrink-0 opacity-70',
-                                        isActive && 'text-primary opacity-100'
-                                    )}
-                                />
-                            )}
-                        </Link>
-                    );
-                })}
+                        return (
+                            <Link
+                                key={lesson.slug}
+                                href={lessonPath}
+                                className={cn(
+                                    'text-sm p-2 rounded-md hover:bg-muted flex items-center justify-between gap-2 group',
+                                    isActive
+                                        ? 'bg-muted/40 font-medium text-primary'
+                                        : 'text-muted-foreground hover:text-foreground',
+                                    isCompleted && !isActive && 'text-foreground/60'
+                                )}
+                                title={lesson.title}
+                            >
+                                <span className="truncate flex-1">{lesson.title}</span>
+                                {isCompleted && (
+                                    <CheckCircle2
+                                        className={cn(
+                                            'h-4 w-4 text-success shrink-0 opacity-70',
+                                            isActive && 'text-primary opacity-100'
+                                        )}
+                                    />
+                                )}
+                            </Link>
+                        );
+                    })}
                 {course.lessons.length === 0 && (
                     <p className="text-xs text-muted-foreground px-2 py-4 text-center">В этом курсе пока нет уроков.</p>
                 )}
@@ -79,34 +83,29 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
     const params = useParams();
     const router = useRouter();
     const courseSlug = params.slug as string;
-    const lessonSlug = params.lessonSlug as string;
+    const lessonSlug = params.lessonSlug as string | undefined;
 
     const [courseData, setCourseData] = useState<Course | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [layoutIsLoading, setLayoutIsLoading] = useState(true);
     const [hasAccess, setHasAccess] = useState<boolean | null>(null);
     const [progressData, setProgressData] = useState<CourseProgress | null>(null);
-    const [isFetchingProgress, setIsFetchingProgress] = useState(true);
 
     const apiClient = new CoursesApiClient();
-
-    const currentLesson = useMemo(() => {
-        return courseData?.lessons.find((lesson) => lesson.slug === lessonSlug) ?? null;
-    }, [courseData, lessonSlug]);
 
     const updateCourseProgressState = (newProgress: CourseProgress) => {
         setProgressData(newProgress);
     };
 
     useEffect(() => {
-        const checkAccessAndFetchData = async () => {
-            setIsLoading(true);
-            setIsFetchingProgress(true);
+        const fetchCourseAndProgress = async () => {
+            setLayoutIsLoading(true);
+            setProgressData(null);
             setHasAccess(null);
 
             if (!courseSlug) {
                 console.error('Course slug is missing');
                 toast.error('Не удалось загрузить курс: отсутствует идентификатор.');
-                setIsLoading(false);
+                setLayoutIsLoading(false);
                 return;
             }
 
@@ -118,7 +117,7 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
                 if (!courseInfo) {
                     toast.error('Курс не найден.');
                     router.push('/courses');
-                    setIsLoading(false);
+                    setLayoutIsLoading(false);
                     return;
                 }
                 courseId = courseInfo.id;
@@ -132,12 +131,15 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
                     accessGranted = accessResult.value;
                     setHasAccess(accessGranted);
                 } else {
-                    console.error('Access check failed:', accessResult.reason);
                     setHasAccess(false);
-                    toast.error('Ошибка проверки доступа.');
+                    const errorMsg =
+                        accessResult.status === 'rejected'
+                            ? (accessResult.reason as Error).message
+                            : 'Доступ запрещен.';
+                    toast.error(`Не удалось получить доступ к курсу: ${errorMsg}`);
+
                     router.push(`/sign-in?from=/courses/${courseSlug}/learn/${lessonSlug}`);
-                    setIsLoading(false);
-                    setIsFetchingProgress(false);
+                    setLayoutIsLoading(false);
                     return;
                 }
 
@@ -149,7 +151,6 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
                     toast.warning('Не удалось загрузить ваш прогресс по курсу.');
                     setProgressData(null);
                 }
-                setIsFetchingProgress(false);
 
                 if (accessGranted) {
                     const fullCourse = await apiClient.getCourseLearnContent(courseId);
@@ -194,23 +195,21 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
 
                 setHasAccess(false);
             } finally {
-                setIsLoading(false);
+                setLayoutIsLoading(false);
             }
         };
 
-        checkAccessAndFetchData();
+        fetchCourseAndProgress();
     }, [courseSlug]);
 
     const completedLessonCount = useMemo(() => progressData?.completedLessons?.length ?? 0, [progressData]);
     const totalLessons = useMemo(() => courseData?.lessons?.length ?? 0, [courseData]);
     const courseProgressPercentage = useMemo(() => {
-        if (isFetchingProgress || totalLessons === 0) return 0;
-        return progressData?.progress ?? 0;
-    }, [progressData, totalLessons, isFetchingProgress]);
+        if (!progressData || totalLessons === 0) return 0;
+        return progressData.progress ?? 0;
+    }, [progressData, totalLessons]);
 
-    const showLoader = isLoading;
-
-    if (showLoader) {
+    if (layoutIsLoading) {
         return (
             <div className="h-full w-full flex flex-col items-center justify-center gap-4 p-4 text-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -236,7 +235,11 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
 
     return (
         <ProtectedRoute>
-            <CourseLearnProvider course={courseData} currentLesson={currentLesson} initialProgress={progressData}>
+            <CourseLearnProvider
+                course={courseData}
+                initialProgress={progressData}
+                updateCourseProgress={updateCourseProgressState}
+            >
                 <div className="flex flex-col h-screen">
                     <header className="flex items-center justify-between px-6 py-3 border-b border-border bg-card sticky top-[var(--header-height)] z-40">
                         <div className="flex items-center gap-4 overflow-hidden">
@@ -245,11 +248,12 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
                                 className="text-sm font-medium hover:underline text-primary shrink-0"
                             >
                                 <ChevronLeft className="inline-block h-4 w-4 mr-1 align-middle" />
-                                {courseData.title}
+                                <span className="truncate hidden sm:inline">{courseData.title}</span>
+                                <span className="truncate sm:hidden">Назад</span>
                             </Link>
                         </div>
                         <div className="flex items-center gap-4 shrink-0">
-                            {isFetchingProgress ? (
+                            {progressData === null && !layoutIsLoading ? (
                                 <Skeleton className="h-4 w-24 rounded" />
                             ) : totalLessons > 0 ? (
                                 <>
@@ -264,11 +268,7 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
                         </div>
                     </header>
                     <div className="flex flex-1 overflow-hidden">
-                        <LessonSidebar
-                            course={courseData}
-                            currentLessonSlug={lessonSlug}
-                            completedLessons={progressData?.completedLessons ?? []}
-                        />
+                        <LessonSidebar course={courseData} />
                         <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-background">{children}</main>
                     </div>
                 </div>

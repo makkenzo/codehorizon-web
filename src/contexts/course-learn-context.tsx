@@ -4,7 +4,6 @@ import { Course, CourseProgress, Lesson } from '@/types';
 
 interface CourseLearnContextType {
     course: Course | null;
-    currentLesson: Lesson | null;
     courseProgress: CourseProgress | null;
     updateCourseProgress: (newProgress: CourseProgress) => void;
 }
@@ -14,26 +13,22 @@ const CourseLearnContext = createContext<CourseLearnContextType | undefined>(und
 export const CourseLearnProvider = ({
     children,
     course,
-    currentLesson,
     initialProgress,
+    updateCourseProgress,
 }: {
     children: ReactNode;
     course: Course | null;
-    currentLesson: Lesson | null;
     initialProgress: CourseProgress | null;
+    updateCourseProgress: (newProgress: CourseProgress) => void;
 }) => {
     const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(initialProgress);
-
-    const updateCourseProgress = (newProgress: CourseProgress) => {
-        setCourseProgress(newProgress);
-    };
 
     useEffect(() => {
         setCourseProgress(initialProgress);
     }, [initialProgress]);
 
     return (
-        <CourseLearnContext.Provider value={{ course, currentLesson, courseProgress, updateCourseProgress }}>
+        <CourseLearnContext.Provider value={{ course, courseProgress, updateCourseProgress }}>
             {children}
         </CourseLearnContext.Provider>
     );

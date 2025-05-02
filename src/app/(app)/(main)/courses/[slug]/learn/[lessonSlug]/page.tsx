@@ -42,13 +42,18 @@ type TaskCompletionStatus = {
 };
 
 export default function LessonPage() {
-    const { currentLesson, course, courseProgress, updateCourseProgress } = useCourseLearnContext();
+    const { course, courseProgress, updateCourseProgress } = useCourseLearnContext();
     const { user } = useUserStore((state) => state);
     const [isLessonMarkedCompleted, setIsLessonMarkedCompleted] = useState(false);
     const [isCompletePending, startCompleteTransition] = useTransition();
     const router = useRouter();
     const params = useParams();
     const courseSlug = params.slug as string;
+    const lessonSlug = params.lessonSlug as string;
+
+    const currentLesson = useMemo(() => {
+        return course?.lessons.find((lesson) => lesson.slug === lessonSlug) ?? null;
+    }, [course, lessonSlug]);
 
     const apiClient = new CoursesApiClient();
 
@@ -118,7 +123,6 @@ export default function LessonPage() {
 
                     if (lessonKey) {
                         clearLessonState(lessonKey);
-                        localStorage.removeItem('lesson-tasks-progress');
                     } else {
                         console.warn('Could not clear lesson state: lessonKey is null');
                     }
