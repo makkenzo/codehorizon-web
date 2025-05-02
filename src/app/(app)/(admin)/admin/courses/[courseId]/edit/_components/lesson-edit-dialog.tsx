@@ -10,8 +10,8 @@ import CodeMirror from '@uiw/react-codemirror';
 import { isAxiosError } from 'axios';
 import { Loader2, PlusCircle, Trash2 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { FaWineGlassEmpty } from 'react-icons/fa6';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 
 import AttachmentLink from '@/components/course/attachment-link';
@@ -33,6 +33,8 @@ import { adminApiClient } from '@/server/admin-api-client';
 import S3ApiClient from '@/server/s3';
 import { TaskType } from '@/types';
 import { AdminCourseDetailDTO, AdminCreateUpdateLessonRequestDTO, AdminLessonDTO } from '@/types/admin';
+
+import TaskItem from './task-item';
 
 const attachmentSchema = z.object({
     name: z.string(),
@@ -87,7 +89,7 @@ const lessonFormSchema = z.object({
     mainAttachment: z.string().url('Неверный формат URL для основного прикрепления').nullable().optional(),
 });
 
-type LessonFormData = z.infer<typeof lessonFormSchema>;
+export type LessonFormData = z.infer<typeof lessonFormSchema>;
 
 interface LessonEditDialogProps {
     courseId: string;
@@ -213,6 +215,10 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
         }
     };
 
+    const {
+        formState: { errors },
+    } = form;
+
     const onSubmit = async (values: LessonFormData) => {
         setIsSubmitting(true);
         try {
@@ -278,7 +284,7 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                 name="title"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Lesson Title</FormLabel>
+                                        <FormLabel className="text-base font-semibold">Lesson Title</FormLabel>
                                         <FormControl>
                                             <Input
                                                 placeholder="e.g., Setting up your environment"
@@ -295,7 +301,7 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                 name="content"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Content</FormLabel>
+                                        <FormLabel className="text-base font-semibold">Content</FormLabel>
                                         <FormControl>
                                             <RichTextEditor
                                                 value={field.value ?? ''}
@@ -308,7 +314,7 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                 )}
                             />
                             <div className="space-y-2 rounded-md border p-4">
-                                <FormLabel>Code Examples</FormLabel>
+                                <FormLabel className="text-base font-semibold">Code Examples</FormLabel>
                                 {codeExampleFields.map((field, index) => (
                                     <FormField
                                         key={field.id}
@@ -364,148 +370,40 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                             </div>
 
                             <div className="space-y-4 rounded-md border p-4">
-                                <FormLabel>Tasks</FormLabel>
-                                {taskFields.map((field, index) => (
-                                    <div key={field.id} className="space-y-3 border-b pb-3 last:border-b-0 last:pb-0">
-                                        <div className="flex justify-between items-center">
-                                            <p className="text-sm font-medium">Task {index + 1}</p>
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon-sm"
-                                                className="text-destructive hover:bg-destructive/10"
-                                                onClick={() => removeTask(index)}
-                                                disabled={isSubmitting}
-                                                aria-label={`Remove task ${index + 1}`}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                        <FormField
+                                <FormLabel className="text-base font-semibold">Tasks</FormLabel>
+                                <div className="space-y-4">
+                                    {taskFields.length === 0 && (
+                                        <p className="text-sm text-muted-foreground px-2 py-4 text-center">
+                                            No tasks added yet.
+                                        </p>
+                                    )}
+                                    {taskFields.map((field, index) => (
+                                        <TaskItem
+                                            key={field.id}
                                             control={form.control}
-                                            name={`tasks.${index}.description`}
-                                            render={({ field: descField }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-xs">Description</FormLabel>
-                                                    <FormControl>
-                                                        <Textarea
-                                                            placeholder="Task description..."
-                                                            {...descField}
-                                                            disabled={isSubmitting}
-                                                            rows={3}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
+                                            index={index}
+                                            removeTask={removeTask}
+                                            isSubmitting={isSubmitting}
+                                            errors={errors}
                                         />
-                                        <FormField
-                                            control={form.control}
-                                            name={`tasks.${index}.taskType`}
-                                            render={({ field: typeField }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-xs">Task Type</FormLabel>
-                                                    <Select
-                                                        onValueChange={typeField.onChange}
-                                                        defaultValue={typeField.value}
-                                                        disabled={isSubmitting}
-                                                    >
-                                                        <FormControl>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Select task type" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            {Object.values(TaskType).map((type) => (
-                                                                <SelectItem key={type} value={type}>
-                                                                    {type.replace('_', ' ')}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        {form.watch(`tasks.${index}.taskType`) === TaskType.MULTIPLE_CHOICE && (
-                                            <FormField
-                                                control={form.control}
-                                                name={`tasks.${index}.options`}
-                                                render={({ field: optionsField }) => (
-                                                    <FormItem>
-                                                        <FormLabel className="text-xs">
-                                                            Options (one per line)
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Textarea
-                                                                placeholder="Option 1
-                                                                Option 2
-                                                                Correct Option"
-                                                                rows={4}
-                                                                {...optionsField}
-                                                                value={optionsField.value?.join('\\n') ?? ''}
-                                                                onChange={(e) =>
-                                                                    optionsField.onChange(e.target.value.split('\\n'))
-                                                                }
-                                                                disabled={isSubmitting}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        )}
-                                        {(form.watch(`tasks.${index}.taskType`) === TaskType.TEXT_INPUT ||
-                                            form.watch(`tasks.${index}.taskType`) === TaskType.CODE_INPUT) && (
-                                            <FormField
-                                                control={form.control}
-                                                name={`tasks.${index}.solution`}
-                                                render={({ field: solutionField }) => (
-                                                    <FormItem>
-                                                        <FormLabel className="text-xs">Solution</FormLabel>
-                                                        <FormControl>
-                                                            <Textarea
-                                                                placeholder="Correct answer or code solution..."
-                                                                rows={
-                                                                    form.watch(`tasks.${index}.taskType`) ===
-                                                                    TaskType.CODE_INPUT
-                                                                        ? 6
-                                                                        : 3
-                                                                }
-                                                                className={
-                                                                    form.watch(`tasks.${index}.taskType`) ===
-                                                                    TaskType.CODE_INPUT
-                                                                        ? 'font-mono'
-                                                                        : ''
-                                                                }
-                                                                {...solutionField}
-                                                                value={solutionField.value ?? ''}
-                                                                disabled={isSubmitting}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        )}
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                                 <Button
                                     type="button"
                                     variant="outline"
                                     size="sm"
                                     onClick={() =>
                                         appendTask({
-                                            id: `temp-${Date.now()}-${Math.random()}`,
+                                            id: uuidv4(),
                                             description: '',
                                             taskType: TaskType.TEXT_INPUT,
                                             solution: null,
-                                            tests: null,
-                                            options: null,
+                                            tests: [],
+                                            options: [],
                                         })
                                     }
                                     disabled={isSubmitting}
-                                    className="mt-2"
+                                    className="mt-4"
                                 >
                                     <PlusCircle className="mr-2 h-4 w-4" /> Add Task
                                 </Button>
@@ -516,7 +414,9 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                 name="mainAttachment"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Main Attachment (Video, PDF, etc.)</FormLabel>
+                                        <FormLabel className="text-base font-semibold">
+                                            Main Attachment (Video, PDF, etc.)
+                                        </FormLabel>
                                         {field.value && (
                                             <div className="mt-1 flex items-center gap-2">
                                                 <AttachmentLink
@@ -553,7 +453,7 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                             />
 
                             <div className="space-y-2 rounded-md border p-4">
-                                <FormLabel>Additional Attachments</FormLabel>
+                                <FormLabel className="text-base font-semibold">Additional Attachments</FormLabel>
                                 <div className="space-y-2">
                                     {attachmentFields.map((field, index) => (
                                         <div
