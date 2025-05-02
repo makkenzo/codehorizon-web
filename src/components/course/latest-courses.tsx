@@ -48,7 +48,7 @@ export default function LatestCourses({ initialCourses, isLoading = false }: Lat
         >
             <div className="flex items-center justify-between">
                 <h2 className="text-xl md:text-2xl font-bold">Недавно добавленные</h2>
-                <Link href="/courses?sortBy=createdAt_desc">
+                <Link href="/courses?sortBy=date_desc">
                     <Button variant="link" className="text-primary">
                         Смотреть все
                         <ArrowRight className="ml-1 h-4 w-4" />

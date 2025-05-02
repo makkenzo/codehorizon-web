@@ -15,7 +15,7 @@ export default async function Home() {
     const [trendingCoursesData, categoriesData, latestCoursesData, popularAuthorsData] = await Promise.all([
         coursesApiClient.getCourses({ sortBy: 'popular', size: 4 }),
         coursesApiClient.getCategories(),
-        coursesApiClient.getCourses({ sortBy: 'createdAt_desc', size: 4 }),
+        coursesApiClient.getCourses({ sortBy: 'date_desc', size: 4 }),
         profileApiClient.getPopularAuthors(4),
     ]);
 
