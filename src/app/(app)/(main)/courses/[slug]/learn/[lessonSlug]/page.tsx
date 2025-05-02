@@ -26,6 +26,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useCourseLearnContext } from '@/contexts/course-learn-context';
 import { cn } from '@/lib/utils';
 import CoursesApiClient from '@/server/courses';
+import { useLessonTasksStore } from '@/stores/tasks/tasks-store-provider';
+import { useUserStore } from '@/stores/user/user-store-provider';
 
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('typescript', typescript);
@@ -41,8 +43,8 @@ type TaskCompletionStatus = {
 
 export default function LessonPage() {
     const { currentLesson, course, courseProgress, updateCourseProgress } = useCourseLearnContext();
+    const { user } = useUserStore((state) => state);
     const [isLessonMarkedCompleted, setIsLessonMarkedCompleted] = useState(false);
-    const [taskStatuses, setTaskStatuses] = useState<TaskCompletionStatus>({});
     const [isCompletePending, startCompleteTransition] = useTransition();
     const router = useRouter();
     const params = useParams();
@@ -50,24 +52,33 @@ export default function LessonPage() {
 
     const apiClient = new CoursesApiClient();
 
+    const initializeLesson = useLessonTasksStore((state) => state.initializeLesson);
+    const getAllTasksCompleted = useLessonTasksStore((state) => state.getAllTasksCompleted);
+    const clearLessonState = useLessonTasksStore((state) => state.clearLessonState);
+
+    const lessonKey = useMemo(() => {
+        if (!user?.id || !course?.id || !currentLesson?.id) return null;
+        return `lesson_${user.id}_${course.id}_${currentLesson.id}`;
+    }, [user?.id, course?.id, currentLesson?.id]);
+
     const allTasksCompleted = useMemo(() => {
-        if (!currentLesson?.tasks || currentLesson.tasks.length === 0) {
-            return true;
-        }
-
-        return currentLesson.tasks.every((task) => taskStatuses[task.id] === true);
-    }, [currentLesson?.tasks, taskStatuses]);
-
-    const updateTaskStatus = (taskId: string, isCorrect: boolean | null) => {
-        setTaskStatuses((prev) => ({
-            ...prev,
-            [taskId]: isCorrect,
-        }));
-    };
+        if (!lessonKey) return !currentLesson?.tasks || currentLesson.tasks.length === 0;
+        return getAllTasksCompleted(lessonKey);
+    }, [lessonKey, getAllTasksCompleted, currentLesson?.tasks]);
 
     useEffect(() => {
-        setTaskStatuses({});
+        if (lessonKey && currentLesson?.tasks) {
+            initializeLesson(lessonKey, currentLesson.tasks);
+        }
 
+        if (currentLesson && courseProgress) {
+            setIsLessonMarkedCompleted(courseProgress.completedLessons?.includes(currentLesson.id) ?? false);
+        } else {
+            setIsLessonMarkedCompleted(false);
+        }
+    }, [lessonKey, currentLesson, courseProgress, initializeLesson]);
+
+    useEffect(() => {
         if (currentLesson && courseProgress) {
             setIsLessonMarkedCompleted(courseProgress.completedLessons?.includes(currentLesson.id) ?? false);
         } else {
@@ -104,6 +115,13 @@ export default function LessonPage() {
                     setIsLessonMarkedCompleted(true);
                     updateCourseProgress(updatedProgressData);
                     toast.success(`Урок "${currentLesson.title}" отмечен как пройденный!`);
+
+                    if (lessonKey) {
+                        clearLessonState(lessonKey);
+                        localStorage.removeItem('lesson-tasks-progress');
+                    } else {
+                        console.warn('Could not clear lesson state: lessonKey is null');
+                    }
 
                     const currentIndex = course.lessons.findIndex((lesson) => lesson.id === currentLesson.id);
                     const nextLesson = course.lessons[currentIndex + 1];
@@ -252,13 +270,7 @@ export default function LessonPage() {
                 <>
                     <h2 className="not-prose text-xl font-semibold mt-6 mb-3">Задачи</h2>
                     {currentLesson.tasks.map((task, index) => (
-                        <TaskDisplay
-                            key={task.id || index}
-                            task={task}
-                            index={index}
-                            onStatusChange={(isCorrect) => updateTaskStatus(task.id, isCorrect)}
-                            currentStatus={taskStatuses[task.id]}
-                        />
+                        <TaskDisplay key={task.id || index} task={task} index={index} lessonKey={lessonKey} />
                     ))}
                 </>
             )}
