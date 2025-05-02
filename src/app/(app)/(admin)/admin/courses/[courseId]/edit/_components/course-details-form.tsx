@@ -22,6 +22,24 @@ import S3ApiClient from '@/server/s3';
 import { CourseDifficultyLevels } from '@/types';
 import { AdminCourseDetailDTO, AdminCreateUpdateCourseRequestDTO, AdminUser } from '@/types/admin';
 
+import FeatureEditor from './feature-editor';
+import TestimonialEditor from './testimonial-editor';
+
+const featureItemSchema = z.object({
+    title: z.string().min(1, 'Заголовок темы обязателен'),
+    description: z.string().min(1, 'Описание темы обязательно'),
+});
+
+const testimonialSchema = z
+    .object({
+        quote: z.string().min(1, 'Цитата обязательна'),
+        authorName: z.string().min(1, 'Имя автора обязательно'),
+        authorTitle: z.string().min(1, 'Должность автора обязательна'),
+        avatarSrc: z.string().url('Неверный URL аватара').nullable().optional(),
+    })
+    .nullable()
+    .optional();
+
 const courseDetailsFormSchema = z.object({
     title: z.string().min(3, 'Название должно содержать не менее 3 символов'),
     description: z.string().optional().or(z.literal('')),
@@ -38,9 +56,11 @@ const courseDetailsFormSchema = z.object({
     featuresDescription: z.string().nullable().optional(),
     benefitTitle: z.string().nullable().optional(),
     benefitDescription: z.string().nullable().optional(),
+    features: z.array(featureItemSchema).optional().default([]),
+    testimonial: testimonialSchema,
 });
 
-type CourseDetailsFormData = z.infer<typeof courseDetailsFormSchema>;
+export type CourseDetailsFormData = z.infer<typeof courseDetailsFormSchema>;
 
 interface CourseDetailsFormProps {
     course?: AdminCourseDetailDTO | null;
@@ -69,6 +89,8 @@ const defaultValues: Partial<CourseDetailsFormData> = {
     featuresDescription: null,
     benefitTitle: null,
     benefitDescription: null,
+    testimonial: null,
+    features: [],
 };
 
 export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFormProps) {
@@ -126,6 +148,8 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                   featuresDescription: course.featuresDescription ?? null,
                   benefitTitle: course.benefitTitle ?? null,
                   benefitDescription: course.benefitDescription ?? null,
+                  features: course.features ?? [],
+                  testimonial: course.testimonial ?? null,
               }
             : defaultValues,
     });
@@ -149,6 +173,8 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                 featuresDescription: course.featuresDescription ?? null,
                 benefitTitle: course.benefitTitle ?? null,
                 benefitDescription: course.benefitDescription ?? null,
+                testimonial: course.testimonial ?? null,
+                features: course.features ?? [],
             });
         }
     }, [course, form]);
@@ -166,10 +192,10 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                 featuresTitle: values.featuresTitle || null,
                 featuresSubtitle: values.featuresSubtitle || null,
                 featuresDescription: values.featuresDescription || null,
-                features: isEditing ? course?.features : [],
+                features: values.features,
                 benefitTitle: values.benefitTitle || null,
                 benefitDescription: values.benefitDescription || null,
-                testimonial: isEditing ? course?.testimonial : null,
+                testimonial: values.testimonial,
             };
 
             let resultCourse: AdminCourseDetailDTO;
@@ -603,7 +629,11 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                                     </FormItem>
                                 )}
                             />
-                            <FormDescription>Список ключевых тем (features) редактируется отдельно.</FormDescription>
+                            <FeatureEditor
+                                control={form.control}
+                                disabled={isSubmitting}
+                                errors={form.formState.errors}
+                            />
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="benefits-section" className="border-b-0">
@@ -655,7 +685,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                             Секция "Отзыв"
                         </AccordionTrigger>
                         <AccordionContent className="pt-4">
-                            <FormDescription>Отзыв (testimonial) редактируется отдельно.</FormDescription>
+                            <TestimonialEditor control={form.control} disabled={isSubmitting} />
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>

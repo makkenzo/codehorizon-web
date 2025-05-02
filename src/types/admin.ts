@@ -92,7 +92,7 @@ export interface AdminCreateUpdateCourseRequestDTO {
     featuresTitle?: string | null;
     featuresSubtitle?: string | null;
     featuresDescription?: string | null;
-    features?: AdminFeatureItemDTO[] | null;
+    features: AdminFeatureItemDTO[] | null;
     benefitTitle?: string | null;
     benefitDescription?: string | null;
     testimonial?: AdminTestimonialDTO | null;
@@ -108,7 +108,6 @@ export interface AdminTestimonialDTO {
     authorName: string;
     authorTitle: string;
     avatarSrc?: string | null;
-    avatarFallback: string;
 }
 
 export interface AdminCreateUpdateLessonRequestDTO {
