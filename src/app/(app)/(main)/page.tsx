@@ -8,6 +8,8 @@ import PageWrapper from '@/components/reusable/page-wrapper';
 import CoursesApiClient from '@/server/courses';
 import ProfileApiClient from '@/server/profile';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
     const coursesApiClient = new CoursesApiClient();
     const profileApiClient = new ProfileApiClient();
