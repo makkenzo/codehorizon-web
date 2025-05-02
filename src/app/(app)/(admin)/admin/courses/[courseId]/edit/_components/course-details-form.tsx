@@ -11,6 +11,7 @@ import { z } from 'zod';
 
 import Image from 'next/image';
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -31,6 +32,12 @@ const courseDetailsFormSchema = z.object({
     authorId: z.string().min(1, 'Автор обязателен'),
     imagePreview: z.string().nullable().optional(),
     videoPreview: z.string().nullable().optional(),
+    featuresBadge: z.string().nullable().optional(),
+    featuresTitle: z.string().nullable().optional(),
+    featuresSubtitle: z.string().nullable().optional(),
+    featuresDescription: z.string().nullable().optional(),
+    benefitTitle: z.string().nullable().optional(),
+    benefitDescription: z.string().nullable().optional(),
 });
 
 type CourseDetailsFormData = z.infer<typeof courseDetailsFormSchema>;
@@ -44,6 +51,24 @@ const difficultyLabels: Record<CourseDifficultyLevels, string> = {
     [CourseDifficultyLevels.BEGINNER]: 'Начинающий',
     [CourseDifficultyLevels.INTERMEDIATE]: 'Средний',
     [CourseDifficultyLevels.ADVANCED]: 'Продвинутый',
+};
+
+const defaultValues: Partial<CourseDetailsFormData> = {
+    title: '',
+    description: '',
+    price: 0,
+    discount: 0,
+    difficulty: CourseDifficultyLevels.BEGINNER,
+    category: '',
+    authorId: '',
+    imagePreview: null,
+    videoPreview: null,
+    featuresBadge: null,
+    featuresTitle: null,
+    featuresSubtitle: null,
+    featuresDescription: null,
+    benefitTitle: null,
+    benefitDescription: null,
 };
 
 export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFormProps) {
@@ -84,22 +109,31 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
 
     const form = useForm<CourseDetailsFormData>({
         resolver: zodResolver(courseDetailsFormSchema),
-        defaultValues: {
-            title: course?.title ?? '',
-            description: course?.description ?? '',
-            price: course?.price ?? 0,
-            discount: course?.discount ?? 0,
-            difficulty: course?.difficulty ?? CourseDifficultyLevels.BEGINNER,
-            category: course?.category ?? '',
-            authorId: course?.authorId ?? '',
-            imagePreview: course?.imagePreview ?? null,
-            videoPreview: course?.videoPreview ?? null,
-        },
+        defaultValues: course
+            ? {
+                  title: course?.title ?? '',
+                  description: course?.description ?? '',
+                  price: course?.price ?? 0,
+                  discount: course?.discount ?? 0,
+                  difficulty: course?.difficulty ?? CourseDifficultyLevels.BEGINNER,
+                  category: course?.category ?? '',
+                  authorId: course?.authorId ?? '',
+                  imagePreview: course?.imagePreview ?? null,
+                  videoPreview: course?.videoPreview ?? null,
+                  featuresBadge: course.featuresBadge ?? null,
+                  featuresTitle: course.featuresTitle ?? null,
+                  featuresSubtitle: course.featuresSubtitle ?? null,
+                  featuresDescription: course.featuresDescription ?? null,
+                  benefitTitle: course.benefitTitle ?? null,
+                  benefitDescription: course.benefitDescription ?? null,
+              }
+            : defaultValues,
     });
 
     useEffect(() => {
         if (course) {
             form.reset({
+                ...defaultValues,
                 title: course.title ?? '',
                 description: course.description ?? '',
                 price: course.price ?? 0,
@@ -109,9 +143,13 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                 authorId: course.authorId ?? '',
                 imagePreview: course.imagePreview ?? null,
                 videoPreview: course.videoPreview ?? null,
+                featuresBadge: course.featuresBadge ?? null,
+                featuresTitle: course.featuresTitle ?? null,
+                featuresSubtitle: course.featuresSubtitle ?? null,
+                featuresDescription: course.featuresDescription ?? null,
+                benefitTitle: course.benefitTitle ?? null,
+                benefitDescription: course.benefitDescription ?? null,
             });
-        } else {
-            form.reset(form.control._defaultValues);
         }
     }, [course, form]);
 
@@ -124,14 +162,14 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                 category: values.category || null,
                 imagePreview: values.imagePreview,
                 videoPreview: values.videoPreview,
-                featuresBadge: course?.featuresBadge,
-                featuresTitle: course?.featuresTitle,
-                featuresSubtitle: course?.featuresSubtitle,
-                featuresDescription: course?.featuresDescription,
-                features: course?.features,
-                benefitTitle: course?.benefitTitle,
-                benefitDescription: course?.benefitDescription,
-                testimonial: course?.testimonial,
+                featuresBadge: values.featuresBadge || null,
+                featuresTitle: values.featuresTitle || null,
+                featuresSubtitle: values.featuresSubtitle || null,
+                featuresDescription: values.featuresDescription || null,
+                features: isEditing ? course?.features : [],
+                benefitTitle: values.benefitTitle || null,
+                benefitDescription: values.benefitDescription || null,
+                testimonial: isEditing ? course?.testimonial : null,
             };
 
             let resultCourse: AdminCourseDetailDTO;
@@ -237,7 +275,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField
                     control={form.control}
                     name="title"
@@ -273,7 +311,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                     )}
                 />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-6">
                     <FormField
                         control={form.control}
                         name="price"
@@ -406,82 +444,221 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                     />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
-                    <FormField
-                        control={form.control}
-                        name="imagePreview"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Превью (Изображение)</FormLabel>
-                                {renderPreview(field.value, 'image')}
-                                <FormControl className="mt-2">
-                                    <div className="flex items-center gap-2">
-                                        <Input
-                                            type="file"
-                                            accept="image/png, image/jpeg, image/webp"
-                                            onChange={(e) =>
-                                                onFileChange(e, 'image', setIsUploadingImage, 'imagePreview')
-                                            }
-                                            disabled={isSubmitting || isUploadingImage}
-                                            className="flex-1"
-                                        />
-                                        {isUploadingImage && <Loader2 className="h-4 w-4 animate-spin" />}
-                                    </div>
-                                </FormControl>
-                                {field.value && (
-                                    <Button
-                                        variant="link"
-                                        size="sm"
-                                        className="text-xs text-destructive p-0 h-auto mt-1"
-                                        onClick={() => field.onChange(null)}
-                                        type="button"
-                                    >
-                                        Удалить изображение
-                                    </Button>
-                                )}
-                                <FormDescription>Рекомендуемый размер: 1920x1080 (16:9).</FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="videoPreview"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Превью (Видео)</FormLabel>
-                                {renderPreview(field.value, 'video')}
-                                <FormControl className="mt-2">
-                                    <div className="flex items-center gap-2">
-                                        <Input
-                                            type="file"
-                                            accept="video/mp4, video/webm"
-                                            onChange={(e) =>
-                                                onFileChange(e, 'video', setIsUploadingVideo, 'videoPreview')
-                                            }
-                                            disabled={isSubmitting || isUploadingVideo}
-                                            className="flex-1"
-                                        />
-                                        {isUploadingVideo && <Loader2 className="h-4 w-4 animate-spin" />}
-                                    </div>
-                                </FormControl>
-                                {field.value && (
-                                    <Button
-                                        variant="link"
-                                        size="sm"
-                                        className="text-xs text-destructive p-0 h-auto mt-1"
-                                        onClick={() => field.onChange(null)}
-                                        type="button"
-                                    >
-                                        Удалить видео
-                                    </Button>
-                                )}
-                                <FormDescription>Короткое видео для демонстрации курса.</FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                <div className="pt-6 border-t">
+                    <h3 className="text-lg font-medium mb-4">Медиа превью</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                            control={form.control}
+                            name="imagePreview"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Превью (Изображение)</FormLabel>
+                                    {renderPreview(field.value, 'image')}
+                                    <FormControl className="mt-2">
+                                        <div className="flex items-center gap-2">
+                                            <Input
+                                                type="file"
+                                                accept="image/png, image/jpeg, image/webp"
+                                                onChange={(e) =>
+                                                    onFileChange(e, 'image', setIsUploadingImage, 'imagePreview')
+                                                }
+                                                disabled={isSubmitting || isUploadingImage}
+                                                className="flex-1"
+                                            />
+                                            {isUploadingImage && <Loader2 className="h-4 w-4 animate-spin" />}
+                                        </div>
+                                    </FormControl>
+                                    {field.value && (
+                                        <Button
+                                            variant="link"
+                                            size="sm"
+                                            className="text-xs text-destructive p-0 h-auto mt-1"
+                                            onClick={() => field.onChange(null)}
+                                            type="button"
+                                        >
+                                            Удалить изображение
+                                        </Button>
+                                    )}
+                                    <FormDescription>Рекомендуемый размер: 1920x1080 (16:9).</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="videoPreview"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Превью (Видео)</FormLabel>
+                                    {renderPreview(field.value, 'video')}
+                                    <FormControl className="mt-2">
+                                        <div className="flex items-center gap-2">
+                                            <Input
+                                                type="file"
+                                                accept="video/mp4, video/webm"
+                                                onChange={(e) =>
+                                                    onFileChange(e, 'video', setIsUploadingVideo, 'videoPreview')
+                                                }
+                                                disabled={isSubmitting || isUploadingVideo}
+                                                className="flex-1"
+                                            />
+                                            {isUploadingVideo && <Loader2 className="h-4 w-4 animate-spin" />}
+                                        </div>
+                                    </FormControl>
+                                    {field.value && (
+                                        <Button
+                                            variant="link"
+                                            size="sm"
+                                            className="text-xs text-destructive p-0 h-auto mt-1"
+                                            onClick={() => field.onChange(null)}
+                                            type="button"
+                                        >
+                                            Удалить видео
+                                        </Button>
+                                    )}
+                                    <FormDescription>Короткое видео для демонстрации курса.</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                 </div>
+
+                <Accordion type="multiple" className="w-full border-t pt-6">
+                    <AccordionItem value="features-section" className="border-b-0">
+                        <AccordionTrigger className="text-lg font-medium hover:no-underline">
+                            Секция "Ключевые темы"
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-4 space-y-6">
+                            <FormField
+                                control={form.control}
+                                name="featuresBadge"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Текст значка</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Например, Новинка"
+                                                {...field}
+                                                value={field.value ?? ''}
+                                                disabled={isSubmitting}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="featuresTitle"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Заголовок секции</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Что вы изучите"
+                                                {...field}
+                                                value={field.value ?? ''}
+                                                disabled={isSubmitting}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="featuresSubtitle"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Подзаголовок секции</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Краткое описание"
+                                                {...field}
+                                                value={field.value ?? ''}
+                                                disabled={isSubmitting}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="featuresDescription"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Описание секции</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="Подробное описание того, что будет в курсе..."
+                                                className="min-h-[100px]"
+                                                {...field}
+                                                value={field.value ?? ''}
+                                                disabled={isSubmitting}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormDescription>Список ключевых тем (features) редактируется отдельно.</FormDescription>
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="benefits-section" className="border-b-0">
+                        <AccordionTrigger className="text-lg font-medium hover:no-underline">
+                            Секция "Преимущества"
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-4 space-y-6">
+                            <FormField
+                                control={form.control}
+                                name="benefitTitle"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Заголовок преимуществ</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Почему этот курс?"
+                                                {...field}
+                                                value={field.value ?? ''}
+                                                disabled={isSubmitting}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="benefitDescription"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Описание преимуществ</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="Расскажите о пользе курса..."
+                                                className="min-h-[100px]"
+                                                {...field}
+                                                value={field.value ?? ''}
+                                                disabled={isSubmitting}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="testimonial-section" className="border-b-0">
+                        <AccordionTrigger className="text-lg font-medium hover:no-underline">
+                            Секция "Отзыв"
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-4">
+                            <FormDescription>Отзыв (testimonial) редактируется отдельно.</FormDescription>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
 
                 <div className="flex justify-end pt-6 border-t mt-8">
                     <Button type="submit" disabled={isSubmitting || isUploadingImage || isUploadingVideo}>
