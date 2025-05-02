@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Check, HelpCircle, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
 import { Task, TaskType } from '@/types';
@@ -13,38 +14,65 @@ import { Textarea } from '../ui/textarea';
 interface TaskDisplayProps {
     task: Task;
     index: number;
+    onStatusChange: (isCorrect: boolean | null) => void;
+    currentStatus?: boolean | null;
 }
 
-const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index }) => {
+const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index, onStatusChange, currentStatus }) => {
     const [userAnswer, setUserAnswer] = useState<string>('');
     const [showSolution, setShowSolution] = useState<boolean>(false);
-    const [checkResult, setCheckResult] = useState<'correct' | 'incorrect' | 'pending' | null>(null);
+
     const [isChecking, setIsChecking] = useState<boolean>(false);
+
+    useEffect(() => {
+        setUserAnswer('');
+        setShowSolution(false);
+        setIsChecking(false);
+    }, [task.id]);
 
     const handleCheckAnswer = () => {
         if (!task.solution) {
             setShowSolution(true);
-            setCheckResult(null);
+            onStatusChange(true);
             return;
         }
 
         setIsChecking(true);
-        setCheckResult('pending');
         setShowSolution(false);
+        onStatusChange(null);
 
         setTimeout(() => {
             const isCorrect = userAnswer.trim().toLowerCase() === task.solution?.trim().toLowerCase();
-            setCheckResult(isCorrect ? 'correct' : 'incorrect');
+            onStatusChange(isCorrect);
             setIsChecking(false);
+
+            if (isCorrect) {
+                toast.success(`Задание ${index + 1}: Правильно!`);
+            } else {
+                toast.error(`Задание ${index + 1}: Неправильно. Попробуйте еще раз.`);
+            }
         }, 500);
     };
 
     const handleShowSolution = () => {
         setShowSolution((prev) => !prev);
-        setCheckResult(null);
+        if (!showSolution && task.solution) {
+            onStatusChange(null);
+        }
     };
 
     const renderInput = () => {
+        const inputBorderClass = cn(
+            'min-h-[100px] font-mono text-sm',
+            currentStatus === true ? 'border-success ring-success/30 focus-visible:ring-success/50' : '',
+            currentStatus === false ? 'border-destructive ring-destructive/30 focus-visible:ring-destructive/50' : ''
+        );
+        const radioGroupClass = cn(
+            'space-y-2',
+            currentStatus === true ? 'text-success' : '',
+            currentStatus === false ? 'text-destructive' : ''
+        );
+
         switch (task.taskType) {
             case TaskType.TEXT_INPUT:
             case TaskType.CODE_INPUT:
@@ -56,19 +84,11 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index }) => {
                         value={userAnswer}
                         onChange={(e) => {
                             setUserAnswer(e.target.value);
-                            setCheckResult(null);
+                            if (currentStatus !== null) onStatusChange(null);
                         }}
-                        className={cn(
-                            'min-h-[100px] font-mono text-sm',
-                            checkResult === 'correct'
-                                ? 'border-success ring-success/30 focus-visible:ring-success/50'
-                                : '',
-                            checkResult === 'incorrect'
-                                ? 'border-destructive ring-destructive/30 focus-visible:ring-destructive/50'
-                                : ''
-                        )}
+                        className={inputBorderClass}
                         rows={task.taskType === TaskType.CODE_INPUT ? 10 : 4}
-                        disabled={isChecking}
+                        disabled={isChecking || currentStatus === true}
                     />
                 );
             case TaskType.MULTIPLE_CHOICE:
@@ -77,14 +97,10 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index }) => {
                         value={userAnswer}
                         onValueChange={(value) => {
                             setUserAnswer(value);
-                            setCheckResult(null);
+                            if (currentStatus !== null) onStatusChange(null);
                         }}
-                        disabled={isChecking}
-                        className={cn(
-                            'space-y-2',
-                            checkResult === 'correct' ? 'text-success' : '',
-                            checkResult === 'incorrect' ? 'text-destructive' : ''
-                        )}
+                        disabled={isChecking || currentStatus === true}
+                        className={radioGroupClass}
                     >
                         {task.options?.map((option, i) => (
                             <div key={i} className="flex items-center space-x-2">
@@ -100,38 +116,43 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index }) => {
     };
 
     return (
-        <div className="not-prose border border-border p-4 rounded-md mb-6 bg-card shadow-sm">
+        <div
+            className={cn(
+                'not-prose border p-4 rounded-md mb-6 bg-card shadow-sm relative group',
+                currentStatus === true ? 'border-success bg-success/5' : 'border-border',
+                currentStatus === false ? 'border-destructive bg-destructive/5' : ''
+            )}
+        >
             <p className="font-semibold mb-2 flex items-center gap-2">
-                <HelpCircle className="h-5 w-5 text-primary" />
+                {currentStatus === true ? (
+                    <Check className="h-5 w-5 text-success" />
+                ) : currentStatus === false ? (
+                    <X className="h-5 w-5 text-destructive" />
+                ) : (
+                    <HelpCircle className="h-5 w-5 text-primary" />
+                )}
                 Задание {index + 1}:
             </p>
             <p className="mb-4 text-card-foreground/90">{task.description}</p>
 
             <div className="mb-4">{renderInput()}</div>
 
-            {checkResult && checkResult !== 'pending' && (
-                <div
-                    className={cn(
-                        'flex items-center gap-2 text-sm font-medium mb-3 p-2 rounded-md',
-                        checkResult === 'correct' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
-                    )}
-                >
-                    {checkResult === 'correct' ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
-                    {checkResult === 'correct' ? 'Правильно!' : 'Неправильно, попробуйте еще раз.'}
-                </div>
-            )}
-
             <div className="flex flex-wrap gap-2">
                 <Button
                     onClick={handleCheckAnswer}
-                    disabled={!userAnswer || isChecking}
+                    disabled={!userAnswer || isChecking || currentStatus === true}
                     isLoading={isChecking}
                     size="sm"
                 >
-                    {isChecking ? 'Проверка...' : 'Проверить ответ'}
+                    {currentStatus === true ? 'Решено верно' : isChecking ? 'Проверка...' : 'Проверить ответ'}
                 </Button>
                 {task.solution && (
-                    <Button onClick={handleShowSolution} variant="outline" size="sm" disabled={isChecking}>
+                    <Button
+                        onClick={handleShowSolution}
+                        variant="outline"
+                        size="sm"
+                        disabled={!userAnswer || isChecking || currentStatus === true}
+                    >
                         {showSolution ? 'Скрыть решение' : 'Показать решение'}
                     </Button>
                 )}

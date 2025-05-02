@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect, useState, useTransition } from 'react';
+import { ReactNode, useEffect, useMemo, useState, useTransition } from 'react';
 
 import { isAxiosError } from 'axios';
 import hljs from 'highlight.js';
@@ -35,9 +35,14 @@ hljs.registerLanguage('json', json);
 hljs.registerLanguage('bash', bash);
 hljs.registerLanguage('plaintext', plaintext);
 
+type TaskCompletionStatus = {
+    [taskId: string]: boolean | null;
+};
+
 export default function LessonPage() {
     const { currentLesson, course, courseProgress, updateCourseProgress } = useCourseLearnContext();
-    const [isCompleted, setIsCompleted] = useState(false);
+    const [isLessonMarkedCompleted, setIsLessonMarkedCompleted] = useState(false);
+    const [taskStatuses, setTaskStatuses] = useState<TaskCompletionStatus>({});
     const [isCompletePending, startCompleteTransition] = useTransition();
     const router = useRouter();
     const params = useParams();
@@ -45,11 +50,28 @@ export default function LessonPage() {
 
     const apiClient = new CoursesApiClient();
 
+    const allTasksCompleted = useMemo(() => {
+        if (!currentLesson?.tasks || currentLesson.tasks.length === 0) {
+            return true;
+        }
+
+        return currentLesson.tasks.every((task) => taskStatuses[task.id] === true);
+    }, [currentLesson?.tasks, taskStatuses]);
+
+    const updateTaskStatus = (taskId: string, isCorrect: boolean | null) => {
+        setTaskStatuses((prev) => ({
+            ...prev,
+            [taskId]: isCorrect,
+        }));
+    };
+
     useEffect(() => {
+        setTaskStatuses({});
+
         if (currentLesson && courseProgress) {
-            setIsCompleted(courseProgress.completedLessons?.includes(currentLesson.id) ?? false);
+            setIsLessonMarkedCompleted(courseProgress.completedLessons?.includes(currentLesson.id) ?? false);
         } else {
-            setIsCompleted(false);
+            setIsLessonMarkedCompleted(false);
         }
     }, [currentLesson, courseProgress]);
 
@@ -73,13 +95,13 @@ export default function LessonPage() {
     };
 
     const handleCompleteLesson = () => {
-        if (!course || !currentLesson || isCompleted) return;
+        if (!course || !currentLesson || isLessonMarkedCompleted || !allTasksCompleted) return;
 
         startCompleteTransition(async () => {
             try {
                 const updatedProgressData = await apiClient.markLessonAsComplete(course.id, currentLesson.id);
                 if (updatedProgressData) {
-                    setIsCompleted(true);
+                    setIsLessonMarkedCompleted(true);
                     updateCourseProgress(updatedProgressData);
                     toast.success(`Урок "${currentLesson.title}" отмечен как пройденный!`);
 
@@ -131,16 +153,11 @@ export default function LessonPage() {
             <div className="absolute top-0 right-0 not-prose">
                 <Button
                     onClick={handleCompleteLesson}
-                    disabled={isCompleted || isCompletePending}
+                    disabled={isLessonMarkedCompleted || isCompletePending || !allTasksCompleted}
                     size="sm"
-                    variant={isCompleted ? 'secondary' : 'default'}
+                    variant={isLessonMarkedCompleted ? 'secondary' : 'default'}
                 >
-                    {isCompletePending ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : isCompleted ? (
-                        <CheckCircle2 className="mr-2 h-4 w-4 text-success" />
-                    ) : null}
-                    {isCompleted ? 'Урок пройден' : 'Отметить и продолжить'}
+                    {isLessonMarkedCompleted ? 'Урок пройден' : 'Отметить и продолжить'}
                 </Button>
             </div>
 
@@ -235,7 +252,13 @@ export default function LessonPage() {
                 <>
                     <h2 className="not-prose text-xl font-semibold mt-6 mb-3">Задачи</h2>
                     {currentLesson.tasks.map((task, index) => (
-                        <TaskDisplay key={task.id || index} task={task} index={index} />
+                        <TaskDisplay
+                            key={task.id || index}
+                            task={task}
+                            index={index}
+                            onStatusChange={(isCorrect) => updateTaskStatus(task.id, isCorrect)}
+                            currentStatus={taskStatuses[task.id]}
+                        />
                     ))}
                 </>
             )}
