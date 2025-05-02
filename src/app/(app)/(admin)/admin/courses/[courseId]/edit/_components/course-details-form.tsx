@@ -12,7 +12,7 @@ import { z } from 'zod';
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,13 +22,13 @@ import { CourseDifficultyLevels } from '@/types';
 import { AdminCourseDetailDTO, AdminCreateUpdateCourseRequestDTO, AdminUser } from '@/types/admin';
 
 const courseDetailsFormSchema = z.object({
-    title: z.string().min(3, 'Title must be at least 3 characters'),
+    title: z.string().min(3, 'Название должно содержать не менее 3 символов'),
     description: z.string().optional().or(z.literal('')),
-    price: z.coerce.number().min(0, 'Price cannot be negative'),
+    price: z.coerce.number().min(0, 'Цена не может быть отрицательной'),
     discount: z.coerce.number().min(0).optional().default(0),
     difficulty: z.nativeEnum(CourseDifficultyLevels),
     category: z.string().optional().or(z.literal('')),
-    authorId: z.string().min(1, 'Author is required'),
+    authorId: z.string().min(1, 'Автор обязателен'),
     imagePreview: z.string().nullable().optional(),
     videoPreview: z.string().nullable().optional(),
 });
@@ -37,22 +37,28 @@ type CourseDetailsFormData = z.infer<typeof courseDetailsFormSchema>;
 
 interface CourseDetailsFormProps {
     course?: AdminCourseDetailDTO | null;
-
     onSuccess: (resultCourse: AdminCourseDetailDTO) => void;
 }
+
+const difficultyLabels: Record<CourseDifficultyLevels, string> = {
+    [CourseDifficultyLevels.BEGINNER]: 'Начинающий',
+    [CourseDifficultyLevels.INTERMEDIATE]: 'Средний',
+    [CourseDifficultyLevels.ADVANCED]: 'Продвинутый',
+};
 
 export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [isUploadingVideo, setIsUploadingVideo] = useState(false);
     const [authors, setAuthors] = useState<AdminUser[]>([]);
+    const [isLoadingAuthors, setIsLoadingAuthors] = useState(true);
 
     const isEditing = !!course;
-
     const s3ApiClient = new S3ApiClient();
 
     useEffect(() => {
         const fetchAuthors = async () => {
+            setIsLoadingAuthors(true);
             try {
                 const authorList = await adminApiClient.getPotentialAuthors();
                 setAuthors(authorList);
@@ -68,8 +74,11 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                 }
 
                 toast.error(`Could not load authors list: ${errorMsg}`);
+            } finally {
+                setIsLoadingAuthors(false);
             }
         };
+
         fetchAuthors();
     }, []);
 
@@ -83,21 +92,27 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
             difficulty: course?.difficulty ?? CourseDifficultyLevels.BEGINNER,
             category: course?.category ?? '',
             authorId: course?.authorId ?? '',
-            imagePreview: course?.imagePreview ?? '',
-            videoPreview: course?.videoPreview ?? '',
+            imagePreview: course?.imagePreview ?? null,
+            videoPreview: course?.videoPreview ?? null,
         },
     });
 
     useEffect(() => {
-        form.reset({
-            title: course?.title ?? '',
-            description: course?.description ?? '',
-            price: course?.price ?? 0,
-            discount: course?.discount ?? 0,
-            difficulty: course?.difficulty ?? CourseDifficultyLevels.BEGINNER,
-            category: course?.category ?? '',
-            authorId: course?.authorId ?? '',
-        });
+        if (course) {
+            form.reset({
+                title: course.title ?? '',
+                description: course.description ?? '',
+                price: course.price ?? 0,
+                discount: course.discount ?? 0,
+                difficulty: course.difficulty ?? CourseDifficultyLevels.BEGINNER,
+                category: course.category ?? '',
+                authorId: course.authorId ?? '',
+                imagePreview: course.imagePreview ?? null,
+                videoPreview: course.videoPreview ?? null,
+            });
+        } else {
+            form.reset(form.control._defaultValues);
+        }
     }, [course, form]);
 
     const onSubmit = async (values: CourseDetailsFormData) => {
@@ -109,6 +124,14 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                 category: values.category || null,
                 imagePreview: values.imagePreview,
                 videoPreview: values.videoPreview,
+                featuresBadge: course?.featuresBadge,
+                featuresTitle: course?.featuresTitle,
+                featuresSubtitle: course?.featuresSubtitle,
+                featuresDescription: course?.featuresDescription,
+                features: course?.features,
+                benefitTitle: course?.benefitTitle,
+                benefitDescription: course?.benefitDescription,
+                testimonial: course?.testimonial,
             };
 
             let resultCourse: AdminCourseDetailDTO;
@@ -175,6 +198,43 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
         }
     };
 
+    const renderPreview = (url: string | null | undefined, type: 'image' | 'video') => {
+        if (!url) {
+            return (
+                <div className="mt-2 flex items-center justify-center h-28 w-48 bg-muted rounded-md text-muted-foreground text-xs">
+                    Нет превью
+                </div>
+            );
+        }
+        if (type === 'image') {
+            return (
+                <Image
+                    src={url}
+                    alt="Превью изображения"
+                    width={192}
+                    height={108}
+                    className="rounded-md object-cover mt-2 border"
+                />
+            );
+        }
+        if (type === 'video') {
+            return (
+                <div className="mt-2 p-2 border rounded-md text-sm bg-muted">
+                    <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline truncate block"
+                    >
+                        {url}
+                    </a>
+                    <span className="text-xs text-muted-foreground">Видео превью загружено</span>
+                </div>
+            );
+        }
+        return null;
+    };
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -183,9 +243,9 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                     name="title"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Title</FormLabel>
+                            <FormLabel>Название курса *</FormLabel>
                             <FormControl>
-                                <Input placeholder="e.g., Introduction to React" {...field} disabled={isSubmitting} />
+                                <Input placeholder="Например, Введение в React" {...field} disabled={isSubmitting} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -197,28 +257,29 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                     name="description"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Description</FormLabel>
+                            <FormLabel>Описание</FormLabel>
                             <FormControl>
                                 <Textarea
-                                    placeholder="Describe the course..."
-                                    className="resize-y min-h-[100px]"
+                                    placeholder="Подробное описание курса..."
+                                    className="resize-y min-h-[120px]"
                                     {...field}
                                     value={field.value ?? ''}
                                     disabled={isSubmitting}
                                 />
                             </FormControl>
+                            <FormDescription>Краткое описание содержания курса.</FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <FormField
                         control={form.control}
                         name="price"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Price ($)</FormLabel>
+                                <FormLabel>Цена ($) *</FormLabel>
                                 <FormControl>
                                     <Input
                                         type="text"
@@ -228,6 +289,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                                         disabled={isSubmitting}
                                     />
                                 </FormControl>
+                                <FormDescription>Сумма</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -237,7 +299,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                         name="discount"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Discount ($)</FormLabel>
+                                <FormLabel>Скидка ($)</FormLabel>
                                 <FormControl>
                                     <Input
                                         type="text"
@@ -248,6 +310,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                                         disabled={isSubmitting}
                                     />
                                 </FormControl>
+                                <FormDescription>Сумма отнимаемая от цены</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -260,7 +323,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                         name="difficulty"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Difficulty</FormLabel>
+                                <FormLabel>Уровень сложности *</FormLabel>
                                 <Select
                                     onValueChange={field.onChange}
                                     defaultValue={field.value}
@@ -268,13 +331,13 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                                 >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select..." />
+                                            <SelectValue placeholder="Выберите..." />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
                                         {Object.values(CourseDifficultyLevels).map((level) => (
                                             <SelectItem key={level} value={level}>
-                                                {level.charAt(0) + level.slice(1).toLowerCase()}
+                                                {difficultyLabels[level]}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -288,10 +351,10 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                         name="category"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Category</FormLabel>
+                                <FormLabel>Категория</FormLabel>
                                 <FormControl>
                                     <Input
-                                        placeholder="e.g., Web Development"
+                                        placeholder="Например, Веб-разработка"
                                         {...field}
                                         value={field.value ?? ''}
                                         disabled={isSubmitting}
@@ -306,27 +369,33 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                         name="authorId"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Author</FormLabel>
+                                <FormLabel>Автор *</FormLabel>
                                 <Select
                                     onValueChange={field.onChange}
                                     defaultValue={field.value}
-                                    disabled={isSubmitting || authors.length === 0}
+                                    disabled={isSubmitting || isLoadingAuthors}
                                 >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select..." />
+                                            <SelectValue
+                                                placeholder={isLoadingAuthors ? 'Загрузка...' : 'Выберите...'}
+                                            />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {authors.length > 0 ? (
+                                        {isLoadingAuthors ? (
+                                            <div className="flex items-center justify-center p-2">
+                                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                            </div>
+                                        ) : authors.length > 0 ? (
                                             authors.map((author) => (
                                                 <SelectItem key={author.id} value={author.id!}>
-                                                    {author.username}
+                                                    {author.username} {author.email ? `(${author.email})` : ''}
                                                 </SelectItem>
                                             ))
                                         ) : (
-                                            <SelectItem value="loading" disabled>
-                                                Loading...
+                                            <SelectItem value="no-authors" disabled>
+                                                Нет доступных авторов
                                             </SelectItem>
                                         )}
                                     </SelectContent>
@@ -337,90 +406,87 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                     />
                 </div>
 
-                <FormField
-                    control={form.control}
-                    name="imagePreview"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Image Preview</FormLabel>
-                            {field.value && (
-                                <div className="mt-2">
-                                    <Image
-                                        src={field.value}
-                                        alt="Image Preview"
-                                        width={200}
-                                        height={112}
-                                        className="rounded-md object-cover"
-                                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+                    <FormField
+                        control={form.control}
+                        name="imagePreview"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Превью (Изображение)</FormLabel>
+                                {renderPreview(field.value, 'image')}
+                                <FormControl className="mt-2">
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            type="file"
+                                            accept="image/png, image/jpeg, image/webp"
+                                            onChange={(e) =>
+                                                onFileChange(e, 'image', setIsUploadingImage, 'imagePreview')
+                                            }
+                                            disabled={isSubmitting || isUploadingImage}
+                                            className="flex-1"
+                                        />
+                                        {isUploadingImage && <Loader2 className="h-4 w-4 animate-spin" />}
+                                    </div>
+                                </FormControl>
+                                {field.value && (
                                     <Button
                                         variant="link"
                                         size="sm"
                                         className="text-xs text-destructive p-0 h-auto mt-1"
                                         onClick={() => field.onChange(null)}
+                                        type="button"
                                     >
-                                        Remove Image
+                                        Удалить изображение
                                     </Button>
-                                </div>
-                            )}
-                            <FormControl>
-                                <div className="flex items-center gap-2">
-                                    <Input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => onFileChange(e, 'image', setIsUploadingImage, 'imagePreview')}
-                                        disabled={isUploadingImage || isSubmitting}
-                                        className="flex-1"
-                                    />
-                                    {isUploadingImage && <Loader2 className="h-4 w-4 animate-spin" />}
-                                </div>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="videoPreview"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Video Preview</FormLabel>
-                            {field.value && (
-                                <div className="mt-2">
-                                    <p className="text-xs truncate max-w-xs bg-muted p-1 rounded">
-                                        Current: {field.value}
-                                    </p>
+                                )}
+                                <FormDescription>Рекомендуемый размер: 1920x1080 (16:9).</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="videoPreview"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Превью (Видео)</FormLabel>
+                                {renderPreview(field.value, 'video')}
+                                <FormControl className="mt-2">
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            type="file"
+                                            accept="video/mp4, video/webm"
+                                            onChange={(e) =>
+                                                onFileChange(e, 'video', setIsUploadingVideo, 'videoPreview')
+                                            }
+                                            disabled={isSubmitting || isUploadingVideo}
+                                            className="flex-1"
+                                        />
+                                        {isUploadingVideo && <Loader2 className="h-4 w-4 animate-spin" />}
+                                    </div>
+                                </FormControl>
+                                {field.value && (
                                     <Button
                                         variant="link"
                                         size="sm"
                                         className="text-xs text-destructive p-0 h-auto mt-1"
                                         onClick={() => field.onChange(null)}
+                                        type="button"
                                     >
-                                        Remove Video
+                                        Удалить видео
                                     </Button>
-                                </div>
-                            )}
-                            <FormControl>
-                                <div className="flex items-center gap-2">
-                                    <Input
-                                        type="file"
-                                        accept="video/*"
-                                        onChange={(e) => onFileChange(e, 'video', setIsUploadingVideo, 'videoPreview')}
-                                        disabled={isUploadingVideo || isSubmitting}
-                                        className="flex-1"
-                                    />
-                                    {isUploadingVideo && <Loader2 className="h-4 w-4 animate-spin" />}
-                                </div>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                                )}
+                                <FormDescription>Короткое видео для демонстрации курса.</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
 
-                <div className="flex justify-end pt-4">
-                    <Button type="submit" disabled={isSubmitting}>
+                <div className="flex justify-end pt-6 border-t mt-8">
+                    <Button type="submit" disabled={isSubmitting || isUploadingImage || isUploadingVideo}>
                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isEditing ? 'Save Course Details' : 'Create Course'}
+                        {isEditing ? 'Сохранить изменения' : 'Создать курс'}
                     </Button>
                 </div>
             </form>

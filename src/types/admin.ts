@@ -68,6 +68,14 @@ export interface AdminCourseDetailDTO {
     category: string | null;
     videoLength: number | null;
     lessons: AdminLessonDTO[];
+    featuresBadge?: string | null;
+    featuresTitle?: string | null;
+    featuresSubtitle?: string | null;
+    featuresDescription?: string | null;
+    features?: AdminFeatureItemDTO[] | null;
+    benefitTitle?: string | null;
+    benefitDescription?: string | null;
+    testimonial?: AdminTestimonialDTO | null;
 }
 
 export interface AdminCreateUpdateCourseRequestDTO {
@@ -80,6 +88,27 @@ export interface AdminCreateUpdateCourseRequestDTO {
     authorId: string;
     imagePreview?: string | null;
     videoPreview?: string | null;
+    featuresBadge?: string | null;
+    featuresTitle?: string | null;
+    featuresSubtitle?: string | null;
+    featuresDescription?: string | null;
+    features?: AdminFeatureItemDTO[] | null;
+    benefitTitle?: string | null;
+    benefitDescription?: string | null;
+    testimonial?: AdminTestimonialDTO | null;
+}
+
+export interface AdminFeatureItemDTO {
+    title: string;
+    description: string;
+}
+
+export interface AdminTestimonialDTO {
+    quote: string;
+    authorName: string;
+    authorTitle: string;
+    avatarSrc?: string | null;
+    avatarFallback: string;
 }
 
 export interface AdminCreateUpdateLessonRequestDTO {
