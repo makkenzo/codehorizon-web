@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
+import { Eye } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { FaUserSecret } from 'react-icons/fa6';
 import { MdAddAPhoto } from 'react-icons/md';
 import { toast } from 'sonner';
 import { z } from 'zod';
+
+import { useRouter } from 'next/navigation';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -18,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Profile } from '@/models';
 import ProfileApiClient from '@/server/profile';
 import S3ApiClient from '@/server/s3';
+import { useUserStore } from '@/stores/user/user-store-provider';
 
 const profileSchema = z.object({
     avatarUrl: z.string().nullable(),
@@ -55,6 +59,9 @@ const ProfileForm = ({}) => {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [pending, setPending] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
+
+    const router = useRouter();
+    const { user } = useUserStore((state) => state);
 
     const form = useForm<z.infer<typeof profileSchema>>({
         resolver: zodResolver(profileSchema),
@@ -150,82 +157,98 @@ const ProfileForm = ({}) => {
         );
 
     return (
-        <Form {...form}>
-            <motion.form
-                initial="hidden"
-                animate="visible"
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4 md:px-[45px] mt-10"
-            >
-                <FormField
-                    key="avatarUrl"
-                    control={form.control}
-                    name="avatarUrl"
-                    render={({}) => (
-                        <FormItem>
-                            <FormControl>
-                                <motion.div className="relative mx-auto" variants={formVariants} custom={0}>
-                                    <Avatar className="size-[60px]">
-                                        <AvatarImage src={form.watch('avatarUrl') ?? ''} />
-                                        <AvatarFallback>
-                                            <FaUserSecret className="size-8" />
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <label className="size-[28px] absolute flex items-center justify-center bg-[#050505] rounded-full -bottom-1 -right-2 opacity-75 z-50 hover:bg-[#050505]/80 cursor-pointer">
-                                        <MdAddAPhoto className="text-gray-200 size-[14px]" />
-                                        <input
-                                            type="file"
-                                            className="hidden"
-                                            onChange={handleFileChange}
-                                            accept={ALLOWED_TYPES.join(', ')}
-                                            disabled={pending}
-                                        />
-                                    </label>
-                                </motion.div>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                {Object.entries(fields).map(
-                    (
-                        [key, { label, placeholder }],
-                        index // Пропускаем сложные поля
-                    ) => (
-                        <FormField
-                            key={key}
-                            control={form.control}
-                            name={key as keyof typeof fields}
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>
-                                        <motion.label variants={formVariants} custom={index + 1}>
-                                            {label}
-                                        </motion.label>
-                                    </FormLabel>
-                                    <FormControl>
-                                        <motion.div variants={formVariants} custom={index + 1}>
-                                            <Input
-                                                placeholder={placeholder!}
-                                                {...field}
-                                                value={field.value ?? ''}
+        <div className="mb-20">
+            <Form {...form}>
+                {user?.username && (
+                    <div className="flex justify-end mb-6 md:px-[45px]">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => router.push(`/u/${user.username}`)}
+                            title="Посмотреть как профиль видят другие"
+                        >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Просмотр
+                        </Button>
+                    </div>
+                )}
+                <motion.form
+                    initial="hidden"
+                    animate="visible"
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4 md:px-[45px] mt-10"
+                >
+                    <FormField
+                        key="avatarUrl"
+                        control={form.control}
+                        name="avatarUrl"
+                        render={({}) => (
+                            <FormItem>
+                                <FormControl>
+                                    <motion.div className="relative mx-auto" variants={formVariants} custom={0}>
+                                        <Avatar className="size-[60px]">
+                                            <AvatarImage src={form.watch('avatarUrl') ?? ''} />
+                                            <AvatarFallback>
+                                                <FaUserSecret className="size-8" />
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <label className="size-[28px] absolute flex items-center justify-center bg-[#050505] rounded-full -bottom-1 -right-2 opacity-75 z-50 hover:bg-[#050505]/80 cursor-pointer">
+                                            <MdAddAPhoto className="text-gray-200 size-[14px]" />
+                                            <input
+                                                type="file"
+                                                className="hidden"
+                                                onChange={handleFileChange}
+                                                accept={ALLOWED_TYPES.join(', ')}
                                                 disabled={pending}
                                             />
-                                        </motion.div>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    )
-                )}
-                <motion.div variants={formVariants} custom={Object.keys(fields).length + 1}>
-                    <Button type="submit" className="max-w-[179px] w-full mx-auto mt-10" isLoading={pending}>
-                        {pending ? 'Загрузка...' : 'Сохранить'}
-                    </Button>
-                </motion.div>
-            </motion.form>
-        </Form>
+                                        </label>
+                                    </motion.div>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    {Object.entries(fields).map(
+                        (
+                            [key, { label, placeholder }],
+                            index // Пропускаем сложные поля
+                        ) => (
+                            <FormField
+                                key={key}
+                                control={form.control}
+                                name={key as keyof typeof fields}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            <motion.label variants={formVariants} custom={index + 1}>
+                                                {label}
+                                            </motion.label>
+                                        </FormLabel>
+                                        <FormControl>
+                                            <motion.div variants={formVariants} custom={index + 1}>
+                                                <Input
+                                                    placeholder={placeholder!}
+                                                    {...field}
+                                                    value={field.value ?? ''}
+                                                    disabled={pending}
+                                                />
+                                            </motion.div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )
+                    )}
+                    <motion.div variants={formVariants} custom={Object.keys(fields).length + 1}>
+                        <Button type="submit" className="max-w-[179px] w-full mx-auto mt-10" isLoading={pending}>
+                            {pending ? 'Загрузка...' : 'Сохранить'}
+                        </Button>
+                    </motion.div>
+                </motion.form>
+            </Form>
+        </div>
     );
 };
 

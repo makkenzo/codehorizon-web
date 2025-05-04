@@ -42,7 +42,7 @@ class AuthApiClient extends ApiClient {
 
     async isLoggedOut() {
         try {
-            const response = await this.post<string>('/auth/logout', {
+            const response = await this.delete<string>('/auth/session', {
                 withCredentials: true,
             })
                 .then((res) => {

@@ -26,6 +26,7 @@ const formSchema = z.object({
     isVerified: z.boolean(),
     isAdmin: z.boolean(),
     isUser: z.boolean(),
+    isMentor: z.boolean(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -44,8 +45,9 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
         defaultValues: {
             isVerified: user.isVerified,
 
-            isAdmin: user.roles.includes('ADMIN'),
-            isUser: user.roles.includes('USER'),
+            isAdmin: user.roles.includes('ADMIN') || user.roles.includes('ROLE_ADMIN'),
+            isUser: user.roles.includes('USER') || user.roles.includes('ROLE_USER'),
+            isMentor: user.roles.includes('MENTOR') || user.roles.includes('ROLE_MENTOR'),
         },
     });
 
@@ -55,9 +57,10 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
             const updatedRoles: string[] = [];
             if (values.isUser) updatedRoles.push('USER');
             if (values.isAdmin) updatedRoles.push('ADMIN');
+            if (values.isMentor) updatedRoles.push('ROLE_MENTOR');
 
             const updateData: AdminUpdateUserRequest = {
-                roles: updatedRoles,
+                roles: updatedRoles.length > 0 ? updatedRoles : ['ROLE_USER'],
                 isVerified: values.isVerified,
             };
 
@@ -81,9 +84,9 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
         <Dialog open={true} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Edit User: {user.username}</DialogTitle>
+                    <DialogTitle>Редактировать пользователя: {user.username}</DialogTitle>
                     <DialogDescription>
-                        Modify user details and roles. Click save when you&apos;re done.
+                        Измените данные пользователя и роли. Нажмите «Сохранить», когда закончите.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -94,8 +97,8 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
                             render={({ field }) => (
                                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                     <div className="space-y-0.5">
-                                        <FormLabel className="text-base">Verified</FormLabel>
-                                        <FormDescription>Is the user&apos;s email verified?</FormDescription>
+                                        <FormLabel className="text-base">Верификация</FormLabel>
+                                        <FormDescription>Пользователь подтвержден эл. почтой?</FormDescription>
                                     </div>
                                     <FormControl>
                                         <Checkbox
@@ -109,8 +112,8 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
                         />
 
                         <div className="space-y-2 rounded-lg border p-4">
-                            <FormLabel className="text-base">Roles</FormLabel>
-                            <FormDescription>Assign roles to the user.</FormDescription>
+                            <FormLabel className="text-base">Роли</FormLabel>
+                            <FormDescription>Назначьте роли пользователю.</FormDescription>
                             <FormField
                                 control={form.control}
                                 name="isUser"
@@ -123,7 +126,7 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
                                                 disabled={isSubmitting}
                                             />
                                         </FormControl>
-                                        <FormLabel className="font-normal">USER</FormLabel>
+                                        <FormLabel className="font-normal">Пользователь</FormLabel>
                                     </FormItem>
                                 )}
                             />
@@ -139,7 +142,26 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
                                                 disabled={isSubmitting}
                                             />
                                         </FormControl>
-                                        <FormLabel className="font-normal">ADMIN</FormLabel>
+                                        <FormLabel className="font-normal">Администратор</FormLabel>
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="isMentor"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                        <FormControl>
+                                            <Checkbox
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                                disabled={isSubmitting}
+                                                id={`mentor-role-${user.id}`}
+                                            />
+                                        </FormControl>
+                                        <FormLabel htmlFor={`mentor-role-${user.id}`} className="font-normal">
+                                            Ментор
+                                        </FormLabel>
                                     </FormItem>
                                 )}
                             />

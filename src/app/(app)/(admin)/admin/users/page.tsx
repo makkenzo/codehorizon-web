@@ -83,18 +83,18 @@ export default function AdminUsersPage() {
     return (
         <Card className="shadow-sm" x-chunk="dashboard-06-chunk-0">
             <CardHeader>
-                <CardTitle>Users</CardTitle>
-                <CardDescription>Manage your users and view their details.</CardDescription>
+                <CardTitle>Пользователи</CardTitle>
+                <CardDescription>Управляйте своими пользователями и просматривайте их данные.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Username</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Roles</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead>Имя пользователя</TableHead>
+                            <TableHead>E-mail</TableHead>
+                            <TableHead>Статус</TableHead>
+                            <TableHead>Роли</TableHead>
+                            <TableHead className="text-right">Действия</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -107,7 +107,7 @@ export default function AdminUsersPage() {
                                     <TableCell>{user.email}</TableCell>
                                     <TableCell>
                                         <Badge variant={user.isVerified ? 'default' : 'destructive'}>
-                                            {user.isVerified ? 'Verified' : 'Not Verified'}
+                                            {user.isVerified ? 'Верифицирован' : 'Не верифицирован'}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
@@ -133,12 +133,12 @@ export default function AdminUsersPage() {
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent className="w-56 px-4 py-2" align="end">
-                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <DropdownMenuLabel>Действия</DropdownMenuLabel>
                                                 <DropdownMenuItem
                                                     onClick={() => setEditingUser(user)}
                                                     className="cursor-pointer"
                                                 >
-                                                    <Pencil className="mr-2 h-4 w-4" /> Edit
+                                                    <Pencil className="mr-2 h-4 w-4" /> Редактировать
                                                 </DropdownMenuItem>
                                                 {/* <DropdownMenuItem className="text-destructive">
                                                      <Trash2 className="mr-2 h-4 w-4" /> Delete
@@ -151,7 +151,7 @@ export default function AdminUsersPage() {
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={5} className="h-24 text-center">
-                                    No users found.
+                                    Пользователей не найдено.
                                 </TableCell>
                             </TableRow>
                         )}

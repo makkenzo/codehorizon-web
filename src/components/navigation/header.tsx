@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { motion } from 'framer-motion';
 import { FaUserSecret } from 'react-icons/fa6';
@@ -24,6 +24,7 @@ import { heroFadeInVariants } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import AuthApiClient from '@/server/auth';
+import CoursesApiClient from '@/server/courses';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
 
@@ -35,6 +36,9 @@ import { Skeleton } from '../ui/skeleton';
 import MobileBurgerMenu from './mobile-burger-menu';
 
 const Header = () => {
+    const [categories, setCategories] = useState<string[]>([]);
+    const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
     const { isAuthenticated, isPending } = useAuth();
     const pathname = usePathname();
 
@@ -42,9 +46,22 @@ const Header = () => {
 
     const { user, clearUser } = useUserStore((state) => state);
 
-    const isAdmin = useMemo(() => {
-        return user?.roles?.includes('ADMIN') ?? false;
-    }, [user]);
+    useEffect(() => {
+        const apiClient = new CoursesApiClient();
+        const fetchCategories = async () => {
+            setIsLoadingCategories(true);
+            try {
+                const fetched = await apiClient.getCategories();
+                setCategories(fetched ?? []);
+            } catch (error) {
+                console.error('Failed to fetch categories:', error);
+                setCategories([]);
+            } finally {
+                setIsLoadingCategories(false);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     return (
         <div className={cn('w-full', pathname !== '/' && 'bg-white')}>
@@ -80,15 +97,21 @@ const Header = () => {
                                 <MobileBurgerMenu profile={profile} />
                                 <Logo />
                             </div>
-                            <CatalogDropdown />
+                            <CatalogDropdown categories={categories} isLoading={isLoadingCategories} />
                         </div>
                         <GlobalSearch className="pt-1 lg:block hidden" />
                         <div className="flex items-center gap-4 w-full justify-end">
-                            <Link href={'/'} className="translate-y-0.5 lg:block hidden">
-                                <Button variant="link" size="link" className="text-foreground">
-                                    Стать ментором
-                                </Button>
-                            </Link>
+                            {isAuthenticated &&
+                                !(user?.roles?.includes('MENTOR') || user?.roles?.includes('ROLE_MENTOR')) && (
+                                    <Button
+                                        variant="link"
+                                        size="link"
+                                        className="text-foreground lg:block hidden translate-y-0.5"
+                                        onClick={() => alert('Чтобы стать ментором, обратитесь к администрации.')}
+                                    >
+                                        Стать ментором
+                                    </Button>
+                                )}
                             {pathname.includes('courses') ? <CatalogFiltersMobile /> : null}
                             {isAuthenticated ? (
                                 <DropdownMenu>
@@ -121,12 +144,12 @@ const Header = () => {
                                                 <DropdownMenuItem>Список желаемого</DropdownMenuItem>
                                             </Link>
                                         </DropdownMenuGroup>
-                                        {isAdmin && (
+                                        {(user?.roles?.includes('ADMIN') || user?.roles?.includes('ROLE_ADMIN')) && (
                                             <>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuGroup>
                                                     <Link href="/admin">
-                                                        <DropdownMenuItem className="text-accent focus:text-accent">
+                                                        <DropdownMenuItem className="text-accent focus:text-accent cursor-pointer">
                                                             Админ-панель
                                                         </DropdownMenuItem>
                                                     </Link>

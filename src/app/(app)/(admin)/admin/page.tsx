@@ -107,7 +107,7 @@ export default function AdminDashboardPage() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card x-chunk="dashboard-01-chunk-1">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                        <CardTitle className="text-sm font-medium">Всего пользователей</CardTitle>
                         <Users className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -120,7 +120,7 @@ export default function AdminDashboardPage() {
                             <Skeleton className="h-4 w-32 mt-1" />
                         ) : (
                             stats?.newUsersToday != null && (
-                                <p className="text-xs text-muted-foreground">+{stats.newUsersToday} today</p>
+                                <p className="text-xs text-muted-foreground">+{stats.newUsersToday} сегодня</p>
                             )
                         )}
                     </CardContent>
@@ -128,7 +128,7 @@ export default function AdminDashboardPage() {
 
                 <Card x-chunk="dashboard-01-chunk-2">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
+                        <CardTitle className="text-sm font-medium">Всего курсов</CardTitle>
                         <BookOpen className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -142,7 +142,7 @@ export default function AdminDashboardPage() {
 
                 <Card x-chunk="dashboard-01-chunk-0">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                        <CardTitle className="text-sm font-medium">Всего дохода</CardTitle>
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -156,7 +156,7 @@ export default function AdminDashboardPage() {
 
                 <Card x-chunk="dashboard-01-chunk-3">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Completed courses</CardTitle>
+                        <CardTitle className="text-sm font-medium">Завершенных курсов</CardTitle>
                         <Activity className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -172,8 +172,8 @@ export default function AdminDashboardPage() {
             <div className="grid gap-4 md:grid-cols-2 lg:gap-8">
                 <Card x-chunk="dashboard-05-chunk-1">
                     <CardHeader className="px-7">
-                        <CardTitle>User Registrations</CardTitle>
-                        <CardDescription>Daily user sign ups in the last period.</CardDescription>
+                        <CardTitle>Регистрации пользователей</CardTitle>
+                        <CardDescription>Ежедневные регистрации пользователей за последний период.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {isLoading ? (
@@ -204,15 +204,17 @@ export default function AdminDashboardPage() {
                                 </LineChart>
                             </ChartContainer>
                         ) : (
-                            <p className="text-center text-muted-foreground py-10">No registration data available.</p>
+                            <p className="text-center text-muted-foreground py-10">
+                                Данные о регистрации пользователей недоступны.
+                            </p>
                         )}
                     </CardContent>
                 </Card>
 
                 <Card x-chunk="dashboard-05-chunk-2">
                     <CardHeader className="px-7">
-                        <CardTitle>Revenue</CardTitle>
-                        <CardDescription>Daily revenue in the last period.</CardDescription>
+                        <CardTitle>Доход</CardTitle>
+                        <CardDescription>Ежедневный доход за последний период.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {isLoading ? (
@@ -232,14 +234,14 @@ export default function AdminDashboardPage() {
                                 </BarChart>
                             </ChartContainer>
                         ) : (
-                            <p className="text-center text-muted-foreground py-10">No revenue data available.</p>
+                            <p className="text-center text-muted-foreground py-10">Данные о доходе недоступны.</p>
                         )}
                     </CardContent>
                 </Card>
                 <Card x-chunk="dashboard-05-chunk-3">
                     <CardHeader className="items-center pb-0">
-                        <CardTitle>Course Categories</CardTitle>
-                        <CardDescription>Distribution of courses by category</CardDescription>
+                        <CardTitle>Категории курсов</CardTitle>
+                        <CardDescription>Распределение курсов по категориям</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-1 pb-0">
                         {isLoading ? (
@@ -278,15 +280,17 @@ export default function AdminDashboardPage() {
                                 </PieChart>
                             </ChartContainer>
                         ) : (
-                            <p className="text-center text-muted-foreground py-10">No category data available.</p>
+                            <p className="text-center text-muted-foreground py-10">
+                                Данные о категориях курсов недоступны.
+                            </p>
                         )}
                     </CardContent>
                 </Card>
 
                 <Card x-chunk="dashboard-05-chunk-4">
                     <CardHeader>
-                        <CardTitle>Top Courses by Students</CardTitle>
-                        <CardDescription>Most popular courses based on enrollment.</CardDescription>
+                        <CardTitle>Топ курсов по учащимся</CardTitle>
+                        <CardDescription>Самые популярные курсы по участию.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {isLoading ? (
@@ -326,7 +330,7 @@ export default function AdminDashboardPage() {
                             </ChartContainer>
                         ) : (
                             <p className="text-center text-muted-foreground py-10">
-                                No course popularity data available.
+                                Данные о популярности курсов недоступны.
                             </p>
                         )}
                     </CardContent>

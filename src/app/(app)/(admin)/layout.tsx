@@ -62,14 +62,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     };
 
     const navLinks = [
-        { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-        { href: '/admin/users', label: 'Users', icon: Users },
-        { href: '/admin/courses', label: 'Courses', icon: BookOpen },
+        { href: '/admin', label: 'Статистика', icon: LayoutDashboard },
+        { href: '/admin/users', label: 'Пользователи', icon: Users },
+        { href: '/admin/courses', label: 'Курсы', icon: BookOpen },
 
-        { href: '/admin/settings', label: 'Settings', icon: Settings, disabled: true },
+        { href: '/admin/settings', label: 'Настройки', icon: Settings, disabled: true },
     ];
 
-    const mobileNavLinks = [{ href: '/', label: 'Go to Site', icon: Home }, ...navLinks];
+    const mobileNavLinks = [{ href: '/', label: 'Вернуться на сайт', icon: Home }, ...navLinks];
 
     if (isLoading) {
         return (
@@ -93,7 +93,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                         href={link.disabled ? '#' : link.href}
                         className={cn(
                             'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                            isActive && 'bg-muted text-primary',
+                            isActive && 'bg-muted/20 text-primary',
                             link.disabled && 'cursor-not-allowed opacity-50'
                         )}
                         aria-disabled={link.disabled}
