@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { adminApiClient } from '@/server/admin-api-client';
+import { useUserStore } from '@/stores/user/user-store-provider';
 import { AdminCourseDetailDTO, AdminLessonDTO } from '@/types/admin';
 
 import CourseDetailsForm from './_components/course-details-form';
@@ -19,6 +20,7 @@ import LessonEditDialog from './_components/lesson-edit-dialog';
 import LessonList from './_components/lesson-list';
 
 export default function EditCoursePage() {
+    const { user } = useUserStore((state) => state);
     const router = useRouter();
     const params = useParams();
     const courseId = Array.isArray(params.courseId) ? params.courseId[0] : params.courseId;
@@ -29,17 +31,18 @@ export default function EditCoursePage() {
     const [editingLesson, setEditingLesson] = useState<AdminLessonDTO | null>(null);
     const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
 
-    const fetchCourse = useCallback(async () => {
+    const fetchCourse = useCallback(async (): Promise<AdminCourseDetailDTO | null> => {
         if (!courseId) {
             toast.error('Course ID is missing.');
             setIsLoading(false);
             setCourseData(null);
-            return;
+            return null;
         }
 
         try {
             const data = await adminApiClient.getCourseAdmin(courseId);
             setCourseData(data);
+            return data;
         } catch (error: unknown) {
             console.error('Failed to fetch course details:', error);
 
@@ -53,18 +56,33 @@ export default function EditCoursePage() {
 
             toast.error(`Failed to load course: ${errorMsg}`);
             setCourseData(null);
+            return null;
         }
     }, [courseId]);
 
     useEffect(() => {
         if (courseId) {
             setIsLoading(true);
-            fetchCourse().finally(() => setIsLoading(false));
+            fetchCourse()
+                .then((loadedCourseData) => {
+                    if (loadedCourseData && user) {
+                        const isAdmin = user.roles?.includes('ADMIN') || user.roles?.includes('ROLE_ADMIN');
+                        const isAuthor = loadedCourseData.authorId === user.id;
+
+                        if (!isAdmin && !isAuthor) {
+                            toast.error('У вас нет прав для редактирования этого курса.');
+                            router.replace('/admin/courses');
+                        }
+                    } else if (!loadedCourseData) {
+                        router.replace('/admin/courses');
+                    }
+                })
+                .finally(() => setIsLoading(false));
         } else {
             setIsLoading(false);
             console.error('EditCoursePage: courseId is missing in params.');
         }
-    }, [courseId, fetchCourse]);
+    }, [courseId, fetchCourse, user, router]);
 
     const handleDetailsUpdateSuccess = (updatedCourse: AdminCourseDetailDTO) => {
         setCourseData(updatedCourse);

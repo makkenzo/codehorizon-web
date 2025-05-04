@@ -65,6 +65,7 @@ export type CourseDetailsFormData = z.infer<typeof courseDetailsFormSchema>;
 interface CourseDetailsFormProps {
     course?: AdminCourseDetailDTO | null;
     onSuccess: (resultCourse: AdminCourseDetailDTO) => void;
+    forcedAuthorId?: string;
 }
 
 const difficultyLabels: Record<CourseDifficultyLevels, string> = {
@@ -93,7 +94,7 @@ const defaultValues: Partial<CourseDetailsFormData> = {
     features: [],
 };
 
-export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFormProps) {
+export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }: CourseDetailsFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [isUploadingVideo, setIsUploadingVideo] = useState(false);
@@ -139,7 +140,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                   discount: course?.discount ?? 0,
                   difficulty: course?.difficulty ?? CourseDifficultyLevels.BEGINNER,
                   category: course?.category ?? '',
-                  authorId: course?.authorId ?? '',
+
                   imagePreview: course?.imagePreview ?? null,
                   videoPreview: course?.videoPreview ?? null,
                   featuresBadge: course.featuresBadge ?? null,
@@ -150,8 +151,9 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                   benefitDescription: course.benefitDescription ?? null,
                   features: course.features ?? [],
                   testimonial: course.testimonial ?? null,
+                  authorId: course?.authorId ?? '',
               }
-            : defaultValues,
+            : { ...defaultValues, authorId: forcedAuthorId ?? '' },
     });
 
     useEffect(() => {
@@ -164,7 +166,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                 discount: course.discount ?? 0,
                 difficulty: course.difficulty ?? CourseDifficultyLevels.BEGINNER,
                 category: course.category ?? '',
-                authorId: course.authorId ?? '',
+
                 imagePreview: course.imagePreview ?? null,
                 videoPreview: course.videoPreview ?? null,
                 featuresBadge: course.featuresBadge ?? null,
@@ -175,9 +177,15 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                 benefitDescription: course.benefitDescription ?? null,
                 testimonial: course.testimonial ?? null,
                 features: course.features ?? [],
+                authorId: course.authorId ?? '',
+            });
+        } else if (forcedAuthorId) {
+            form.reset({
+                ...defaultValues,
+                authorId: forcedAuthorId,
             });
         }
-    }, [course, form]);
+    }, [course, form, forcedAuthorId]);
 
     const onSubmit = async (values: CourseDetailsFormData) => {
         setIsSubmitting(true);
@@ -437,7 +445,7 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                                 <Select
                                     onValueChange={field.onChange}
                                     defaultValue={field.value}
-                                    disabled={isSubmitting || isLoadingAuthors}
+                                    disabled={!!forcedAuthorId || isSubmitting || isLoadingAuthors}
                                 >
                                     <FormControl>
                                         <SelectTrigger>
@@ -464,6 +472,11 @@ export default function CourseDetailsForm({ course, onSuccess }: CourseDetailsFo
                                         )}
                                     </SelectContent>
                                 </Select>
+                                {!!forcedAuthorId && (
+                                    <FormDescription className="text-xs text-blue-600">
+                                        Вы можете создавать курсы только от своего имени.
+                                    </FormDescription>
+                                )}
                                 <FormMessage />
                             </FormItem>
                         )}

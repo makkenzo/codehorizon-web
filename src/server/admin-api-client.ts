@@ -61,11 +61,13 @@ class AdminApiClient {
         page: number = 1,
         size: number = 10,
         sortBy?: string,
-        titleSearch?: string
+        titleSearch?: string,
+        authorId?: string
     ): Promise<PagedResponse<AdminCourseListItemDTO>> {
         const params = new URLSearchParams();
         params.append('page', page.toString());
         params.append('size', size.toString());
+        if (authorId) params.append('authorId', authorId);
         if (sortBy) params.append('sortBy', sortBy);
         if (titleSearch) params.append('titleSearch', titleSearch);
         try {

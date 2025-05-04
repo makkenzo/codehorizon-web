@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
 
 import { BookOpen, Home, LayoutDashboard, Loader2, LogOut, Menu, Package2, Settings, Users } from 'lucide-react';
 
@@ -18,8 +18,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useHasHydrated } from '@/hooks/use-has-hydrated';
 import { cn } from '@/lib/utils';
-import { User } from '@/models';
 import { useAuth } from '@/providers/auth-provider';
 import AuthApiClient from '@/server/auth';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
@@ -29,30 +29,32 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const { isAuthenticated, isPending: isAuthPending } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
+    const hasHydrated = useHasHydrated();
 
-    const [hydratedUser, setHydratedUser] = useState<User | undefined>(undefined);
-    const [isHydrated, setIsHydrated] = useState(false);
-    const userFromStore = useUserStore((state) => state.user);
+    const user = useUserStore((state) => state.user);
     const clearUser = useUserStore((state) => state.clearUser);
     const { profile, clearProfile } = useProfileStore((state) => state);
 
-    useEffect(() => {
-        setHydratedUser(userFromStore);
-        setIsHydrated(true);
-    }, [userFromStore]);
+    const isLoading = isAuthPending || !hasHydrated;
 
-    const isLoading = isAuthPending || !isHydrated;
-    const isAdmin = hydratedUser?.roles?.includes('ADMIN');
+    const isAdmin = hasHydrated && (user?.roles?.includes('ADMIN') || user?.roles?.includes('ROLE_ADMIN'));
+    const isMentor = hasHydrated && (user?.roles?.includes('MENTOR') || user?.roles?.includes('ROLE_MENTOR'));
+
+    const canAccessAdminArea = isAdmin || isMentor;
 
     useEffect(() => {
         if (!isLoading) {
             if (!isAuthenticated) {
-                router.replace('/sign-in?from=/admin');
-            } else if (!isAdmin) {
+                console.log('AdminLayout: Not authenticated, redirecting to sign-in...');
+                router.replace(`/sign-in?from=${encodeURIComponent(pathname)}`);
+            } else if (!canAccessAdminArea) {
+                console.log('AdminLayout: Not an admin or mentor, redirecting to home...');
                 router.replace('/');
+            } else {
+                console.log('AdminLayout: Access granted (Authenticated Admin or Mentor).');
             }
         }
-    }, [isLoading, isAuthenticated, isAdmin, router]);
+    }, [isLoading, isAuthenticated, canAccessAdminArea, router, pathname]);
 
     const handleLogout = async () => {
         clearUser();
@@ -61,15 +63,23 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         router.push('/sign-in');
     };
 
-    const navLinks = [
+    const baseNavLinks = [
         { href: '/admin', label: 'Статистика', icon: LayoutDashboard },
         { href: '/admin/users', label: 'Пользователи', icon: Users },
         { href: '/admin/courses', label: 'Курсы', icon: BookOpen },
-
         { href: '/admin/settings', label: 'Настройки', icon: Settings, disabled: true },
     ];
 
-    const mobileNavLinks = [{ href: '/', label: 'Вернуться на сайт', icon: Home }, ...navLinks];
+    const filteredNavLinks = baseNavLinks.filter((link) => {
+        if (isAdmin) {
+            return true;
+        } else if (isMentor) {
+            return link.href === '/admin/courses';
+        }
+        return false;
+    });
+
+    const filteredMobileNavLinks = [{ href: '/', label: 'Вернуться на сайт', icon: Home }, ...filteredNavLinks];
 
     if (isLoading) {
         return (
@@ -79,11 +89,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         );
     }
 
-    if (!isAuthenticated || !isAdmin) {
+    if (!isAuthenticated || !canAccessAdminArea) {
         return null;
     }
 
-    const SidebarNav = ({ links }: { links: typeof navLinks }) => (
+    const SidebarNav = ({ links }: { links: typeof baseNavLinks }) => (
         <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
             {links.map((link) => {
                 const isActive = pathname === link.href;
@@ -122,7 +132,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                          </Button> */}
                     </div>
                     <div className="flex-1 overflow-auto py-2">
-                        <SidebarNav links={navLinks} />
+                        <SidebarNav links={filteredNavLinks} />
                     </div>
                 </div>
             </div>
@@ -143,7 +153,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                                     <span>CodeHorizon Admin</span>
                                 </Link>
 
-                                <SidebarNav links={mobileNavLinks} />
+                                <SidebarNav links={filteredMobileNavLinks} />
                             </nav>
                         </SheetContent>
                     </Sheet>
@@ -164,16 +174,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                         <DropdownMenuTrigger asChild>
                             <Avatar className="hover:cursor-pointer lg:block hidden hover:outline-4 outline-primary outline-0 ease-in-out transition-all duration-100">
                                 {profile?.avatarUrl ? (
-                                    <AvatarImage src={profile.avatarUrl} alt={hydratedUser?.username} />
+                                    <AvatarImage src={profile.avatarUrl} alt={user?.username} />
                                 ) : null}
-                                <AvatarFallback>
-                                    {hydratedUser?.username?.substring(0, 1).toUpperCase() ?? 'A'}
-                                </AvatarFallback>
+                                <AvatarFallback>{user?.username?.substring(0, 1).toUpperCase() ?? 'A'}</AvatarFallback>
                             </Avatar>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56 px-4 py-2" align="end">
                             <DropdownMenuLabel className="pl-0">
-                                {profile?.firstName || hydratedUser?.username}
+                                {profile?.firstName || user?.username}
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>

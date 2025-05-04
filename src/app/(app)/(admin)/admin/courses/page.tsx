@@ -25,6 +25,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatNumber } from '@/lib/utils';
 import { adminApiClient } from '@/server/admin-api-client';
+import { useUserStore } from '@/stores/user/user-store-provider';
 import { PagedResponse } from '@/types';
 import { AdminCourseListItemDTO } from '@/types/admin';
 
@@ -39,11 +40,30 @@ export default function AdminCoursesPage() {
     const currentPage = parseInt(searchParams.get('page') || '1', 10);
     const pageSize = parseInt(searchParams.get('size') || '10', 10);
 
+    const { user } = useUserStore((state) => state);
+    const isAdmin = user?.roles?.includes('ADMIN') || user?.roles?.includes('ROLE_ADMIN');
+    const isMentor = user?.roles?.includes('MENTOR') || user?.roles?.includes('ROLE_MENTOR');
+
     const fetchData = useCallback(
         async (page = currentPage, size = pageSize) => {
             setIsLoading(true);
             try {
-                const result = await adminApiClient.getCoursesAdmin(page, size);
+                const params: any = { page, size };
+                if (!isAdmin && isMentor && user?.id) {
+                    params.authorId = user.id;
+                } else if (!isAdmin && !isMentor) {
+                    setData(null);
+                    setIsLoading(false);
+                    return;
+                }
+
+                const result = await adminApiClient.getCoursesAdmin(
+                    params.page,
+                    params.size,
+                    undefined,
+                    undefined,
+                    params.authorId
+                );
                 setData(result);
             } catch (error: unknown) {
                 console.error('Failed to fetch courses:', error);
@@ -62,7 +82,7 @@ export default function AdminCoursesPage() {
                 setIsLoading(false);
             }
         },
-        [currentPage, pageSize]
+        [currentPage, pageSize, isAdmin, isMentor, user?.id]
     );
 
     useEffect(() => {
@@ -132,12 +152,15 @@ export default function AdminCoursesPage() {
                     <CardTitle>Courses</CardTitle>
                     <CardDescription>Manage your courses. Add, edit, or delete courses.</CardDescription>
                 </div>
-                <Link href="/admin/courses/new">
-                    <Button size="sm">
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        Add Course
-                    </Button>
-                </Link>
+
+                {(isAdmin || isMentor) && (
+                    <Link href="/admin/courses/new">
+                        <Button size="sm">
+                            <PlusCircle className="h-4 w-4 mr-2" />
+                            Add Course
+                        </Button>
+                    </Link>
+                )}
             </CardHeader>
             <CardContent>
                 <Table>
@@ -206,15 +229,22 @@ export default function AdminCoursesPage() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-56 px-4 py-2">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem className="cursor-pointer">
-                                                    <Pencil className="mr-2 h-4 w-4" /> Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    className="text-destructive cursor-pointer"
-                                                    onClick={() => handleDeleteCourse(course.id, course.title)}
-                                                >
-                                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
-                                                </DropdownMenuItem>
+                                                {(isAdmin || course.authorId === user?.id) && (
+                                                    <DropdownMenuItem
+                                                        className="cursor-pointer"
+                                                        onClick={() => router.push(`/admin/courses/${course.id}/edit`)}
+                                                    >
+                                                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                                                    </DropdownMenuItem>
+                                                )}
+                                                {(isAdmin || course.authorId === user?.id) && (
+                                                    <DropdownMenuItem
+                                                        className="text-destructive cursor-pointer"
+                                                        onClick={() => handleDeleteCourse(course.id, course.title)}
+                                                    >
+                                                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                                    </DropdownMenuItem>
+                                                )}
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>

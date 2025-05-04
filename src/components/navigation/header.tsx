@@ -144,7 +144,10 @@ const Header = () => {
                                                 <DropdownMenuItem>Список желаемого</DropdownMenuItem>
                                             </Link>
                                         </DropdownMenuGroup>
-                                        {(user?.roles?.includes('ADMIN') || user?.roles?.includes('ROLE_ADMIN')) && (
+                                        {(user?.roles?.includes('MENTOR') ||
+                                            user?.roles?.includes('ROLE_MENTOR') ||
+                                            user?.roles?.includes('ADMIN') ||
+                                            user?.roles?.includes('ROLE_ADMIN')) && (
                                             <>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuGroup>
