@@ -66,8 +66,8 @@ pnpm dev
     <li>✅ Add authentication and authorization system (JWT).</li>
     <li>✅ Integrate SMTP for email notifications.</li>
     <li>✅ Set up CI/CD using GitHub Actions.</li>
-    <li>❌ Develop lesson and assignment functionality.</li>
-    <li>❌ Implement role-based access control (student, author, admin).</li>
+    <li>✅ Develop lesson and assignment functionality.</li>
+    <li>✅ Implement role-based access control (student, author, admin).</li>
     <li>✅ Integrate payment systems (Stripe, PayPal).</li>
     <li>✅ Add ratings and review system.</li>
     <li>❌ Develop course analytics for authors.</li>
