@@ -59,7 +59,9 @@ const CourseCard = ({ course, progress }: CourseCardProps) => {
                 </Link>
             ) : null}
             {course.description && pathname !== '/me/courses' ? (
-                <p className="line-clamp-2 md:line-clamp-3">{course.description}</p>
+                <p className="line-clamp-2 md:line-clamp-3">
+                    <div dangerouslySetInnerHTML={{ __html: course.description }} />
+                </p>
             ) : null}
             {typeof course.rating === 'number' && course.rating > 0 && pathname !== '/me/courses' ? (
                 <div className="mt-1">

@@ -111,7 +111,9 @@ const CoursePage = async (props: CoursePageProps) => {
                                 <Label htmlFor="description" className="font-bold text-lg">
                                     О курсе
                                 </Label>
-                                {course.description ? <p className="text-black-60/60">{course.description}</p> : null}
+                                {course.description ? (
+                                    <div className="prose" dangerouslySetInnerHTML={{ __html: course.description }} />
+                                ) : null}
                             </div>
 
                             <CourseFeatureSection {...featureSectionData} />
