@@ -150,8 +150,6 @@ export default function LessonPage() {
                         setTimeout(() => {
                             router.push(nextLessonUrl);
                         }, 800);
-                    } else {
-                        toast.info('🎉 Поздравляем! Вы завершили курс!');
                     }
                 } else {
                     toast.error('Не удалось обновить прогресс.');

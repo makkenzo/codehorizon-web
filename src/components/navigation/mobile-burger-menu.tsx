@@ -1,7 +1,7 @@
 import { Fragment, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bell, Book, ChevronUp, Heart, Home, Menu, Settings, ShoppingBag, X } from 'lucide-react';
+import { Award, Bell, Book, ChevronUp, Heart, Home, Menu, Settings, ShoppingBag, X } from 'lucide-react';
 import { RiProfileFill, RiProfileLine, RiProgress5Line } from 'react-icons/ri';
 
 import Link from 'next/link';
@@ -65,6 +65,13 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                           href: '/me/profile',
                           label: 'Профиль',
                           icon: <RiProfileLine />,
+                          className: 'text-primary',
+                      },
+                      {
+                          id: 'certs-mobile-link',
+                          href: '/me/certificates',
+                          label: 'Мои Сертификаты',
+                          icon: <Award />,
                           className: 'text-primary',
                       },
                       {

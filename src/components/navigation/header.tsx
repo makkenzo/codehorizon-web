@@ -140,6 +140,9 @@ const Header = () => {
                                             <Link href="/me/courses">
                                                 <DropdownMenuItem>Мои курсы</DropdownMenuItem>
                                             </Link>
+                                            <Link href="/me/certificates">
+                                                <DropdownMenuItem>Мои сертификаты</DropdownMenuItem>
+                                            </Link>
                                             <Link href="/me/courses?tab=wishlist">
                                                 <DropdownMenuItem>Список желаемого</DropdownMenuItem>
                                             </Link>

@@ -20,6 +20,8 @@ const LessonSidebar = ({ course, isCourseCompleted }: LessonSidebarProps) => {
     const { courseProgress } = useCourseLearnContext();
     const completedLessons = courseProgress?.completedLessons ?? [];
 
+    console.log(completedLessons);
+
     return (
         <aside className="w-64 h-full border-r border-border p-4 overflow-y-auto shrink-0 md:block hidden bg-card">
             <Link href={`/courses/${course.slug}`} className="mb-4 block">
@@ -43,8 +45,17 @@ const LessonSidebar = ({ course, isCourseCompleted }: LessonSidebarProps) => {
                 {course.lessons.length > 0 &&
                     course.lessons.map((lesson) => {
                         const isCompleted = completedLessons.includes(lesson.id);
+
                         const lessonPath = `/courses/${course.slug}/learn/${lesson.slug}`;
-                        const isActive = pathname === lessonPath;
+
+                        let isActive = false;
+                        try {
+                            isActive = decodeURIComponent(pathname) === lessonPath;
+                        } catch (e) {
+                            console.error('Failed to decode pathname:', pathname, e);
+
+                            isActive = pathname === lessonPath;
+                        }
 
                         return (
                             <Link
@@ -53,7 +64,7 @@ const LessonSidebar = ({ course, isCourseCompleted }: LessonSidebarProps) => {
                                 className={cn(
                                     'text-sm p-2 rounded-md hover:bg-muted flex items-center justify-between gap-2 group',
                                     isActive
-                                        ? 'bg-muted/40 font-medium text-primary'
+                                        ? 'bg-muted/40 text-primary font-semibold'
                                         : 'text-muted-foreground hover:text-foreground',
                                     isCompleted && !isActive && 'text-foreground/60'
                                 )}
