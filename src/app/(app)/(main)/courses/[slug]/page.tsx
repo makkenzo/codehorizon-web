@@ -1,3 +1,5 @@
+import { Award } from 'lucide-react';
+import { Metadata } from 'next';
 import Player from 'next-video/player';
 import MediaThemeMinimal from 'player.style/minimal/react';
 import { FaBook } from 'react-icons/fa';
@@ -11,6 +13,7 @@ import { notFound } from 'next/navigation';
 
 import CourseButtons from '@/components/course-buttons';
 import CourseFeatureSection from '@/components/course/course-feature-section';
+import CourseTimeline, { TimelineModule } from '@/components/course/course-timeline';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -18,56 +21,121 @@ import { formatDuration } from '@/lib/utils';
 import CoursesApiClient from '@/server/courses';
 import ProfileApiClient from '@/server/profile';
 import ReviewsApiClient from '@/server/reviews';
+import { Lesson } from '@/types';
 
-import CourseClientPage from './course-client-page';
+import CoursePageClientActionsAndTimeline, {
+    CoursePageClientActionsAndTimelineProps,
+} from './_components/course-page-client-actions-and-timeline';
 
 interface CoursePageProps {
     params: Promise<{ slug: string }>;
 }
 
-const CoursePage = async (props: CoursePageProps) => {
-    const params = await props.params;
-    const { slug } = params;
+export async function generateMetadata({ params }: CoursePageProps): Promise<Metadata> {
+    const coursesApiClient = new CoursesApiClient();
+    const slug = (await params).slug;
+    const course = await coursesApiClient.getCourseBySlug(slug).catch(() => null);
+
+    if (!course) {
+        return {
+            title: 'Курс не найден',
+            description: 'Запрошенный курс не существует или был удален.',
+        };
+    }
+    return {
+        title: `${course.title} | CodeHorizon`,
+        description: course.description?.substring(0, 160) || `Узнайте больше о курсе ${course.title} на CodeHorizon.`,
+        openGraph: {
+            title: `${course.title} | CodeHorizon`,
+            description:
+                course.description?.substring(0, 160) || `Узнайте больше о курсе ${course.title} на CodeHorizon.`,
+            images: course.imagePreview ? [{ url: course.imagePreview }] : [],
+            type: 'website',
+        },
+    };
+}
+
+const CoursePage = async ({ params }: CoursePageProps) => {
+    const { slug } = await params;
 
     const coursesApiClient = new CoursesApiClient();
     const profileApiClient = new ProfileApiClient();
     const reviewsApiClient = new ReviewsApiClient();
 
-    const course = await coursesApiClient.getCourseBySlug(slug).catch((error) => {
+    const courseData = await coursesApiClient.getCourseBySlug(slug).catch((error) => {
         console.error(`Ошибка при загрузке курса ${slug}:`, error);
         return null;
     });
 
-    if (!course) {
-        console.warn(`Курс с slug ${slug} не найден`);
+    if (!courseData) {
         notFound();
     }
 
-    const authorPromise = profileApiClient.getUserProfile(course.authorUsername).catch((err) => {
-        console.error(`Ошибка загрузки автора ${course.authorUsername}:`, err);
+    const authorPromise = courseData.authorUsername
+        ? profileApiClient.getUserProfile(courseData.authorUsername).catch((err) => {
+              console.warn(`Не удалось загрузить автора ${courseData.authorUsername}:`, err.message);
+              return null;
+          })
+        : Promise.resolve(null);
+
+    const reviewsPromise = reviewsApiClient.getReviews(courseData.id, 0, 5).catch((err) => {
+        console.warn(`Не удалось загрузить отзывы для курса ${courseData.id}:`, err.message);
+        return null;
+    });
+    const ratingDistributionPromise = reviewsApiClient.getRatingDistribution(courseData.id).catch((err) => {
+        console.warn(`Не удалось загрузить распределение рейтинга для курса ${courseData.id}:`, err.message);
         return null;
     });
 
-    const author = await authorPromise;
+    const progressPromise = coursesApiClient.getUserCourseProgress(courseData.id).catch((err) => {
+        console.warn(`Не удалось загрузить прогресс для курса ${courseData.id}:`, err.message);
+        return null;
+    });
+
+    const [author, initialReviewsData, ratingDistribution, progressData] = await Promise.all([
+        authorPromise,
+        reviewsPromise,
+        ratingDistributionPromise,
+        progressPromise,
+    ]);
+
+    const lessonsForClient: Pick<Lesson, 'id' | 'title' | 'slug' | 'videoLength'>[] = courseData.lessons.map(
+        (lesson) => ({
+            id: lesson.id,
+            title: lesson.title,
+            slug: lesson.slug,
+            videoLength: lesson.videoLength,
+        })
+    );
+
+    const courseForClient: CoursePageClientActionsAndTimelineProps['courseFromServer'] = {
+        id: courseData.id,
+        slug: courseData.slug,
+        title: courseData.title,
+        price: courseData.price,
+        discount: courseData.discount,
+        rating: courseData.rating,
+        lessons: lessonsForClient,
+    };
 
     if (!author) {
         console.warn(
-            `Автор ${course.authorUsername} не найден или не удалось загрузить. Отображение страницы без автора.`
+            `Автор ${courseData.authorUsername} не найден или не удалось загрузить. Отображение страницы без автора.`
         );
     }
 
     const featureSectionData = {
-        badgeText: course.featuresBadge,
-        title: course.featuresTitle,
-        subtitle: course.featuresSubtitle,
-        description: course.featuresDescription,
-        features: course.features,
-        benefitTitle: course.benefitTitle,
-        benefitDescription: course.benefitDescription,
-        testimonial: course.testimonial,
+        badgeText: courseData.featuresBadge,
+        title: courseData.featuresTitle,
+        subtitle: courseData.featuresSubtitle,
+        description: courseData.featuresDescription,
+        features: courseData.features,
+        benefitTitle: courseData.benefitTitle,
+        benefitDescription: courseData.benefitDescription,
+        testimonial: courseData.testimonial,
     };
 
-    const hasCourseDescription = !!course.description;
+    const hasCourseDescription = !!courseData.description;
     const hasFeatureContent =
         !!featureSectionData.description ||
         featureSectionData.features ||
@@ -76,34 +144,30 @@ const CoursePage = async (props: CoursePageProps) => {
         !!featureSectionData.testimonial;
     const shouldShowAboutSection = hasCourseDescription || hasFeatureContent;
 
-    const initialReviewsData = await reviewsApiClient.getReviews(course.id, 0, 5).catch(() => null);
-    const ratingDistribution = await reviewsApiClient.getRatingDistribution(course.id).catch(() => null);
-
     return (
         <PageWrapper className="mb-16">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div className="col-span-2 flex flex-col gap-4">
-                    <div className="relative aspect-video">
-                        {course.videoPreview ? (
+                <div className="md:col-span-2 flex flex-col gap-6">
+                    <div className="relative aspect-video shadow-lg overflow-hidden rounded-lg">
+                        {courseData.videoPreview ? (
                             <Player
-                                src={course.videoPreview}
+                                src={courseData.videoPreview}
                                 theme={MediaThemeMinimal}
                                 style={{
                                     '--media-secondary-color': '#3eccb2',
                                     '--media-primary-color': '#faf2f0',
                                 }}
                             />
-                        ) : course.imagePreview ? (
-                            <Image
-                                src={course.imagePreview}
-                                alt="Course Image"
-                                fill
-                                className="object-cover rounded-lg"
-                            />
-                        ) : null}
+                        ) : courseData.imagePreview ? (
+                            <Image src={courseData.imagePreview} alt={courseData.title} fill className="object-cover" />
+                        ) : (
+                            <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">
+                                Нет превью
+                            </div>
+                        )}
                     </div>
 
-                    <h1 className="text-[24px] font-semibold">{course.title}</h1>
+                    <h1 className="md:text-3xl text-2xl font-bold tracking-tight">{courseData.title}</h1>
 
                     {shouldShowAboutSection ? (
                         <>
@@ -111,8 +175,11 @@ const CoursePage = async (props: CoursePageProps) => {
                                 <Label htmlFor="description" className="font-bold text-lg">
                                     О курсе
                                 </Label>
-                                {course.description ? (
-                                    <div className="prose" dangerouslySetInnerHTML={{ __html: course.description }} />
+                                {courseData.description ? (
+                                    <div
+                                        className="prose"
+                                        dangerouslySetInnerHTML={{ __html: courseData.description }}
+                                    />
                                 ) : null}
                             </div>
 
@@ -122,59 +189,43 @@ const CoursePage = async (props: CoursePageProps) => {
 
                     <Separator />
 
-                    <div className="flex flex-col gap-4">
-                        <Label htmlFor="modules" className="font-bold text-lg">
-                            Модули
-                        </Label>
-                        <div className="border-l-8 border-double border-black-60/60 px-4 flex flex-col gap-4">
-                            {course.lessons.map((lesson, idx) => (
-                                <div key={lesson.slug} className="flex gap-4 items-center">
-                                    <FaBook className="size-6 text-primary" />
-                                    <div className="flex flex-col">
-                                        <h3 className="text-lg">{lesson.title}</h3>
-                                        <h4 className="text-sm text-black-60/60">Module {idx}</h4>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <Separator />
-
-                    <CourseClientPage
-                        courseId={course.id}
+                    <CoursePageClientActionsAndTimeline
+                        courseFromServer={courseForClient}
                         initialReviewsData={initialReviewsData}
-                        courseRating={course.rating}
                         ratingDistribution={ratingDistribution}
                     />
                 </div>
 
-                <div className="col-span-1 relative md:order-1 -order-1 w-full">
+                <div className="md:col-span-1 relative md:order-1 -order-1 w-full">
                     <div className="flex flex-col gap-6 sticky top-10">
                         <div className="shadow-[0px_6px_20px_0px_rgba(0,0,0,0.05)] p-6 rounded-[6px] bg-white h-fit">
                             <CourseButtons
                                 course={{
-                                    discount: course.discount,
-                                    id: course.id,
-                                    price: course.price,
-                                    slug: course.slug,
-                                    lessons: course.lessons,
+                                    discount: courseData.discount,
+                                    id: courseData.id,
+                                    price: courseData.price,
+                                    slug: courseData.slug,
+                                    lessons: lessonsForClient,
                                 }}
                             />
                             <div className="flex flex-col gap-3 text-black-60/60 mt-6">
                                 <div className="flex items-center gap-4">
                                     <MdChromeReaderMode className="size-[22px]" />
-                                    {course.lessons.length} Уроков
+                                    {courseData.lessons.length} Уроков
                                 </div>
-                                {course.videoLength && course.videoLength > 0 ? (
+                                {courseData.videoLength && courseData.videoLength > 0 ? (
                                     <div className="flex items-center gap-4">
                                         <MdLiveTv className="size-[22px]" />
-                                        {formatDuration(course.videoLength)}
+                                        {formatDuration(courseData.videoLength)}
                                     </div>
                                 ) : null}
                                 <div className="flex items-center gap-4">
                                     <IoMdVolumeHigh className="size-[22px]" />
                                     English
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <Award className="size-[22px]" />
+                                    <span>Сертификат по окончанию</span>
                                 </div>
                             </div>
                         </div>
@@ -196,11 +247,20 @@ const CoursePage = async (props: CoursePageProps) => {
                                         <h2 className="bg-primary text-white p-1 font-semibold rounded-[4px] w-fit">
                                             {author.username}
                                         </h2>
-                                        <h3 className="text-white text-2xl">{course.authorName}</h3>
+                                        <h3 className="text-white text-2xl">{courseData.authorName}</h3>
                                     </div>
                                 </Link>
                             </div>
                         ) : null}
+                        <div id="course-content-section" className="scroll-mt-20">
+                            <CourseTimeline
+                                courseTitle={courseData.title}
+                                courseProgress={progressData?.progress ?? 0}
+                                courseFromServer={courseData}
+                                completedLessons={progressData?.completedLessons ?? []}
+                                courseSlug={courseData.slug}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

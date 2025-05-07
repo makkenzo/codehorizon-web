@@ -81,6 +81,7 @@ export interface Lesson {
     tasks?: Task[];
     attachments?: Attachment[];
     mainAttachment?: string;
+    videoLength?: number;
 }
 
 export interface Attachment {
@@ -139,4 +140,13 @@ export interface PopularAuthorDTO {
     avatarUrl?: string | null;
     avatarColor?: string | null;
     courseCount: number;
+}
+
+export interface UserSpecificCourseProgressDetails {
+    id?: string;
+    userId: string;
+    courseId: string;
+    completedLessons: string[];
+    progress: number;
+    lastUpdated: string;
 }

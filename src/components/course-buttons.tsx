@@ -10,12 +10,12 @@ import { toast } from 'sonner';
 
 import { useRouter } from 'next/navigation';
 
-import { getPercentDifference } from '@/lib/utils';
+import { cn, getPercentDifference } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import CoursesApiClient from '@/server/courses';
 import PaymentsApiClient from '@/server/payments';
 import { useUserStore } from '@/stores/user/user-store-provider';
-import { Course, Lesson } from '@/types';
+import { Course, Lesson, UserCourseDTO, UserSpecificCourseProgressDetails } from '@/types';
 
 import Price from './reusable/price';
 import { Button } from './ui/button';
@@ -29,31 +29,46 @@ interface CourseButtonsProps {
         slug: string;
         price: number;
         discount: number;
-        lessons: Pick<Lesson, 'title' | 'slug'>[];
+        lessons: Pick<Lesson, 'title' | 'slug' | 'id' | 'videoLength'>[];
     };
+
+    currentCourseProgressDetails?: UserSpecificCourseProgressDetails | null;
+    className?: string;
 }
 
-const CourseButtons = ({ course }: CourseButtonsProps) => {
-    const { isAuthenticated } = useAuth();
+const CourseButtons = ({
+    course,
+
+    currentCourseProgressDetails,
+    className,
+}: CourseButtonsProps) => {
+    const { isAuthenticated, isPending: isAuthPending } = useAuth();
     const router = useRouter();
     const user = useUserStore((state) => state.user);
-    const [loading, setLoading] = useState(false);
+    const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+    const [access, setAccess] = useState<boolean | null>(null);
 
     const [isInWishlist, setIsInWishlist] = useState(false);
-    const [isPending, startTransition] = useTransition();
-    const [access, setAccess] = useState<boolean | null>(null);
+    const [isWishlistPending, startWishlistTransition] = useTransition();
 
     const apiClient = new CoursesApiClient();
 
     useEffect(() => {
-        const fetchData = async () => {
-            const isInWishlist = await apiClient.isCourseInWishlist(course.id).catch((err) => {
-                console.error(`Ошибка проверки вишлиста для курса ${course.id}:`, err);
-                return false;
-            });
+        const fetchWishlistStatus = async () => {
+            if (!isAuthenticated || !user) {
+                setIsInWishlist(false);
+                return;
+            }
 
-            setIsInWishlist(isInWishlist);
+            try {
+                const status = await apiClient.isCourseInWishlist(course.id);
+                setIsInWishlist(status);
+            } catch (err) {
+                console.error(`Ошибка проверки вишлиста для курса ${course.id}:`, err);
+                setIsInWishlist(false);
+            }
         };
+
         const fetchAccess = async () => {
             const response = await apiClient.checkCourseAccess(course.id).catch((error) => {
                 console.error(`Ошибка при проверке доступа к курсу ${course.id}:`, error);
@@ -62,43 +77,53 @@ const CourseButtons = ({ course }: CourseButtonsProps) => {
         };
 
         fetchAccess();
-        fetchData();
-    }, []);
+        fetchWishlistStatus();
+    }, [isAuthenticated, user, course.id, apiClient]);
 
     const handleCheckout = async () => {
-        if (!isAuthenticated) {
+        if (!isAuthenticated || !user) {
             router.push(`/sign-in?from=/courses/${course.slug}`);
+            return;
         }
-        setLoading(true);
+
+        setIsCheckoutLoading(true);
+
         try {
             const sessionId = await new PaymentsApiClient().createCheckoutSession(course.id, user!.id);
             if (!sessionId) throw new Error('Ошибка при создании сессии оплаты');
 
             const stripe = await stripePromise;
-            await stripe?.redirectToCheckout({ sessionId });
+            const result = await stripe?.redirectToCheckout({ sessionId });
+
+            if (result?.error) {
+                toast.error(result.error.message || 'Ошибка при перенаправлении на Stripe');
+            }
         } catch (error) {
             console.error('Ошибка при покупке курса', error);
             toast.error('Ошибка при покупке курса');
         } finally {
-            setLoading(false);
+            setIsCheckoutLoading(false);
         }
     };
 
     const handleToggleWishlist = () => {
-        startTransition(async () => {
+        if (!isAuthenticated || !user) {
+            router.push(`/sign-in?from=/courses/${course.slug}`);
+            return;
+        }
+
+        startWishlistTransition(async () => {
             const action = isInWishlist ? 'удаления' : 'добавления';
-            const currentWishlistStatus = isInWishlist;
 
             try {
-                if (currentWishlistStatus) {
+                if (isInWishlist) {
                     await apiClient.removeFromWishlist(course.id);
                     toast.success('Курс удален из желаемого');
-                    setIsInWishlist(false);
                 } else {
                     await apiClient.addToWishlist(course.id);
                     toast.success('Курс добавлен в желаемое');
-                    setIsInWishlist(true);
                 }
+                setIsInWishlist(!isInWishlist);
             } catch (error: unknown) {
                 console.error(`Ошибка ${action} курса (${course.id}) в желаемое:`, error);
 
@@ -118,36 +143,56 @@ const CourseButtons = ({ course }: CourseButtonsProps) => {
         });
     };
 
-    if (access === null) {
+    const handleGoToLearning = () => {
+        const completedLessonIds = currentCourseProgressDetails?.completedLessons ?? [];
+        let targetLessonSlug = course.lessons?.[0]?.slug;
+
+        if (course.lessons && course.lessons.length > 0) {
+            if (completedLessonIds.length < course.lessons.length) {
+                const firstUncompleted = course.lessons.find((l) => !completedLessonIds.includes(l.id));
+                if (firstUncompleted) {
+                    targetLessonSlug = firstUncompleted.slug;
+                }
+            } else if (completedLessonIds.length === course.lessons.length && course.lessons.length > 0) {
+                targetLessonSlug = course.lessons[course.lessons.length - 1].slug;
+            }
+        }
+
+        if (targetLessonSlug) {
+            router.push(`/courses/${course.slug}/learn/${targetLessonSlug}`);
+        } else {
+            toast.error('В этом курсе пока нет уроков или не удалось определить следующий урок.');
+        }
+    };
+
+    if (isAuthPending) {
         return (
             <div className="space-y-4">
-                <Skeleton className="h-8 w-24" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-28 mb-2" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
             </div>
         );
     }
 
-    const handleGoToLearning = () => {
-        const firstLessonSlug = course.lessons?.[0]?.slug;
-        if (firstLessonSlug) {
-            router.push(`/courses/${course.slug}/learn/${firstLessonSlug}`);
-        } else {
-            toast.error('В этом курсе пока нет уроков.');
-        }
-    };
-
     if (access) {
+        const progressPercentage = currentCourseProgressDetails?.progress ?? 0;
+        const buttonText =
+            progressPercentage > 0 && progressPercentage < 100 ? 'Продолжить обучение' : 'Перейти к изучению';
+
         return (
-            <Button size="lg" className="w-full" onClick={handleGoToLearning}>
-                <BookOpen className="mr-2 h-5 w-5" /> Перейти к изучению
-            </Button>
+            <div className={className}>
+                <Button id="course-buttons-go-to-learning" size="lg" className="w-full" onClick={handleGoToLearning}>
+                    <BookOpen className="mr-2 h-5 w-5" />
+                    {buttonText}
+                </Button>
+            </div>
         );
     }
 
     return (
-        <>
-            <>
+        <div className={cn('space-y-4', className)}>
+            <div className="mb-4">
                 <Price
                     discount={course.discount}
                     price={course.price}
@@ -159,19 +204,24 @@ const CourseButtons = ({ course }: CourseButtonsProps) => {
                         СКИДКА {getPercentDifference(course.price, course.price - course.discount)}
                     </div>
                 ) : null}
-            </>
+            </div>
             <div className="w-full flex flex-col gap-4 mt-8">
-                <Button size="lg" onClick={handleCheckout} isLoading={loading}>
-                    Купить
+                <Button
+                    id="course-buttons-buy-main-action"
+                    size="lg"
+                    onClick={handleCheckout}
+                    isLoading={isCheckoutLoading}
+                >
+                    Купить курс
                 </Button>
                 <Button
                     variant={isInWishlist ? 'secondary' : 'outline'}
                     size="lg"
                     onClick={handleToggleWishlist}
-                    isLoading={isPending}
+                    isLoading={isWishlistPending}
                     aria-live="polite"
                 >
-                    {isPending ? (
+                    {isWishlistPending ? (
                         <>
                             <span>Обновление...</span>
                         </>
@@ -186,7 +236,7 @@ const CourseButtons = ({ course }: CourseButtonsProps) => {
                     )}
                 </Button>
             </div>
-        </>
+        </div>
     );
 };
 

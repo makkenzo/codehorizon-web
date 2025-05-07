@@ -1,7 +1,7 @@
 import axios, { isAxiosError } from 'axios';
 import qs from 'qs';
 
-import { Course, CourseProgress, Lesson, PagedResponse } from '@/types';
+import { Course, CourseProgress, Lesson, PagedResponse, UserSpecificCourseProgressDetails } from '@/types';
 
 import ApiClient from './api-client';
 
@@ -65,7 +65,7 @@ class CoursesApiClient extends ApiClient {
         try {
             const response = await this.get<
                 Omit<Course, 'lessons' | 'authorId'> & {
-                    lessons: Pick<Lesson, 'title' | 'slug'>[];
+                    lessons: Pick<Lesson, 'title' | 'slug' | 'id' | 'videoLength'>[];
                     authorUsername: string;
                     authorName: string;
                 }
@@ -239,10 +239,10 @@ class CoursesApiClient extends ApiClient {
         }
     }
 
-    async getUserCourseProgress(courseId: string): Promise<CourseProgress | null> {
+    async getUserCourseProgress(courseId: string): Promise<UserSpecificCourseProgressDetails | null> {
         const endpoint = `/courses/${courseId}/progress`;
         try {
-            const response = await this.get<CourseProgress>(endpoint);
+            const response = await this.get<UserSpecificCourseProgressDetails>(endpoint);
             return response.data;
         } catch (error: unknown) {
             if (axios.isAxiosError(error) && error.response?.status === 404) {
