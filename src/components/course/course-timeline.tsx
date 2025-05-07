@@ -82,7 +82,6 @@ const CourseTimeline = ({
     }, [courseFromServer.lessons, hasAccess, progressData]);
 
     const unlockedModulesCount = useMemo(() => {
-        if (hasAccess) return courseFromServer.lessons.length;
         return Math.min(UNLOCKED_INITIALLY, courseFromServer.lessons.length);
     }, [hasAccess, courseFromServer.lessons.length]);
 
@@ -319,20 +318,20 @@ const CourseTimeline = ({
 
                     {hiddenModulesCount > 0 && (
                         <div className="relative pl-10 mt-3 md:mt-4">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 h-5 w-5 rounded-full border-2 border-muted-foreground/30 bg-muted"></div>
+                            <div className="absolute left-4 top-1.5 -translate-x-1/2 z-10 h-5 w-5 rounded-full border-2 border-muted-foreground/30 bg-muted"></div>
                             <Button
                                 variant="outline"
-                                className="w-full border-dashed text-muted-foreground hover:text-foreground hover:border-primary/50"
+                                className="w-full border-dashed text-muted-foreground hover:bg-primary/10 hover:text-foreground hover:border-primary/50"
                                 onClick={() => setShowAllModules(!showAllModules)}
                                 size="sm"
                             >
                                 {showAllModules ? (
                                     <>
-                                        <ChevronUp className="mr-2 h-4 w-4" /> Свернуть
+                                        <ChevronUp className="h-4 w-4" /> Свернуть
                                     </>
                                 ) : (
                                     <>
-                                        <ChevronDown className="mr-2 h-4 w-4" /> Показать еще {hiddenModulesCount}
+                                        <ChevronDown className="h-4 w-4" /> Показать еще {hiddenModulesCount}
                                     </>
                                 )}
                             </Button>
