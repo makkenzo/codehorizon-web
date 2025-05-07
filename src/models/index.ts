@@ -23,6 +23,7 @@ export type Profile = {
     lastName: string | null;
     location: string | null;
     website: string | null;
+    signatureUrl: string | null;
 };
 
 export type CourseProgress = {
