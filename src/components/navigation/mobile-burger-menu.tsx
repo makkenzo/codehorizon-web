@@ -1,16 +1,21 @@
-import { Fragment, useState } from 'react';
+import React, { isValidElement, useEffect, useMemo, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Award, Bell, Book, ChevronUp, Heart, Home, Menu, Settings, ShoppingBag, X } from 'lucide-react';
+import { Award, Bell, Book, ChevronUp, Heart, Home, Menu, Settings, ShieldQuestion, X } from 'lucide-react';
 import { RiProfileFill, RiProfileLine, RiProgress5Line } from 'react-icons/ri';
 
 import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
 import { Profile } from '@/models';
+import { useAuth } from '@/providers/auth-provider';
+import { mentorshipApiClient } from '@/server/mentorship';
+import { useUserStore } from '@/stores/user/user-store-provider';
 import { NavItem } from '@/types';
 
+import MentorshipApplicationModal from '../mentorship/mentorship-application-modal';
 import { Button } from '../ui/button';
+import { Dialog, DialogTrigger } from '../ui/dialog';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
 
 interface MobileBurgerMenuProps {
@@ -18,11 +23,58 @@ interface MobileBurgerMenuProps {
 }
 
 const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
-    const [open, setOpen] = useState(false);
-    const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({});
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [expandedSubmenus, setExpandedSubmenus] = useState<{ [key: string]: boolean }>({});
+
+    const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
+    const [canApplyForMentorship, setCanApplyForMentorship] = useState(false);
+    const [isCheckingMentorshipStatus, setIsCheckingMentorshipStatus] = useState(true);
+
+    const { user } = useUserStore((state) => state);
+    const { isAuthenticated, isPending: isAuthPending } = useAuth();
+
+    const isMentor = useMemo(() => user?.roles?.includes('ROLE_MENTOR') || user?.roles?.includes('MENTOR'), [user]);
+    const isAdmin = useMemo(() => user?.roles?.includes('ADMIN') || user?.roles?.includes('ROLE_ADMIN'), [user]);
+
+    useEffect(() => {
+        const checkMentorshipPossibility = async () => {
+            if (isAuthenticated && user && !isMentor && !isAdmin) {
+                setIsCheckingMentorshipStatus(true);
+                try {
+                    const hasActive = await mentorshipApiClient.hasActiveApplication();
+                    setCanApplyForMentorship(!hasActive);
+                } catch {
+                    setCanApplyForMentorship(true);
+                } finally {
+                    setIsCheckingMentorshipStatus(false);
+                }
+            } else {
+                setCanApplyForMentorship(false);
+                setIsCheckingMentorshipStatus(false);
+            }
+        };
+        if (!isAuthPending) {
+            checkMentorshipPossibility();
+        }
+    }, [isAuthenticated, user, isMentor, isAdmin, isAuthPending]);
+
+    const handleApplicationSuccess = () => {
+        setIsApplicationModalOpen(false);
+        setCanApplyForMentorship(false);
+        setIsSheetOpen(false);
+    };
 
     const toggleExpand = (label: string) => {
-        setExpanded((prev) => ({ ...prev, [label]: !prev[label] }));
+        setExpandedSubmenus((prev) => ({ ...prev, [label]: !prev[label] }));
+    };
+
+    const handleBecomeMentorClick = () => {
+        setIsApplicationModalOpen(true);
+    };
+
+    const closeSheetAndReset = () => {
+        setIsSheetOpen(false);
+        setExpandedSubmenus({});
     };
 
     const commonNavItems: NavItem[] = [
@@ -37,12 +89,6 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
             label: 'Каталог',
             icon: <Book />,
             href: '/courses',
-        },
-        {
-            id: '2c5bf575-c80b-571f-a0e5-3a5a53e3e28a',
-            href: '/',
-            label: 'Корзина',
-            icon: <ShoppingBag />,
         },
         {
             id: '53ca9885-ba7a-5957-a305-7697cd654dda',
@@ -108,49 +154,67 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
               },
           ];
 
-    const allNavItems = [...commonNavItems.slice(0, 2), ...authNavItems, ...commonNavItems.slice(2)];
+    const becomeMentorItem: NavItem | null =
+        isAuthenticated && user && !isMentor && !isAdmin && canApplyForMentorship && !isCheckingMentorshipStatus
+            ? {
+                  id: 'become-mentor-mobile',
+                  label: 'Стать ментором',
+                  icon: <ShieldQuestion />,
+              }
+            : null;
+
+    const allNavItems = [
+        ...commonNavItems.slice(0, 2),
+        ...(becomeMentorItem ? [becomeMentorItem] : []),
+        ...authNavItems,
+        ...commonNavItems.slice(2),
+    ].filter(Boolean) as NavItem[];
 
     return (
-        <Sheet
-            open={open}
-            onOpenChange={(open) => {
-                setOpen(open);
-                setExpanded({});
-            }}
-        >
-            <SheetTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="px-2 lg:hidden block text-primary !outline-0 !ring-0 !border-0"
-                >
-                    {open ? <X size={24} /> : <Menu size={24} />}
-                </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-full p-4">
-                <SheetTitle>Меню</SheetTitle>
-
-                <nav className="flex flex-col gap-4">
-                    {allNavItems.map((item, index) => (
-                        <Fragment key={item.id}>
+        <>
+            <Sheet
+                open={isSheetOpen}
+                onOpenChange={(open) => {
+                    setIsSheetOpen(open);
+                    if (!open) setExpandedSubmenus({});
+                }}
+            >
+                <SheetTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="px-2 lg:hidden block text-primary !outline-0 !ring-0 !border-0"
+                        aria-label="Открыть меню"
+                    >
+                        {isSheetOpen ? <X size={24} /> : <Menu size={24} />}
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-full p-4">
+                    <SheetTitle>Меню</SheetTitle>
+                    <nav className="flex flex-col gap-4 mt-4">
+                        {allNavItems.map((item, index) => (
                             <motion.div
-                                key={item.id}
+                                key={item.id + '-motion'}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
                                 transition={{
-                                    delay: (index + 1) * 0.1,
-                                    duration: 0.3,
+                                    delay: (index + 1) * 0.05,
+                                    duration: 0.2,
                                 }}
                             >
-                                {item.href ? (
-                                    <Link
-                                        href={item.href}
-                                        onClick={() => {
-                                            setOpen(false);
-                                            setExpanded({});
-                                        }}
+                                {item.id === 'become-mentor-mobile' ? (
+                                    <Button
+                                        variant={item.variant || 'ghost'}
+                                        className={`w-full justify-start ${item.className}`}
+                                        size="lg"
+                                        onClick={handleBecomeMentorClick}
                                     >
+                                        {item.icon}
+                                        {item.label}
+                                    </Button>
+                                ) : item.href ? (
+                                    <Link href={item.href} onClick={closeSheetAndReset}>
                                         <Button
                                             variant={item.variant || 'ghost'}
                                             className={`w-full justify-start ${item.className}`}
@@ -177,69 +241,77 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                                                     size={16}
                                                     className={cn(
                                                         'transition-transform duration-300',
-                                                        expanded[item.label] && 'rotate-180'
+                                                        expandedSubmenus[item.label] && 'rotate-180'
                                                     )}
                                                 />
                                             )}
                                         </div>
                                     </Button>
                                 )}
-                            </motion.div>
-                            <AnimatePresence>
-                                {item.subItems && expanded[item.label] && (
-                                    <motion.div
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
-                                        exit={{ opacity: 0, height: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                        className="flex flex-col gap-4"
-                                    >
-                                        {item.subItems.map((subItem, subIndex) => (
-                                            <motion.div
-                                                key={subItem.id}
-                                                initial={{
-                                                    opacity: 0,
-                                                    x: -20,
-                                                }}
-                                                animate={{
-                                                    opacity: 1,
-                                                    x: 0,
-                                                }}
-                                                exit={{
-                                                    opacity: 0,
-                                                    x: -20,
-                                                }}
-                                                transition={{
-                                                    delay: subIndex * 0.1,
-                                                    duration: 0.3,
-                                                }}
-                                            >
-                                                <Link
-                                                    href={subItem.href || '#'}
-                                                    onClick={() => {
-                                                        setOpen(false);
-                                                        setExpanded({});
-                                                    }}
+
+                                <AnimatePresence>
+                                    {item.subItems && expandedSubmenus[item.label] && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                            className="flex flex-col gap-2 pl-4 mt-1"
+                                        >
+                                            {item.subItems.map((subItem, subIndex) => (
+                                                <motion.div
+                                                    key={subItem.id}
+                                                    initial={{ opacity: 0, x: -20 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    exit={{ opacity: 0, x: -20 }}
+                                                    transition={{ delay: subIndex * 0.05, duration: 0.2 }}
                                                 >
-                                                    <Button
-                                                        variant={subItem.variant || 'ghost'}
-                                                        className={`w-full justify-start ${subItem.className}`}
-                                                        size="lg"
-                                                    >
-                                                        - {subItem.icon}
-                                                        {subItem.label}
-                                                    </Button>
-                                                </Link>
-                                            </motion.div>
-                                        ))}
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </Fragment>
-                    ))}
-                </nav>
-            </SheetContent>
-        </Sheet>
+                                                    <Link href={subItem.href || '#'} onClick={closeSheetAndReset}>
+                                                        <Button
+                                                            variant={subItem.variant || 'ghost'}
+                                                            className={`w-full justify-start ${subItem.className}`}
+                                                            size="lg"
+                                                        >
+                                                            {subItem.icon &&
+                                                            isValidElement(subItem.icon) &&
+                                                            React.isValidElement<{ className?: string }>(subItem.icon)
+                                                                ? React.cloneElement(
+                                                                      subItem.icon as React.ReactElement<{
+                                                                          className?: string;
+                                                                      }>,
+                                                                      {
+                                                                          className: cn(
+                                                                              subItem.icon.props.className,
+                                                                              'mr-2 h-4 w-4 opacity-70'
+                                                                          ),
+                                                                      }
+                                                                  )
+                                                                : subItem.icon}
+                                                            {subItem.label}
+                                                        </Button>
+                                                    </Link>
+                                                </motion.div>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </motion.div>
+                        ))}
+                    </nav>
+                </SheetContent>
+            </Sheet>
+
+            {/* Dialog для модального окна теперь не оборачивает Sheet */}
+            <Dialog open={isApplicationModalOpen} onOpenChange={setIsApplicationModalOpen}>
+                {/* Мы не используем DialogTrigger здесь, так как открываем программно */}
+                {isApplicationModalOpen && (
+                    <MentorshipApplicationModal
+                        onClose={() => setIsApplicationModalOpen(false)}
+                        onSuccess={handleApplicationSuccess}
+                    />
+                )}
+            </Dialog>
+        </>
     );
 };
 

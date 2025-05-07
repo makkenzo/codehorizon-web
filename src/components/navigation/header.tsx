@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { motion } from 'framer-motion';
+import { ShieldQuestion } from 'lucide-react';
 import { FaUserSecret } from 'react-icons/fa6';
 import { RiProgress5Line } from 'react-icons/ri';
 
@@ -25,13 +26,16 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import AuthApiClient from '@/server/auth';
 import CoursesApiClient from '@/server/courses';
+import { mentorshipApiClient } from '@/server/mentorship';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
 
 import CatalogDropdown from '../catalog-dropdown';
 import CatalogFiltersMobile from '../catalog/filters-mobile';
+import MentorshipApplicationModal from '../mentorship/mentorship-application-modal';
 import GlobalSearch from '../reusable/global-search';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Dialog, DialogTrigger } from '../ui/dialog';
 import { Skeleton } from '../ui/skeleton';
 import MobileBurgerMenu from './mobile-burger-menu';
 
@@ -44,7 +48,14 @@ const Header = () => {
 
     const { profile, clearProfile } = useProfileStore((state) => state);
 
-    const { user, clearUser } = useUserStore((state) => state);
+    const { user, clearUser, setUser } = useUserStore((state) => state);
+
+    const [canApplyForMentorship, setCanApplyForMentorship] = useState(false);
+    const [isCheckingMentorshipStatus, setIsCheckingMentorshipStatus] = useState(true);
+    const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
+
+    const isMentor = useMemo(() => user?.roles?.includes('ROLE_MENTOR') || user?.roles?.includes('MENTOR'), [user]);
+    const isAdmin = useMemo(() => user?.roles?.includes('ADMIN') || user?.roles?.includes('ROLE_ADMIN'), [user]);
 
     useEffect(() => {
         const apiClient = new CoursesApiClient();
@@ -62,6 +73,34 @@ const Header = () => {
         };
         fetchCategories();
     }, []);
+
+    useEffect(() => {
+        const checkMentorshipPossibility = async () => {
+            if (isAuthenticated && user && !isMentor && !isAdmin) {
+                setIsCheckingMentorshipStatus(true);
+                try {
+                    const hasActive = await mentorshipApiClient.hasActiveApplication();
+                    setCanApplyForMentorship(!hasActive);
+                } catch {
+                    setCanApplyForMentorship(true);
+                } finally {
+                    setIsCheckingMentorshipStatus(false);
+                }
+            } else {
+                setCanApplyForMentorship(false);
+                setIsCheckingMentorshipStatus(false);
+            }
+        };
+
+        if (!isPending) {
+            checkMentorshipPossibility();
+        }
+    }, [isAuthenticated, user, isMentor, isAdmin, isPending]);
+
+    const handleApplicationSuccess = () => {
+        setIsApplicationModalOpen(false);
+        setCanApplyForMentorship(false);
+    };
 
     return (
         <div className={cn('w-full', pathname !== '/' && 'bg-white')}>
@@ -99,19 +138,29 @@ const Header = () => {
                             </div>
                             <CatalogDropdown categories={categories} isLoading={isLoadingCategories} />
                         </div>
-                        <GlobalSearch className="pt-1 lg:block hidden" />
-                        <div className="flex items-center gap-4 w-full justify-end">
-                            {isAuthenticated &&
-                                !(user?.roles?.includes('MENTOR') || user?.roles?.includes('ROLE_MENTOR')) && (
-                                    <Button
-                                        variant="link"
-                                        size="link"
-                                        className="text-foreground lg:block hidden translate-y-0.5"
-                                        onClick={() => alert('Чтобы стать ментором, обратитесь к администрации.')}
-                                    >
-                                        Стать ментором
-                                    </Button>
-                                )}
+                        <GlobalSearch className="pt-1 lg:block hidden mx-4 flex-grow max-w-md" />
+
+                        <div className="flex items-center gap-4 w-full justify-end ml-auto">
+                            {isAuthenticated && canApplyForMentorship && !isCheckingMentorshipStatus && (
+                                <Dialog open={isApplicationModalOpen} onOpenChange={setIsApplicationModalOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-foreground lg:flex hidden items-center gap-1.5 hover:bg-primary/10 hover:text-primary"
+                                        >
+                                            <ShieldQuestion className="h-4 w-4" />
+                                            Стать ментором
+                                        </Button>
+                                    </DialogTrigger>
+                                    {isApplicationModalOpen && (
+                                        <MentorshipApplicationModal
+                                            onClose={() => setIsApplicationModalOpen(false)}
+                                            onSuccess={handleApplicationSuccess}
+                                        />
+                                    )}
+                                </Dialog>
+                            )}
                             {pathname.includes('courses') ? <CatalogFiltersMobile /> : null}
                             {isAuthenticated ? (
                                 <DropdownMenu>
