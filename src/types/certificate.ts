@@ -3,4 +3,6 @@ export interface CertificateDTO {
     uniqueCertificateId: string;
     courseTitle: string;
     completionDate: string;
+    instructorName?: string;
+    category?: string;
 }
