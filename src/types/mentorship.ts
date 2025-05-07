@@ -19,4 +19,5 @@ export interface MentorshipApplication {
     appliedAt: string;
     reviewedAt?: string;
     reviewedBy?: string;
+    userRegisteredAt?: string;
 }

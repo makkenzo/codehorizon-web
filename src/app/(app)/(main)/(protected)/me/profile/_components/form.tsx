@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { isAxiosError } from 'axios';
 import { motion } from 'framer-motion';
-import { Eye, Loader2, Signature, Trash2 } from 'lucide-react';
+import { Eye, Hourglass, Loader2, Shield, ShieldAlert, ShieldCheck, Signature, Trash2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { FaUserSecret } from 'react-icons/fa6';
 import { MdAddAPhoto } from 'react-icons/md';
@@ -21,10 +22,13 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { Profile } from '@/models';
+import { mentorshipApiClient } from '@/server/mentorship';
 import ProfileApiClient from '@/server/profile';
 import S3ApiClient from '@/server/s3';
 import { useUserStore } from '@/stores/user/user-store-provider';
+import { ApplicationStatus, MentorshipApplication } from '@/types/mentorship';
 
 const profileSchema = z.object({
     avatarUrl: z.string().nullable(),
@@ -65,11 +69,20 @@ const ProfileForm = ({}) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isUploadingSignatureFile, setIsUploadingSignatureFile] = useState(false);
     const [signatureSource, setSignatureSource] = useState<'draw' | 'upload'>('draw');
-    const signatureCanvasRef = useRef<{ clear: () => void; getDataURL: () => string }>(null);
+
+    const [applicationStatus, setApplicationStatus] = useState<ApplicationStatus | null>(null);
+    const [applicationDetails, setApplicationDetails] = useState<MentorshipApplication | null>(null);
+    const [isCheckingApplication, setIsCheckingApplication] = useState(true);
+
+    const [applicationReason, setApplicationReason] = useState('');
+    const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
+    const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
 
     const router = useRouter();
-    const { user } = useUserStore((state) => state);
-    const isMentor = user?.roles?.includes('ROLE_MENTOR') || user?.roles?.includes('MENTOR');
+    const { user, setUser } = useUserStore((state) => state);
+
+    const isMentor = useMemo(() => user?.roles?.includes('ROLE_MENTOR') || user?.roles?.includes('MENTOR'), [user]);
+    const isAdmin = useMemo(() => user?.roles?.includes('ADMIN') || user?.roles?.includes('ROLE_ADMIN'), [user]);
 
     const form = useForm<z.infer<typeof profileSchema>>({
         resolver: zodResolver(profileSchema),
@@ -111,8 +124,55 @@ const ProfileForm = ({}) => {
             }
         };
 
+        const checkApplication = async () => {
+            if (user && !isMentor) {
+                setIsCheckingApplication(true);
+                try {
+                    const app = await mentorshipApiClient.getMyApplication();
+                    setApplicationDetails(app);
+                    setApplicationStatus(app ? app.status : null);
+                } catch {
+                    setApplicationStatus(null);
+                    setApplicationDetails(null);
+                } finally {
+                    setIsCheckingApplication(false);
+                }
+            } else {
+                setApplicationStatus(null);
+                setApplicationDetails(null);
+                setIsCheckingApplication(false);
+            }
+        };
+        if (user) {
+            checkApplication();
+        }
+
         fetchData();
-    }, [form]);
+    }, [user, isMentor]);
+
+    const handleApplyForMentorship = async () => {
+        setIsSubmittingApplication(true);
+        try {
+            const newApplication = await mentorshipApiClient.applyForMentorship({ reason: applicationReason });
+            if (newApplication) {
+                toast.success('Заявка на менторство успешно подана!');
+                setApplicationDetails(newApplication);
+                setApplicationStatus(newApplication.status);
+                setIsApplicationModalOpen(false);
+            }
+        } catch (error: unknown) {
+            if (isAxiosError(error) && error.response?.data?.message) {
+                toast.error(`Ошибка: ${error.response.data.message}`);
+            } else {
+                toast.error('Не удалось подать заявку. Попробуйте позже.');
+            }
+            console.error('Mentorship application error:', error);
+        } finally {
+            setIsSubmittingApplication(false);
+        }
+    };
+
+    const openMentorshipModal = () => setIsApplicationModalOpen(true);
 
     const onSubmit = async (values: z.infer<typeof profileSchema>) => {
         setPending(true);
@@ -282,98 +342,169 @@ const ProfileForm = ({}) => {
                             )}
                         />
                     ))}
-                    {isMentor && (
-                        <motion.div
-                            variants={formVariants}
-                            custom={Object.keys(fields).length + 1}
-                            className="space-y-3"
-                        >
-                            <FormLabel className="flex items-center gap-2 text-base">
-                                <Signature className="size-5" />
-                                Ваша подпись (для сертификатов)
-                            </FormLabel>
-                            <Tabs
-                                value={signatureSource}
-                                onValueChange={(value) => setSignatureSource(value as 'draw' | 'upload')}
-                                className="w-full"
+
+                    <motion.div variants={formVariants} className="mt-8 pt-6 border-t">
+                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <Shield className="size-5 text-primary" />
+                            Статус ментора
+                        </h3>
+
+                        {isCheckingApplication && !isMentor && (
+                            <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Проверяем статус вашей заявки...
+                            </div>
+                        )}
+
+                        {!isCheckingApplication && isMentor && (
+                            <div className="flex items-center gap-2 text-sm mb-4 text-green-600 dark:text-green-400 p-3 bg-green-500/10 rounded-md">
+                                <ShieldCheck className="h-5 w-5" />
+                                Вы являетесь ментором.
+                            </div>
+                        )}
+
+                        {!isCheckingApplication && !isMentor && applicationStatus === ApplicationStatus.PENDING && (
+                            <div className="flex items-center gap-2 text-sm mb-4 text-blue-600 dark:text-blue-400 p-3 bg-blue-500/10 rounded-md">
+                                <Hourglass className="h-5 w-5" />
+                                Ваша заявка на менторство находится на рассмотрении.
+                            </div>
+                        )}
+
+                        {!isCheckingApplication && !isMentor && applicationStatus === ApplicationStatus.REJECTED && (
+                            <div className="flex flex-col gap-2 text-sm text-red-600 mb-4 dark:text-red-400 p-3 bg-red-500/10 rounded-md">
+                                <div className="flex items-center gap-2">
+                                    <ShieldAlert className="h-5 w-5" />
+                                    Ваша заявка на менторство была отклонена.
+                                </div>
+                                {applicationDetails?.rejectionReason && (
+                                    <p className="text-xs pl-7">Причина: {applicationDetails.rejectionReason}</p>
+                                )}
+                            </div>
+                        )}
+
+                        {!isCheckingApplication && !isMentor && !applicationStatus && (
+                            <>
+                                <p className="text-sm text-muted-foreground mb-4">
+                                    Хотите делиться своими знаниями и создавать курсы? Подайте заявку!
+                                </p>
+
+                                <Textarea
+                                    placeholder="Расскажите, почему вы хотите стать ментором (необязательно)"
+                                    value={applicationReason}
+                                    onChange={(e) => setApplicationReason(e.target.value)}
+                                    className="mb-3"
+                                    rows={3}
+                                    disabled={isSubmittingApplication}
+                                />
+                                <Button
+                                    onClick={handleApplyForMentorship}
+                                    isLoading={isSubmittingApplication}
+                                    disabled={isSubmittingApplication}
+                                >
+                                    Подать заявку на менторство
+                                </Button>
+                            </>
+                        )}
+
+                        {isMentor && (
+                            <motion.div
+                                variants={formVariants}
+                                custom={Object.keys(fields).length + 1}
+                                className="space-y-3"
                             >
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="draw">Нарисовать</TabsTrigger>
-                                    <TabsTrigger value="upload">Загрузить файл</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="draw" className="mt-4">
-                                    <SignatureCanvas
-                                        onSave={handleSaveSignatureFromCanvas}
-                                        initialDataUrl={
-                                            currentSignatureUrl?.startsWith('data:image/') ? currentSignatureUrl : null
-                                        }
-                                        disabled={pending}
-                                        width={450}
-                                        height={180}
-                                    />
-                                </TabsContent>
-                                <TabsContent value="upload" className="mt-4 space-y-2">
-                                    <FormField
-                                        control={form.control}
-                                        name="signatureUrl"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormControl>
-                                                    <>
-                                                        <div className="flex items-center gap-2">
-                                                            <Input
-                                                                id="signature-file-upload"
-                                                                type="file"
-                                                                accept={ALLOWED_TYPES.join(', ')}
-                                                                onChange={(e) => {
-                                                                    handleFileChange(e, 'signatureUrl', 'signatures');
-                                                                }}
-                                                                disabled={pending || isUploadingSignatureFile}
-                                                                className="flex-1"
-                                                            />
-                                                            {isUploadingSignatureFile && (
-                                                                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                                                            )}
-                                                        </div>
-                                                        {field.value && !isUploadingSignatureFile && (
-                                                            <div className="mt-2 p-2 border rounded-md bg-muted/50">
-                                                                <p className="text-xs text-muted-foreground mb-1">
-                                                                    Текущая подпись (файл):
-                                                                </p>
-                                                                <Image
-                                                                    src={field.value}
-                                                                    alt="Предпросмотр подписи"
-                                                                    width={150}
-                                                                    height={50}
-                                                                    className="rounded border bg-white object-contain"
-                                                                />
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="link"
-                                                                    size="sm"
-                                                                    className="text-xs text-destructive p-0 h-auto mt-1"
-                                                                    onClick={() => field.onChange(null)}
+                                <FormLabel className="flex items-center gap-2 text-base">
+                                    <Signature className="size-5" />
+                                    Ваша подпись (для сертификатов)
+                                </FormLabel>
+                                <Tabs
+                                    value={signatureSource}
+                                    onValueChange={(value) => setSignatureSource(value as 'draw' | 'upload')}
+                                    className="w-full"
+                                >
+                                    <TabsList className="grid w-full grid-cols-2">
+                                        <TabsTrigger value="draw">Нарисовать</TabsTrigger>
+                                        <TabsTrigger value="upload">Загрузить файл</TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="draw" className="mt-4">
+                                        <SignatureCanvas
+                                            onSave={handleSaveSignatureFromCanvas}
+                                            initialDataUrl={
+                                                currentSignatureUrl?.startsWith('data:image/')
+                                                    ? currentSignatureUrl
+                                                    : null
+                                            }
+                                            disabled={pending}
+                                            width={450}
+                                            height={180}
+                                        />
+                                    </TabsContent>
+                                    <TabsContent value="upload" className="mt-4 space-y-2">
+                                        <FormField
+                                            control={form.control}
+                                            name="signatureUrl"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormControl>
+                                                        <>
+                                                            <div className="flex items-center gap-2">
+                                                                <Input
+                                                                    id="signature-file-upload"
+                                                                    type="file"
+                                                                    accept={ALLOWED_TYPES.join(', ')}
+                                                                    onChange={(e) => {
+                                                                        handleFileChange(
+                                                                            e,
+                                                                            'signatureUrl',
+                                                                            'signatures'
+                                                                        );
+                                                                    }}
                                                                     disabled={pending || isUploadingSignatureFile}
-                                                                >
-                                                                    <Trash2 className="mr-1 h-3 w-3" />
-                                                                    Удалить подпись
-                                                                </Button>
+                                                                    className="flex-1"
+                                                                />
+                                                                {isUploadingSignatureFile && (
+                                                                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                                                                )}
                                                             </div>
-                                                        )}
-                                                    </>
-                                                </FormControl>
-                                                <FormDescription>
-                                                    Загрузите изображение вашей подписи (прозрачный фон рекомендуется,
-                                                    .png). Макс. размер 1MB.
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </TabsContent>
-                            </Tabs>
-                        </motion.div>
-                    )}
+                                                            {field.value && !isUploadingSignatureFile && (
+                                                                <div className="mt-2 p-2 border rounded-md bg-muted/50">
+                                                                    <p className="text-xs text-muted-foreground mb-1">
+                                                                        Текущая подпись (файл):
+                                                                    </p>
+                                                                    <Image
+                                                                        src={field.value}
+                                                                        alt="Предпросмотр подписи"
+                                                                        width={150}
+                                                                        height={50}
+                                                                        className="rounded border bg-white object-contain"
+                                                                    />
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="link"
+                                                                        size="sm"
+                                                                        className="text-xs text-destructive p-0 h-auto mt-1"
+                                                                        onClick={() => field.onChange(null)}
+                                                                        disabled={pending || isUploadingSignatureFile}
+                                                                    >
+                                                                        <Trash2 className="mr-1 h-3 w-3" />
+                                                                        Удалить подпись
+                                                                    </Button>
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                        Загрузите изображение вашей подписи (прозрачный фон
+                                                        рекомендуется, .png). Макс. размер 1MB.
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </TabsContent>
+                                </Tabs>
+                            </motion.div>
+                        )}
+                    </motion.div>
                     <motion.div variants={formVariants} custom={Object.keys(fields).length + 1}>
                         <Button type="submit" className="max-w-[179px] w-full mx-auto mt-10" isLoading={pending}>
                             {pending ? 'Загрузка...' : 'Сохранить'}

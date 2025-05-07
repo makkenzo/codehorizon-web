@@ -2,7 +2,18 @@
 
 import { ReactNode, useEffect } from 'react';
 
-import { BookOpen, Home, LayoutDashboard, Loader2, LogOut, Menu, Package2, Settings, Users } from 'lucide-react';
+import {
+    BookOpen,
+    Home,
+    LayoutDashboard,
+    Loader2,
+    LogOut,
+    Menu,
+    Package2,
+    Settings,
+    ShieldAlert,
+    Users,
+} from 'lucide-react';
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -67,7 +78,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         { href: '/admin', label: 'Статистика', icon: LayoutDashboard },
         { href: '/admin/users', label: 'Пользователи', icon: Users },
         { href: '/admin/courses', label: 'Курсы', icon: BookOpen },
-        { href: '/admin/settings', label: 'Настройки', icon: Settings, disabled: true },
+        { href: '/admin/mentorship-applications', label: 'Заявки на менторство', icon: ShieldAlert },
     ];
 
     const filteredNavLinks = baseNavLinks.filter((link) => {
@@ -100,14 +111,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 return (
                     <Link
                         key={link.href}
-                        href={link.disabled ? '#' : link.href}
+                        href={link.href}
                         className={cn(
                             'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                            isActive && 'bg-muted/20 text-primary',
-                            link.disabled && 'cursor-not-allowed opacity-50'
+                            isActive && 'bg-muted/20 text-primary'
                         )}
-                        aria-disabled={link.disabled}
-                        onClick={(e) => link.disabled && e.preventDefault()}
                     >
                         <link.icon className="h-4 w-4" />
                         {link.label}
