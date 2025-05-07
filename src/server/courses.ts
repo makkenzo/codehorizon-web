@@ -216,10 +216,10 @@ class CoursesApiClient extends ApiClient {
         }
     }
 
-    async markLessonAsComplete(courseId: string, lessonId: string): Promise<CourseProgress | null> {
+    async markLessonAsComplete(courseId: string, lessonId: string): Promise<UserSpecificCourseProgressDetails | null> {
         const endpoint = `/courses/${courseId}/lessons/${lessonId}/complete`;
         try {
-            const response = await this.post<CourseProgress>(endpoint);
+            const response = await this.post<UserSpecificCourseProgressDetails>(endpoint);
             return response.data;
         } catch (error: unknown) {
             let errorMsg = 'Не удалось отметить урок в курсе как пройденный';

@@ -86,8 +86,15 @@ const CourseTimeline = ({
     }, [hasAccess, courseFromServer.lessons.length]);
 
     const totalLessons = modules.reduce((total, module) => total + module.lessons, 0);
-    const displayedModules = showAllModules ? modules : modules.slice(0, Math.max(6, unlockedModulesCount));
-    const hiddenModulesCount = modules.length - displayedModules.length;
+    const initialDisplayLimit = useMemo(() => {
+        if (hasAccess === null) {
+            return Math.min(UNLOCKED_INITIALLY, courseFromServer.lessons.length);
+        }
+        return hasAccess ? Math.max(6, unlockedModulesCount) : unlockedModulesCount;
+    }, [hasAccess, unlockedModulesCount, courseFromServer.lessons.length]);
+
+    const canToggleExpansion = modules.length > initialDisplayLimit;
+    const displayedModules = showAllModules ? modules : modules.slice(0, initialDisplayLimit);
 
     const coursesApiClient = new CoursesApiClient();
 
@@ -316,9 +323,13 @@ const CourseTimeline = ({
                         );
                     })}
 
-                    {hiddenModulesCount > 0 && (
+                    {canToggleExpansion && (
                         <div className="relative pl-10 mt-3 md:mt-4">
-                            <div className="absolute left-4 top-1.5 -translate-x-1/2 z-10 h-5 w-5 rounded-full border-2 border-muted-foreground/30 bg-muted"></div>
+                            <div
+                                className={cn(
+                                    'absolute left-4 top-1.5 -translate-x-1/2 z-10 h-5 w-5 rounded-full border-2 border-muted-foreground/30 bg-muted'
+                                )}
+                            />
                             <Button
                                 variant="outline"
                                 className="w-full border-dashed text-muted-foreground hover:bg-primary/10 hover:text-foreground hover:border-primary/50"
@@ -327,11 +338,12 @@ const CourseTimeline = ({
                             >
                                 {showAllModules ? (
                                     <>
-                                        <ChevronUp className="h-4 w-4" /> Свернуть
+                                        <ChevronUp className="mr-1 h-4 w-4" /> Свернуть
                                     </>
                                 ) : (
                                     <>
-                                        <ChevronDown className="h-4 w-4" /> Показать еще {hiddenModulesCount}
+                                        <ChevronDown className="mr-1 h-4 w-4" /> Показать еще{' '}
+                                        {modules.length - initialDisplayLimit}
                                     </>
                                 )}
                             </Button>
