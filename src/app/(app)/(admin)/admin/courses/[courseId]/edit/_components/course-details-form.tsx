@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { adminApiClient } from '@/server/admin-api-client';
 import S3ApiClient from '@/server/s3';
+import { useUserStore } from '@/stores/user/user-store-provider';
 import { CourseDifficultyLevels } from '@/types';
 import { AdminCourseDetailDTO, AdminCreateUpdateCourseRequestDTO, AdminUser } from '@/types/admin';
 
@@ -96,6 +97,15 @@ const defaultValues: Partial<CourseDetailsFormData> = {
 };
 
 export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }: CourseDetailsFormProps) {
+    const { user } = useUserStore((state) => state);
+    const isAdmin = user?.roles?.includes('ADMIN') || user?.roles?.includes('ROLE_ADMIN');
+    const isCurrentAuthorAndMentorOnly =
+        course &&
+        user &&
+        course.authorId === user.id &&
+        (user.roles?.includes('MENTOR') || user.roles?.includes('ROLE_MENTOR')) &&
+        !isAdmin;
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [isUploadingVideo, setIsUploadingVideo] = useState(false);
@@ -122,7 +132,7 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
                     errorMsg = error.message;
                 }
 
-                toast.error(`Could not load authors list: ${errorMsg}`);
+                toast.error(`Не удалось загрузить список авторов: ${errorMsg}`);
             } finally {
                 setIsLoadingAuthors(false);
             }
@@ -211,24 +221,24 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
 
             if (isEditing && course) {
                 resultCourse = await adminApiClient.updateCourseAdmin(course.id, requestData);
-                toast.success(`Course "${values.title}" updated.`);
+                toast.success(`Курс "${values.title}" обновлен.`);
             } else {
                 resultCourse = await adminApiClient.createCourseAdmin(requestData);
-                toast.success(`Course "${values.title}" created.`);
+                toast.success(`Курс "${values.title}" создан.`);
             }
             onSuccess(resultCourse);
         } catch (error: unknown) {
-            console.error(`Error ${isEditing ? 'updating' : 'creating'} course:`, error);
+            console.error(`ОШибка ${isEditing ? 'обновления' : 'создания'} курса:`, error);
 
-            let errorMsg = 'Unknown error';
+            let errorMsg = 'Неизвестная ошибка';
 
             if (isAxiosError(error)) {
-                errorMsg = error?.response?.data?.message || error.message || 'Unknown error';
+                errorMsg = error?.response?.data?.message || error.message || 'Неизвестная ошибка';
             } else if (error instanceof Error) {
                 errorMsg = error.message;
             }
 
-            toast.error(`Failed to ${isEditing ? 'save' : 'create'} course: ${errorMsg}`);
+            toast.error(`Не удалось ${isEditing ? 'сохранить' : 'создать'} курс: ${errorMsg}`);
         } finally {
             setIsSubmitting(false);
         }
@@ -246,13 +256,15 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
             const response = await s3ApiClient.uploadFile(file, 'course-previews');
             if (response?.url) {
                 form.setValue(fieldName, response.url);
-                toast.success(`${fileType === 'image' ? 'Image' : 'Video'} uploaded successfully!`);
+                toast.success(
+                    `${fileType === 'image' ? 'Картинка' : 'Видео'} успешно ${fileType === 'image' ? 'загружена' : 'загружено'}!`
+                );
             } else {
                 throw new Error('Upload failed, URL not received.');
             }
         } catch (error) {
             console.error(`Error uploading ${fileType}:`, error);
-            toast.error(`Failed to upload ${fileType}.`);
+            toast.error(`Не удалось загрузить ${fileType}.`);
             form.setValue(fieldName, course?.[fieldName] ?? null);
         } finally {
             setLoading(false);
@@ -444,8 +456,13 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
                                 <FormLabel>Автор *</FormLabel>
                                 <Select
                                     onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                    disabled={!!forcedAuthorId || isSubmitting || isLoadingAuthors}
+                                    value={field.value}
+                                    disabled={
+                                        !!forcedAuthorId ||
+                                        (isEditing && isCurrentAuthorAndMentorOnly) ||
+                                        isSubmitting ||
+                                        isLoadingAuthors
+                                    }
                                 >
                                     <FormControl>
                                         <SelectTrigger>
@@ -472,9 +489,11 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
                                         )}
                                     </SelectContent>
                                 </Select>
-                                {!!forcedAuthorId && (
+                                {(forcedAuthorId || (isEditing && isCurrentAuthorAndMentorOnly)) && (
                                     <FormDescription className="text-xs text-blue-600">
-                                        Вы можете создавать курсы только от своего имени.
+                                        {forcedAuthorId
+                                            ? 'Вы можете создавать курсы только от своего имени.'
+                                            : 'Менторы не могут изменять автора курса.'}
                                     </FormDescription>
                                 )}
                                 <FormMessage />

@@ -14,27 +14,26 @@ import CourseDetailsForm from '../[courseId]/edit/_components/course-details-for
 
 export default function CreateCoursePage() {
     const router = useRouter();
-
     const { user } = useUserStore((state) => state);
+
     const isAdmin = user?.roles?.includes('ADMIN') || user?.roles?.includes('ROLE_ADMIN');
-    const isMentor = user?.roles?.includes('MENTOR') || user?.roles?.includes('ROLE_MENTOR');
+    const isMentorOnly = (user?.roles?.includes('MENTOR') || user?.roles?.includes('ROLE_MENTOR')) && !isAdmin;
 
     const handleCreateSuccess = (newCourse: AdminCourseDetailDTO) => {
-        toast.success(`Course "${newCourse.title}" created successfully!`);
-
+        toast.success(`Курс \"${newCourse.title}\" успешно создан!`);
         router.push(`/admin/courses/${newCourse.id}/edit`);
     };
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Create New Course</CardTitle>
-                <CardDescription>Fill in the details for the new course.</CardDescription>
+                <CardTitle>Создать курс</CardTitle>
+                <CardDescription>Создайте новый курс для вашего проекта.</CardDescription>
             </CardHeader>
             <CardContent>
                 <CourseDetailsForm
                     onSuccess={handleCreateSuccess}
-                    forcedAuthorId={!isAdmin && isMentor ? user?.id : undefined}
+                    forcedAuthorId={isMentorOnly ? user?.id : undefined}
                 />
             </CardContent>
         </Card>

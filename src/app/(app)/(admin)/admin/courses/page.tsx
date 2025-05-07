@@ -48,22 +48,33 @@ export default function AdminCoursesPage() {
         async (page = currentPage, size = pageSize) => {
             setIsLoading(true);
             try {
-                const params: any = { page, size };
+                const params: { page: number; size: number; authorId?: string; sortBy?: string; titleSearch?: string } =
+                    {
+                        page,
+                        size,
+                        sortBy: searchParams.get('sortBy') ?? undefined,
+                        titleSearch: searchParams.get('titleSearch') ?? undefined,
+                    };
+
                 if (!isAdmin && isMentor && user?.id) {
                     params.authorId = user.id;
                 } else if (!isAdmin && !isMentor) {
                     setData(null);
                     setIsLoading(false);
+
+                    toast.error('У вас нет прав для просмотра этой страницы.');
+
                     return;
                 }
 
                 const result = await adminApiClient.getCoursesAdmin(
                     params.page,
                     params.size,
-                    undefined,
-                    undefined,
+                    params.sortBy,
+                    params.titleSearch,
                     params.authorId
                 );
+
                 setData(result);
             } catch (error: unknown) {
                 console.error('Failed to fetch courses:', error);
@@ -82,7 +93,7 @@ export default function AdminCoursesPage() {
                 setIsLoading(false);
             }
         },
-        [currentPage, pageSize, isAdmin, isMentor, user?.id]
+        [currentPage, pageSize, isAdmin, isMentor, user?.id, searchParams]
     );
 
     useEffect(() => {
@@ -149,15 +160,17 @@ export default function AdminCoursesPage() {
         <Card x-chunk="dashboard-06-chunk-0">
             <CardHeader className="flex flex-row items-start sm:items-center justify-between gap-2">
                 <div>
-                    <CardTitle>Courses</CardTitle>
-                    <CardDescription>Manage your courses. Add, edit, or delete courses.</CardDescription>
+                    <CardTitle>Курсы</CardTitle>
+                    <CardDescription>
+                        Управляйте своими курсами. Добавляйте, редактируйте или удаляйте курсы.
+                    </CardDescription>
                 </div>
 
                 {(isAdmin || isMentor) && (
                     <Link href="/admin/courses/new">
                         <Button size="sm">
                             <PlusCircle className="h-4 w-4 mr-2" />
-                            Add Course
+                            Добавить курс
                         </Button>
                     </Link>
                 )}
@@ -166,13 +179,13 @@ export default function AdminCoursesPage() {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="hidden w-[80px] sm:table-cell">Image</TableHead>
-                            <TableHead>Title</TableHead>
-                            <TableHead>Author</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Lessons</TableHead>
-                            <TableHead>Difficulty</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead className="hidden w-[80px] sm:table-cell">Изображение</TableHead>
+                            <TableHead>Название</TableHead>
+                            <TableHead>Автор</TableHead>
+                            <TableHead>Цена</TableHead>
+                            <TableHead>Уроки</TableHead>
+                            <TableHead>Сложность</TableHead>
+                            <TableHead className="text-right">Действия</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -228,13 +241,13 @@ export default function AdminCoursesPage() {
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-56 px-4 py-2">
-                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <DropdownMenuLabel>Действия</DropdownMenuLabel>
                                                 {(isAdmin || course.authorId === user?.id) && (
                                                     <DropdownMenuItem
                                                         className="cursor-pointer"
                                                         onClick={() => router.push(`/admin/courses/${course.id}/edit`)}
                                                     >
-                                                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                                                        <Pencil className="mr-2 h-4 w-4" /> Редактировать
                                                     </DropdownMenuItem>
                                                 )}
                                                 {(isAdmin || course.authorId === user?.id) && (
@@ -242,7 +255,7 @@ export default function AdminCoursesPage() {
                                                         className="text-destructive cursor-pointer"
                                                         onClick={() => handleDeleteCourse(course.id, course.title)}
                                                     >
-                                                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                                        <Trash2 className="mr-2 h-4 w-4" /> Удалить
                                                     </DropdownMenuItem>
                                                 )}
                                             </DropdownMenuContent>
