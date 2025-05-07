@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { isAxiosError } from 'axios';
-import { CheckCircle2, ChevronLeft, Loader2, PartyPopper } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { shallow } from 'zustand/shallow';
 
 import Link from 'next/link';
-import { useParams, usePathname, useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import CourseCompletionActions from '@/components/course/completion-actions';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ import { CourseLearnProvider } from '@/contexts/course-learn-context';
 import { ProtectedRoute } from '@/providers/protected-route';
 import CoursesApiClient from '@/server/courses';
 import { useLessonTasksStore } from '@/stores/tasks/tasks-store-provider';
-import { Course, CourseProgress } from '@/types';
+import { Course, UserSpecificCourseProgressDetails } from '@/types';
 
 import LessonSidebar from './_components/lesson-sidebar';
 
@@ -32,7 +32,7 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
     const [courseData, setCourseData] = useState<Course | null>(null);
     const [layoutIsLoading, setLayoutIsLoading] = useState(true);
     const [hasAccess, setHasAccess] = useState<boolean | null>(null);
-    const [progressData, setProgressData] = useState<CourseProgress | null>(null);
+    const [progressData, setProgressData] = useState<UserSpecificCourseProgressDetails | null>(null);
     const [isCourseCompleted, setIsCourseCompleted] = useState(false);
 
     const { congratsShownForCourses, markCongratsAsShown } = useLessonTasksStore(
@@ -45,7 +45,7 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
 
     const apiClient = new CoursesApiClient();
 
-    const updateCourseProgressState = (newProgress: CourseProgress) => {
+    const updateCourseProgressState = (newProgress: UserSpecificCourseProgressDetails) => {
         setProgressData(newProgress);
     };
 

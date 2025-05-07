@@ -1,11 +1,11 @@
 import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
-import { Course, CourseProgress, Lesson } from '@/types';
+import { Course, CourseProgress, Lesson, UserSpecificCourseProgressDetails } from '@/types';
 
 interface CourseLearnContextType {
     course: Course | null;
-    courseProgress: CourseProgress | null;
-    updateCourseProgress: (newProgress: CourseProgress) => void;
+    courseProgress: UserSpecificCourseProgressDetails | null;
+    updateCourseProgress: (newProgress: UserSpecificCourseProgressDetails) => void;
 }
 
 const CourseLearnContext = createContext<CourseLearnContextType | undefined>(undefined);
@@ -18,10 +18,10 @@ export const CourseLearnProvider = ({
 }: {
     children: ReactNode;
     course: Course | null;
-    initialProgress: CourseProgress | null;
-    updateCourseProgress: (newProgress: CourseProgress) => void;
+    initialProgress: UserSpecificCourseProgressDetails | null;
+    updateCourseProgress: (newProgress: UserSpecificCourseProgressDetails) => void;
 }) => {
-    const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(initialProgress);
+    const [courseProgress, setCourseProgress] = useState<UserSpecificCourseProgressDetails | null>(initialProgress);
 
     useEffect(() => {
         setCourseProgress(initialProgress);

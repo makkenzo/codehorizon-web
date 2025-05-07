@@ -144,7 +144,7 @@ const CourseTimeline = ({
             return (
                 <Video
                     className={cn(
-                        'h-4 w-4 text-muted-foreground transition-colors',
+                        'h-4 w-4 text-muted-foreground transition-colors shrink-0',
                         canAccessModule && 'group-hover:text-primary'
                     )}
                 />
@@ -153,7 +153,7 @@ const CourseTimeline = ({
         return (
             <FileText
                 className={cn(
-                    'h-4 w-4 text-muted-foreground transition-colors',
+                    'h-4 w-4 text-muted-foreground transition-colors shrink-0',
                     canAccessModule && 'group-hover:text-primary'
                 )}
             />
