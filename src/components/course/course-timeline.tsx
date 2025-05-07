@@ -22,7 +22,7 @@ import { cn, formatDuration } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import CoursesApiClient from '@/server/courses';
 import { useUserStore } from '@/stores/user/user-store-provider';
-import { Course, Lesson } from '@/types';
+import { Course, Lesson, UserSpecificCourseProgressDetails } from '@/types';
 
 import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
@@ -42,22 +42,18 @@ export interface TimelineModule {
 
 interface CourseTimelineProps {
     courseTitle?: string;
-    courseProgress?: number;
     courseSlug: string;
     courseFromServer: Omit<Course, 'lessons' | 'authorId'> & {
         lessons: Pick<Lesson, 'title' | 'slug' | 'id' | 'videoLength'>[];
         authorUsername: string;
         authorName: string;
     };
-    completedLessons: string[];
 }
 
 const CourseTimeline = ({
     courseTitle = 'Загрузка названия...',
-    courseProgress = 0,
     courseSlug,
     courseFromServer,
-    completedLessons,
 }: CourseTimelineProps) => {
     const router = useRouter();
     const { user } = useUserStore((state) => state);
@@ -66,11 +62,12 @@ const CourseTimeline = ({
     const [showAllModules, setShowAllModules] = useState(false);
     const [hasAccess, setHasAccess] = useState<boolean | null>(null);
     const [isLoadingClientData, setIsLoadingClientData] = useState(true);
+    const [progressData, setProgressData] = useState<UserSpecificCourseProgressDetails | null>(null);
 
     const modules: TimelineModule[] = useMemo(() => {
         return courseFromServer.lessons.map((lesson, index) => {
             const isLockedForPreview = !hasAccess && index >= UNLOCKED_INITIALLY;
-            const isCompleted = completedLessons?.includes(lesson.id) ?? false;
+            const isCompleted = progressData?.completedLessons?.includes(lesson.id) ?? false;
 
             return {
                 id: lesson.id,
@@ -82,7 +79,7 @@ const CourseTimeline = ({
                 isLocked: isLockedForPreview,
             };
         });
-    }, [courseFromServer.lessons, hasAccess, completedLessons]);
+    }, [courseFromServer.lessons, hasAccess, progressData]);
 
     const unlockedModulesCount = useMemo(() => {
         if (hasAccess) return courseFromServer.lessons.length;
@@ -107,10 +104,12 @@ const CourseTimeline = ({
             }
 
             try {
-                const [accessRes] = await Promise.all([
+                const [accessRes, progressRes] = await Promise.all([
                     coursesApiClient.checkCourseAccess(courseFromServer.id).catch(() => false),
+                    coursesApiClient.getUserCourseProgress(courseFromServer.id).catch(() => null),
                 ]);
                 setHasAccess(accessRes);
+                setProgressData(progressRes);
             } catch (error) {
                 console.error('Error fetching client-specific course data:', error);
                 setHasAccess(false);
@@ -121,7 +120,7 @@ const CourseTimeline = ({
         };
 
         fetchClientSpecificData();
-    }, [isAuthenticated, isAuthPending, user, courseFromServer.id, coursesApiClient]);
+    }, [isAuthenticated]);
 
     const onPurchase = () => {
         if (hasAccess) {
@@ -189,14 +188,14 @@ const CourseTimeline = ({
     }
 
     return (
-        <div className="w-full max-w-md rounded-lg border bg-card p-4 md:p-6 shadow-sm">
+        <div className="w-full rounded-lg border bg-card p-4 md:p-6 shadow-sm">
             <div className="mb-4 md:mb-6">
                 <h2 className="text-xl md:text-2xl font-bold text-foreground">{courseTitle}</h2>
-                {hasAccess && courseProgress > 0 && (
+                {hasAccess && (progressData?.progress ?? 0) > 0 && (
                     <div className="mt-2 flex items-center gap-2">
-                        <Progress value={courseProgress} className="h-2 w-full" />
+                        <Progress value={progressData?.progress ?? 0} className="h-2 w-full" />
                         <span className="text-xs md:text-sm font-medium text-muted-foreground">
-                            {courseProgress.toFixed(0)}%
+                            {(progressData?.progress ?? 0).toFixed(0)}%
                         </span>
                     </div>
                 )}
@@ -213,9 +212,7 @@ const CourseTimeline = ({
             </div>
 
             <div className="relative mb-4 md:mb-6">
-                {displayedModules.length > 0 && (
-                    <div className="absolute left-4 top-2.5 bottom-2.5 w-0.5 bg-muted-foreground/20 rounded-full"></div>
-                )}
+                {displayedModules.length > 0 && <div className="absolute left-4 top-0 h-full w-0.5 bg-gray-200"></div>}
 
                 <div className="space-y-3 md:space-y-4">
                     {displayedModules.map((module, index) => {
@@ -289,7 +286,7 @@ const CourseTimeline = ({
                             <div key={module.id} className="relative pl-10 group">
                                 <div
                                     className={cn(
-                                        'absolute left-4 top-1/2 -translate-y-1/2 z-10 h-5 w-5 rounded-full border-2 flex items-center justify-center',
+                                        'absolute left-4 top-1.5 -translate-x-1/2 z-10 h-5 w-5 rounded-full border-2 flex items-center justify-center',
                                         module.isCompleted
                                             ? 'border-primary bg-primary'
                                             : module.isLocked

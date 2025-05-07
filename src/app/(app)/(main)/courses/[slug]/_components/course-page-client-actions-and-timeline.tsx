@@ -1,16 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { toast } from 'sonner';
 
-import { useRouter } from 'next/navigation';
-
 import CourseButtons from '@/components/course-buttons';
-import CourseTimeline, { TimelineModule } from '@/components/course/course-timeline';
-import { Separator } from '@/components/ui/separator';
-import { formatDuration } from '@/lib/utils';
-import { UserProfile } from '@/models';
 import { useAuth } from '@/providers/auth-provider';
 import CoursesApiClient from '@/server/courses';
 import { useUserStore } from '@/stores/user/user-store-provider';
@@ -75,7 +69,7 @@ const CoursePageClientActionsAndTimeline: React.FC<CoursePageClientActionsAndTim
         };
 
         fetchClientSpecificData();
-    }, [isAuthenticated, isAuthPending, user, courseFromServer.id, coursesApiClient]);
+    }, [isAuthenticated, isAuthPending, user, courseFromServer.id]);
 
     return (
         <>

@@ -129,7 +129,7 @@ export default function CourseClientPageReviews({
 
     useEffect(() => {
         fetchCurrentUserReview();
-    }, [fetchCurrentUserReview]);
+    }, []);
 
     const handlePageChange = (newPage: number) => {
         setReviewsPage(newPage);

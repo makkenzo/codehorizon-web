@@ -87,16 +87,10 @@ const CoursePage = async ({ params }: CoursePageProps) => {
         return null;
     });
 
-    const progressPromise = coursesApiClient.getUserCourseProgress(courseData.id).catch((err) => {
-        console.warn(`Не удалось загрузить прогресс для курса ${courseData.id}:`, err.message);
-        return null;
-    });
-
-    const [author, initialReviewsData, ratingDistribution, progressData] = await Promise.all([
+    const [author, initialReviewsData, ratingDistribution] = await Promise.all([
         authorPromise,
         reviewsPromise,
         ratingDistributionPromise,
-        progressPromise,
     ]);
 
     const lessonsForClient: Pick<Lesson, 'id' | 'title' | 'slug' | 'videoLength'>[] = courseData.lessons.map(
@@ -255,9 +249,7 @@ const CoursePage = async ({ params }: CoursePageProps) => {
                         <div id="course-content-section" className="scroll-mt-20">
                             <CourseTimeline
                                 courseTitle={courseData.title}
-                                courseProgress={progressData?.progress ?? 0}
                                 courseFromServer={courseData}
-                                completedLessons={progressData?.completedLessons ?? []}
                                 courseSlug={courseData.slug}
                             />
                         </div>
