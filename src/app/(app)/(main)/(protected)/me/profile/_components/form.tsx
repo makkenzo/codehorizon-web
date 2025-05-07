@@ -79,10 +79,9 @@ const ProfileForm = ({}) => {
     const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
 
     const router = useRouter();
-    const { user, setUser } = useUserStore((state) => state);
+    const { user } = useUserStore((state) => state);
 
     const isMentor = useMemo(() => user?.roles?.includes('ROLE_MENTOR') || user?.roles?.includes('MENTOR'), [user]);
-    const isAdmin = useMemo(() => user?.roles?.includes('ADMIN') || user?.roles?.includes('ROLE_ADMIN'), [user]);
 
     const form = useForm<z.infer<typeof profileSchema>>({
         resolver: zodResolver(profileSchema),
@@ -172,11 +171,9 @@ const ProfileForm = ({}) => {
         }
     };
 
-    const openMentorshipModal = () => setIsApplicationModalOpen(true);
-
     const onSubmit = async (values: z.infer<typeof profileSchema>) => {
         setPending(true);
-        let submissionValues = { ...values };
+        const submissionValues = { ...values };
 
         try {
             await new ProfileApiClient().updateProfile(submissionValues);

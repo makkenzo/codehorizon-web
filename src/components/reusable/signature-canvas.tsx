@@ -232,7 +232,6 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
             setHistoryStep(newStep);
             const nextLines = history[newStep];
             setLines(nextLines);
-            3;
         }
     };
 
