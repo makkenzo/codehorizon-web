@@ -22,15 +22,15 @@ import { AdminChartDataDTO, AdminDashboardStatsDTO } from '@/types/admin';
 
 const chartConfig = {
     users: {
-        label: 'Users',
+        label: 'Пользователи',
         color: 'var(--chart-1)',
     },
     revenue: {
-        label: 'Revenue',
+        label: 'Доход',
         color: 'var(--chart-2)',
     },
     students: {
-        label: 'Students',
+        label: 'Студенты',
         color: 'var(--chart-3)',
     },
 } satisfies ChartConfig;
@@ -81,13 +81,13 @@ export default function AdminDashboardPage() {
 
     const formattedUserChartData =
         chartData?.userRegistrations.map((item) => ({
-            date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            date: new Date(item.date).toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' }),
             users: item.value,
         })) ?? [];
 
     const formattedRevenueChartData =
         chartData?.revenueData.map((item) => ({
-            date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            date: new Date(item.date).toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' }),
             revenue: item.value,
         })) ?? [];
     const formattedCategoryData =
@@ -105,7 +105,7 @@ export default function AdminDashboardPage() {
     return (
         <div className="flex flex-col gap-4 md:gap-6 lg:gap-8">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card x-chunk="dashboard-01-chunk-1">
+                <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Всего пользователей</CardTitle>
                         <Users className="h-4 w-4 text-muted-foreground" />
@@ -170,7 +170,7 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:gap-8">
-                <Card x-chunk="dashboard-05-chunk-1">
+                <Card>
                     <CardHeader className="px-7">
                         <CardTitle>Регистрации пользователей</CardTitle>
                         <CardDescription>Ежедневные регистрации пользователей за последний период.</CardDescription>
