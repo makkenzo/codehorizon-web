@@ -9,9 +9,7 @@ export default function AppLayout({
     return (
         <>
             <ZustandProvider>
-                <AuthProvider>
-                    {children} {/* Сюда будут рендериться layout из (main) или (admin) */}
-                </AuthProvider>
+                <AuthProvider>{children}</AuthProvider>
             </ZustandProvider>
         </>
     );
