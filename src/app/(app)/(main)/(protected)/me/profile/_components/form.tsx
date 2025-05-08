@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { isAxiosError } from 'axios';
@@ -64,7 +64,6 @@ const fields: Record<
 };
 
 const ProfileForm = ({}) => {
-    const [profile, setProfile] = useState<Profile | null>(null);
     const [pending, setPending] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploadingSignatureFile, setIsUploadingSignatureFile] = useState(false);
@@ -76,7 +75,6 @@ const ProfileForm = ({}) => {
 
     const [applicationReason, setApplicationReason] = useState('');
     const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
-    const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
 
     const router = useRouter();
     const { user } = useUserStore((state) => state);
@@ -106,7 +104,6 @@ const ProfileForm = ({}) => {
                 if (!profileData) {
                     return;
                 }
-                setProfile(profileData);
                 form.reset({
                     ...profileData,
                     signatureUrl: profileData.signatureUrl ?? null,
@@ -157,7 +154,6 @@ const ProfileForm = ({}) => {
                 toast.success('Заявка на менторство успешно подана!');
                 setApplicationDetails(newApplication);
                 setApplicationStatus(newApplication.status);
-                setIsApplicationModalOpen(false);
             }
         } catch (error: unknown) {
             if (isAxiosError(error) && error.response?.data?.message) {
@@ -178,7 +174,6 @@ const ProfileForm = ({}) => {
         try {
             await new ProfileApiClient().updateProfile(submissionValues);
             toast.success('Профиль успешно обновлён!');
-            setProfile((prev) => ({ ...prev, ...submissionValues }) as Profile);
         } catch (error) {
             console.error('Ошибка при обновлении профиля:', error);
             toast.error('Ошибка при обновлении профиля');

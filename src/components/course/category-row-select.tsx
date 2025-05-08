@@ -30,7 +30,7 @@ const CategoryRowSelect = ({ categories }: CategoryRowSelectProps) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 5 * 0.1, duration: 0.3 }}
         >
-            {allCategories.map((category, index) => {
+            {allCategories.map((category) => {
                 const isActive = activeCategory === category || (category === 'Все курсы' && activeCategory === null);
                 const href =
                     category === 'Все курсы' ? '/courses' : `/courses?category=${encodeURIComponent(category)}`;

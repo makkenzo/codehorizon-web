@@ -135,7 +135,7 @@ export default function CourseClientPageReviews({
         setReviewsPage(newPage);
     };
 
-    const handleReviewFormSuccess = (updatedReview: ReviewDTO) => {
+    const handleReviewFormSuccess = () => {
         setIsReviewFormOpen(false);
         fetchCurrentUserReview();
         fetchReviewsAndDistribution(1);
@@ -196,7 +196,6 @@ export default function CourseClientPageReviews({
                                 <ReviewForm
                                     courseId={courseId}
                                     existingReview={currentUserReview ?? undefined}
-                                    onClose={() => setIsReviewFormOpen(false)}
                                     onSuccess={handleReviewFormSuccess}
                                     onDeleteSuccess={handleReviewDeleteSuccess}
                                 />

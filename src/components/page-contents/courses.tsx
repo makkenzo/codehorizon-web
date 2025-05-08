@@ -134,15 +134,15 @@ const CoursesPageContent = () => {
         setPage(newPage);
     };
 
-    const handleSortChange = (value: string) => {
-        setPage(1);
+    // const handleSortChange = (value: string) => {
+    //     setPage(1);
 
-        const params = new URLSearchParams(searchParams.toString());
-        params.set('sortBy', value);
-        params.set('page', '1');
-        window.history.pushState(null, '', `?${params.toString()}`);
-        setSortBy(value);
-    };
+    //     const params = new URLSearchParams(searchParams.toString());
+    //     params.set('sortBy', value);
+    //     params.set('page', '1');
+    //     window.history.pushState(null, '', `?${params.toString()}`);
+    //     setSortBy(value);
+    // };
 
     return (
         <PageWrapper className="md:grid md:grid-cols-4 mb-20 max-md:mt-4 gap-5">

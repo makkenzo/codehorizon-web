@@ -1,14 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import debounce from 'lodash.debounce';
 import { Loader2, Search } from 'lucide-react';
-import { FaSearch } from 'react-icons/fa';
 import { FaUserSecret } from 'react-icons/fa6';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { cn } from '@/lib/utils';
@@ -18,7 +16,6 @@ import { AuthorSearchResult, CourseSearchResult, SearchResultItem } from '@/type
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
-import { Input } from '../ui/input';
 
 interface GlobalSearchProps {
     className?: string;

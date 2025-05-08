@@ -15,7 +15,7 @@ import { NavItem } from '@/types';
 
 import MentorshipApplicationModal from '../mentorship/mentorship-application-modal';
 import { Button } from '../ui/button';
-import { Dialog, DialogTrigger } from '../ui/dialog';
+import { Dialog } from '../ui/dialog';
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
 
 interface MobileBurgerMenuProps {

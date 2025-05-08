@@ -27,12 +27,11 @@ type ReviewFormData = z.infer<typeof reviewFormSchema>;
 interface ReviewFormProps {
     courseId: string;
     existingReview?: ReviewDTO;
-    onClose: () => void;
     onSuccess: (updatedReview: ReviewDTO) => void;
     onDeleteSuccess: () => void;
 }
 
-const ReviewForm = ({ courseId, existingReview, onClose, onSuccess, onDeleteSuccess }: ReviewFormProps) => {
+const ReviewForm = ({ courseId, existingReview, onSuccess, onDeleteSuccess }: ReviewFormProps) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [hoverRating, setHoverRating] = useState<number>(0);

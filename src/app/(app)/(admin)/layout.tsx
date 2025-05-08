@@ -2,18 +2,7 @@
 
 import { ReactNode, useEffect, useMemo } from 'react';
 
-import {
-    BookOpen,
-    Home,
-    LayoutDashboard,
-    Loader2,
-    LogOut,
-    Menu,
-    Package2,
-    Settings,
-    ShieldAlert,
-    Users,
-} from 'lucide-react';
+import { BookOpen, Home, LayoutDashboard, Loader2, LogOut, Package2, Settings, ShieldAlert, Users } from 'lucide-react';
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -29,14 +18,12 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useHasHydrated } from '@/hooks/use-has-hydrated';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import AuthApiClient from '@/server/auth';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
-import { NavItem } from '@/types';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
     const { isAuthenticated, isPending: isAuthPending } = useAuth();

@@ -16,9 +16,7 @@ import { Button } from '../ui/button';
 import { Skeleton } from '../ui/skeleton';
 import CourseCard from './card';
 
-interface CoursesInProgressProps {}
-
-const CoursesInProgress = ({}: CoursesInProgressProps) => {
+const CoursesInProgress = () => {
     const [courses, setCourses] = useState<UserCourseDTO[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

@@ -136,7 +136,7 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
                     errorMsg = error?.response?.data?.message || error.message || 'Не удалось загрузить данные курса.';
 
                     if (error.response?.status === 401 || error.response?.status === 403) {
-                        toast.error('Необходимо войти или приобрести курс для доступа.');
+                        toast.error(errorMsg);
 
                         router.push(`/sign-in?from=/courses/${courseSlug}/learn/${lessonSlug}`);
                     } else {

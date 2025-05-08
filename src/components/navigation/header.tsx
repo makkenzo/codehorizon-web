@@ -48,7 +48,7 @@ const Header = () => {
 
     const { profile, clearProfile } = useProfileStore((state) => state);
 
-    const { user, clearUser, setUser } = useUserStore((state) => state);
+    const { user, clearUser } = useUserStore((state) => state);
 
     const [canApplyForMentorship, setCanApplyForMentorship] = useState(false);
     const [isCheckingMentorshipStatus, setIsCheckingMentorshipStatus] = useState(true);

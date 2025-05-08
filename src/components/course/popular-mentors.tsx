@@ -1,14 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
-
-import Link from 'next/link';
 
 import { PopularAuthorDTO } from '@/types';
 
 import AuthorCard from '../author/author-card';
-import { Button } from '../ui/button';
 import { Skeleton } from '../ui/skeleton';
 
 interface PopularMentorsSectionProps {

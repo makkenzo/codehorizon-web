@@ -11,7 +11,6 @@ import json from 'highlight.js/lib/languages/json';
 import plaintext from 'highlight.js/lib/languages/plaintext';
 import typescript from 'highlight.js/lib/languages/typescript';
 import xml from 'highlight.js/lib/languages/xml';
-import { CheckCircle2, Loader2 } from 'lucide-react';
 import Player from 'next-video/player';
 import 'player.style/minimal';
 import MediaThemeMinimal from 'player.style/minimal/react';
@@ -38,10 +37,6 @@ hljs.registerLanguage('json', json);
 hljs.registerLanguage('bash', bash);
 hljs.registerLanguage('plaintext', plaintext);
 
-type TaskCompletionStatus = {
-    [taskId: string]: boolean | null;
-};
-
 export default function LessonPage() {
     const { course, courseProgress, updateCourseProgress } = useCourseLearnContext();
 
@@ -64,18 +59,14 @@ export default function LessonPage() {
         return `lesson_${user.id}_${course.id}_${currentLesson.id}`;
     }, [user?.id, course?.id, currentLesson?.id]);
 
-    const { currentLessonTasks, getAllTasksCompleted, initializeLesson, clearLessonState } = useLessonTasksStore(
-        (state) => {
-            const tasks = lessonKey ? state.lessons[lessonKey]?.tasks : undefined;
-            return {
-                currentLessonTasks: tasks,
-                getAllTasksCompleted: state.getAllTasksCompleted,
-                initializeLesson: state.initializeLesson,
-                clearLessonState: state.clearLessonState,
-            };
-        },
-        shallow
-    );
+    const { currentLessonTasks, initializeLesson, clearLessonState } = useLessonTasksStore((state) => {
+        const tasks = lessonKey ? state.lessons[lessonKey]?.tasks : undefined;
+        return {
+            currentLessonTasks: tasks,
+            initializeLesson: state.initializeLesson,
+            clearLessonState: state.clearLessonState,
+        };
+    }, shallow);
 
     useEffect(() => {
         if (lessonKey && currentLesson?.tasks && !currentLessonTasks) {

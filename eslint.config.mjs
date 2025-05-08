@@ -17,6 +17,7 @@ const eslintConfig = [
             '@typescript-eslint/no-explicit-any': 'warn',
             '@typescript-eslint/no-empty-object-type': 'warn',
             'react-hooks/exhaustive-deps': 'off',
+            'prefer-const': 'warn',
         },
     }),
 ];

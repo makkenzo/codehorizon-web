@@ -35,9 +35,7 @@ import { mentorshipApiClient } from '@/server/mentorship';
 import { PagedResponse } from '@/types';
 import { ApplicationStatus, MentorshipApplication } from '@/types/mentorship';
 
-interface AdminMentorshipApplicationsPageProps {}
-
-const AdminMentorshipApplicationsPage = ({}: AdminMentorshipApplicationsPageProps) => {
+const AdminMentorshipApplicationsPage = () => {
     const [applicationsData, setApplicationsData] = useState<PagedResponse<MentorshipApplication> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);

@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { Award, Calendar, Download, Eye, ShieldAlert } from 'lucide-react';
-
-import Link from 'next/link';
+import { Award, Calendar, Download, ShieldAlert } from 'lucide-react';
 
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Badge } from '@/components/ui/badge';
@@ -14,9 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { certificateApiClient } from '@/server/certificate';
 import { CertificateDTO } from '@/types/certificate';
 
-interface MyCertificatesPageProps {}
-
-const MyCertificatesPage = ({}: MyCertificatesPageProps) => {
+const MyCertificatesPage = () => {
     const [certificates, setCertificates] = useState<CertificateDTO[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

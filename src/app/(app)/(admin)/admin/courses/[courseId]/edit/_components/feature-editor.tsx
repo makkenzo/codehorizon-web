@@ -15,7 +15,7 @@ interface FeatureEditorProps {
 }
 
 const FeatureEditor: React.FC<FeatureEditorProps> = ({ control, disabled, errors }) => {
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append } = useFieldArray({
         control,
         name: 'features',
     });

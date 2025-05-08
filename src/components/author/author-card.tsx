@@ -17,11 +17,6 @@ interface AuthorCardProps {
 const AuthorCard = ({ author }: AuthorCardProps) => {
     const [hoveredAuthor, setHoveredAuthor] = useState<string | null>(null);
 
-    const displayName =
-        author.firstName || author.lastName
-            ? `${author.firstName || ''} ${author.lastName || ''}`.trim()
-            : author.username;
-
     return (
         <Link
             href={`/u/${author.username}`}

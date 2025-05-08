@@ -2,7 +2,6 @@ import { Award } from 'lucide-react';
 import { Metadata } from 'next';
 import Player from 'next-video/player';
 import MediaThemeMinimal from 'player.style/minimal/react';
-import { FaBook } from 'react-icons/fa';
 import { IoMdVolumeHigh } from 'react-icons/io';
 import { MdLiveTv } from 'react-icons/md';
 import { MdChromeReaderMode } from 'react-icons/md';
@@ -13,7 +12,7 @@ import { notFound } from 'next/navigation';
 
 import CourseButtons from '@/components/course-buttons';
 import CourseFeatureSection from '@/components/course/course-feature-section';
-import CourseTimeline, { TimelineModule } from '@/components/course/course-timeline';
+import CourseTimeline from '@/components/course/course-timeline';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
