@@ -1,20 +1,23 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import debounce from 'lodash.debounce';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 import { FaSearch } from 'react-icons/fa';
 import { FaUserSecret } from 'react-icons/fa6';
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { cn } from '@/lib/utils';
 import { searchApiClient } from '@/server/search';
 import { AuthorSearchResult, CourseSearchResult, SearchResultItem } from '@/types/search';
 
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Button } from '../ui/button';
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 import { Input } from '../ui/input';
 
 interface GlobalSearchProps {
@@ -22,17 +25,17 @@ interface GlobalSearchProps {
 }
 
 const GlobalSearch = ({ className }: GlobalSearchProps) => {
+    const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<SearchResultItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const searchContainerRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
+
     const abortControllerRef = useRef<AbortController | null>(null);
 
-    const fetchResults = async (searchQuery: string) => {
+    const runSearch = async (searchQuery: string) => {
         if (searchQuery.trim().length < 2) {
             setResults([]);
-            setIsDropdownOpen(false);
             setIsLoading(false);
             return;
         }
@@ -41,144 +44,139 @@ const GlobalSearch = ({ className }: GlobalSearchProps) => {
         abortControllerRef.current = new AbortController();
 
         setIsLoading(true);
-        setIsDropdownOpen(true);
 
-        const response = await searchApiClient.search(searchQuery, abortControllerRef.current.signal);
-        if (!abortControllerRef.current.signal.aborted) {
-            setResults(response?.results || []);
-            setIsLoading(false);
+        try {
+            const response = await searchApiClient.search(searchQuery, abortControllerRef.current.signal);
+
+            if (!abortControllerRef.current.signal.aborted) {
+                setResults(response?.results || []);
+            }
+        } catch (error) {
+            if (!abortControllerRef.current?.signal.aborted) {
+                console.error('Search API error:', error);
+                setResults([]);
+            }
+        } finally {
+            if (!abortControllerRef.current?.signal.aborted) {
+                setIsLoading(false);
+            }
         }
     };
 
-    const debouncedFetchResults = useCallback(debounce(fetchResults, 300), []);
+    const debouncedRunSearch = useCallback(debounce(runSearch, 300), []);
 
     useEffect(() => {
-        debouncedFetchResults(query);
-
+        debouncedRunSearch(query);
         return () => {
-            debouncedFetchResults.cancel();
+            debouncedRunSearch.cancel();
             abortControllerRef.current?.abort();
         };
-    }, [query, debouncedFetchResults]);
+    }, [query, debouncedRunSearch]);
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-                setIsDropdownOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setQuery(e.target.value);
-        if (e.target.value.trim().length >= 2) {
-            setIsDropdownOpen(true);
-        } else {
-            setIsDropdownOpen(false);
-        }
-    };
-
-    const handleLinkClick = () => {
-        setIsDropdownOpen(false);
+    const handleSelect = (url: string) => {
+        router.push(url);
+        setOpen(false);
         setQuery('');
+        setResults([]);
     };
+
+    const courseResults = results.filter((item) => item.type === 'course') as Array<
+        SearchResultItem & { data: CourseSearchResult }
+    >;
+    const authorResults = results.filter((item) => item.type === 'author') as Array<
+        SearchResultItem & { data: AuthorSearchResult }
+    >;
 
     return (
-        <div ref={searchContainerRef} className={cn('relative max-w-[400px] w-full', className)}>
-            <Input
-                className="h-[37px] bg-white-90 border-0 pl-3 pr-10 py-0 rounded-[5px]"
-                placeholder="Найти курс или автора..."
-                value={query}
-                onChange={handleInputChange}
-                onFocus={() => query.trim().length >= 2 && setIsDropdownOpen(true)}
-            />
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
-                {isLoading ? <Loader2 className="animate-spin h-4 w-4" /> : <FaSearch />}
-            </div>
-
-            {isDropdownOpen && (
-                <div className="absolute top-full mt-2 w-full bg-background border border-border rounded-md shadow-lg z-50 max-h-80 overflow-y-auto custom-scrollbar">
-                    {isLoading && results.length === 0 && (
-                        <div className="p-4 text-center text-muted-foreground">Загрузка...</div>
+        <div className={cn('relative max-w-[400px] w-full', className)}>
+            <Button
+                variant="default"
+                className="relative h-[32px] w-full justify-start rounded-[5px] px-3 text-sm md:w-64 lg:w-80"
+                onClick={() => setOpen(true)}
+            >
+                <Search className="mr-2 h-4 w-4" />
+                <span>Найти курс или автора...</span>
+            </Button>
+            <CommandDialog open={open} onOpenChange={setOpen}>
+                <CommandInput placeholder="Найти курс или автора..." value={query} onValueChange={setQuery} />
+                <CommandList>
+                    {isLoading && (
+                        <div className="flex items-center justify-center py-6">
+                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        </div>
                     )}
                     {!isLoading && query.trim().length >= 2 && results.length === 0 && (
-                        <div className="p-4 text-center text-muted-foreground">Ничего не найдено.</div>
+                        <CommandEmpty>Ничего не найдено.</CommandEmpty>
                     )}
-                    {results.length > 0 && (
-                        <ul>
-                            {results.map((item, index) => (
-                                <li key={`${item.type}-${(item.data as any).id || (item.data as any).userId}-${index}`}>
-                                    <Link
-                                        href={
-                                            item.type === 'course'
-                                                ? `/courses/${(item.data as CourseSearchResult).slug}`
-                                                : `/u/${(item.data as AuthorSearchResult).username}`
-                                        }
-                                        className="block hover:bg-muted p-3 border-b last:border-b-0"
-                                        onClick={handleLinkClick}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            {item.type === 'course' && (
-                                                <>
-                                                    <Image
-                                                        src={
-                                                            (item.data as CourseSearchResult).imagePreview ||
-                                                            '/image_not_available.webp'
-                                                        }
-                                                        alt={(item.data as CourseSearchResult).title}
-                                                        width={48}
-                                                        height={27}
-                                                        className="rounded object-cover w-12 h-[27px]"
-                                                    />
-                                                    <div className="flex-1 overflow-hidden">
-                                                        <p className="font-medium truncate">
-                                                            {(item.data as CourseSearchResult).title}
-                                                        </p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            Курс от @{(item.data as CourseSearchResult).authorUsername}
-                                                        </p>
-                                                    </div>
-                                                </>
-                                            )}
-                                            {item.type === 'author' && (
-                                                <>
-                                                    <Avatar className="h-8 w-8">
-                                                        <AvatarImage
-                                                            src={
-                                                                (item.data as AuthorSearchResult).avatarUrl ?? undefined
-                                                            }
-                                                        />
-                                                        <AvatarFallback
-                                                            style={{
-                                                                backgroundColor:
-                                                                    (item.data as AuthorSearchResult).avatarColor ??
-                                                                    undefined,
-                                                            }}
-                                                        >
-                                                            {(
-                                                                item.data as AuthorSearchResult
-                                                            ).displayName?.[0]?.toUpperCase() ?? <FaUserSecret />}
-                                                        </AvatarFallback>
-                                                    </Avatar>
-                                                    <div className="flex-1 overflow-hidden">
-                                                        <p className="font-medium truncate">
-                                                            {(item.data as AuthorSearchResult).displayName ||
-                                                                (item.data as AuthorSearchResult).username}
-                                                        </p>
-                                                        <p className="text-xs text-muted-foreground">Автор</p>
-                                                    </div>
-                                                </>
-                                            )}
+
+                    {courseResults.length > 0 && (
+                        <CommandGroup heading="Курсы">
+                            {courseResults.map((item, index) => (
+                                <CommandItem
+                                    key={`${item.type}-${(item.data as any).id || (item.data as any).userId}-${index}`}
+                                    onSelect={() => handleSelect(`/courses/${item.data.slug}`)}
+                                    value={`course-${item.data.title}-${item.data.id}`}
+                                >
+                                    <div className="flex w-full cursor-pointer items-center gap-3 p-3">
+                                        <Image
+                                            src={
+                                                (item.data as CourseSearchResult).imagePreview ||
+                                                '/image_not_available.webp'
+                                            }
+                                            alt={(item.data as CourseSearchResult).title}
+                                            width={96}
+                                            height={51}
+                                            className="rounded w-24 object-cover"
+                                        />
+                                        <div className="flex-1 overflow-hidden">
+                                            <p className="font-medium truncate">
+                                                {(item.data as CourseSearchResult).title}
+                                            </p>
+                                            <p className="text-xs">
+                                                Курс от @{(item.data as CourseSearchResult).authorUsername}
+                                            </p>
                                         </div>
-                                    </Link>
-                                </li>
+                                    </div>
+                                </CommandItem>
                             ))}
-                        </ul>
+                        </CommandGroup>
                     )}
-                </div>
-            )}
+                    {authorResults.length > 0 && (
+                        <CommandGroup heading="Пользователи">
+                            {authorResults.map((item, index) => (
+                                <CommandItem
+                                    key={`${item.type}-${(item.data as any).id || (item.data as any).userId}-${index}`}
+                                    value={`author-${item.data.username}-${item.data.userId}`}
+                                    onSelect={() => handleSelect(`/u/${item.data.username}`)}
+                                >
+                                    <div className="flex w-full cursor-pointer items-center gap-3 p-3">
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarImage
+                                                src={(item.data as AuthorSearchResult).avatarUrl ?? undefined}
+                                            />
+                                            <AvatarFallback
+                                                style={{
+                                                    backgroundColor:
+                                                        (item.data as AuthorSearchResult).avatarColor ?? undefined,
+                                                }}
+                                            >
+                                                {(item.data as AuthorSearchResult).displayName?.[0]?.toUpperCase() ?? (
+                                                    <FaUserSecret />
+                                                )}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 overflow-hidden">
+                                            <p className="font-medium truncate">
+                                                {item.data.displayName || item.data.username}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                    )}
+                </CommandList>
+            </CommandDialog>
         </div>
     );
 };
