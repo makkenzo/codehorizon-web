@@ -81,6 +81,7 @@ const CoursePageClientActionsAndTimeline: React.FC<CoursePageClientActionsAndTim
                         price: courseFromServer.price,
                         discount: courseFromServer.discount,
                         lessons: courseFromServer.lessons,
+                        isFree: courseFromServer.isFree,
                     }}
                     currentCourseProgressDetails={userCourseProgressDetails}
                 />
