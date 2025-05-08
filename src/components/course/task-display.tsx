@@ -145,7 +145,7 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index, lessonKey }) => 
                 )}
                 Задание {index + 1}:
             </p>
-            <p className="mb-4 text-card-foreground/90">{task.description}</p>
+            <p className="prose mb-4 text-card-foreground/90">{task.description}</p>
 
             <div className="mb-4">{renderInput()}</div>
 

@@ -177,7 +177,6 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
             const progressIs100 = typeof progressData.progress === 'number' && progressData.progress >= 100;
 
             if (progressIs100 || allLessonsCompleted) {
-                console.log('КУРС ЗАВЕРШЕН!');
                 setIsCourseCompleted(true);
             }
         } else if (

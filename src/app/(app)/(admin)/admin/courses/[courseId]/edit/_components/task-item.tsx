@@ -1,9 +1,11 @@
+import ReactCodeMirror from '@uiw/react-codemirror';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { Control, FieldErrors, UseFieldArrayRemove, useFieldArray, useWatch } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
@@ -50,22 +52,16 @@ const TaskItem: React.FC<TaskItemProps> = ({ control, index, removeTask, isSubmi
                 <Trash2 className="h-4 w-4" />
             </Button>
 
-            <p className="text-sm font-medium text-muted-foreground">Task {index + 1}</p>
+            <p className="text-sm font-medium text-muted-foreground">Задание {index + 1}</p>
 
             <FormField
                 control={control}
                 name={`tasks.${index}.description`}
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel className="text-xs">Description *</FormLabel>
+                        <FormLabel className="text-xs">Описание задачи *</FormLabel>
                         <FormControl>
-                            <Textarea
-                                placeholder="Task description..."
-                                {...field}
-                                disabled={isSubmitting}
-                                rows={3}
-                                aria-required="true"
-                            />
+                            <RichTextEditor value={field.value ?? ''} onChange={field.onChange} />
                         </FormControl>
                         <FormMessage>{taskErrors?.description?.message}</FormMessage>
                     </FormItem>
@@ -76,11 +72,11 @@ const TaskItem: React.FC<TaskItemProps> = ({ control, index, removeTask, isSubmi
                 name={`tasks.${index}.taskType`}
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel className="text-xs">Task Type</FormLabel>
+                        <FormLabel className="text-xs">Тип задачи</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value} disabled={isSubmitting}>
                             <FormControl>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select task type" />
+                                    <SelectValue placeholder="Выберите тип задачи" />
                                 </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -98,7 +94,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ control, index, removeTask, isSubmi
             {taskType === TaskType.MULTIPLE_CHOICE && (
                 <div className="space-y-2 border-l-2 border-dashed pl-3 ml-1 border-blue-500/30">
                     <FormLabel className="text-xs text-blue-600 dark:text-blue-400">
-                        Options (for Multiple Choice)
+                        Варианты ответа (для выбора нескольких)
                     </FormLabel>
                     {optionFields.map((optionField, optionIndex) => (
                         <FormField

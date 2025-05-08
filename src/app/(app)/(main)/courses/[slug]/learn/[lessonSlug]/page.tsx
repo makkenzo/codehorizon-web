@@ -48,8 +48,6 @@ export default function LessonPage() {
     const courseSlug = params.slug as string;
     const lessonSlug = params.lessonSlug as string;
 
-    console.log(course?.lessons.find((lesson) => lesson.slug === lessonSlug));
-
     const currentLesson = useMemo(() => {
         return (
             course?.lessons.find(
@@ -75,7 +73,9 @@ export default function LessonPage() {
     }, shallow);
 
     useEffect(() => {
-        if (lessonKey && currentLesson?.tasks && !currentLessonTasks) {
+        const tasksExist = currentLessonTasks && Object.keys(currentLessonTasks).length > 0;
+
+        if (lessonKey && currentLesson?.tasks && !tasksExist) {
             initializeLesson(lessonKey, currentLesson.tasks);
         }
 
@@ -84,7 +84,7 @@ export default function LessonPage() {
         } else {
             setIsLessonMarkedCompleted(false);
         }
-    }, [lessonKey, currentLesson, courseProgress, initializeLesson, currentLessonTasks]);
+    }, [lessonKey, currentLesson, initializeLesson]);
 
     useEffect(() => {
         if (currentLesson && courseProgress) {
@@ -167,8 +167,6 @@ export default function LessonPage() {
             }
         });
     };
-
-    console.log(currentLesson);
 
     if (!currentLesson) {
         return (

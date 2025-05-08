@@ -40,7 +40,7 @@ const attachmentSchema = z.object({
 });
 
 const codeExampleSchema = z.object({
-    value: z.string().min(1, 'Code example cannot be empty'),
+    value: z.string().min(1, 'Пример кода обязателен'),
 });
 
 const taskSchema = z
@@ -266,11 +266,13 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
         <Dialog open={true} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
                 <DialogHeader>
-                    <DialogTitle>{isEditing ? `Edit Lesson: ${lesson?.title}` : 'Add New Lesson'}</DialogTitle>
+                    <DialogTitle>
+                        {isEditing ? `Редактирование урока: ${lesson?.title}` : 'Добавить новый урок'}
+                    </DialogTitle>
                     <DialogDescription>
                         {isEditing
-                            ? 'Modify the lesson content and details.'
-                            : 'Fill in the details for the new lesson.'}
+                            ? 'Измените содержимое и подробности урока.'
+                            : 'Заполните подробную информацию для нового урока.'}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -285,7 +287,7 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                         <FormLabel className="text-base font-semibold">Lesson Title</FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder="e.g., Setting up your environment"
+                                                placeholder="Например, настройка среды разработки"
                                                 {...field}
                                                 disabled={isSubmitting}
                                             />
@@ -299,7 +301,7 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                 name="content"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-base font-semibold">Content</FormLabel>
+                                        <FormLabel className="text-base font-semibold">Контент</FormLabel>
                                         <FormControl>
                                             <RichTextEditor
                                                 value={field.value ?? ''}
@@ -312,7 +314,7 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                 )}
                             />
                             <div className="space-y-2 rounded-md border p-4">
-                                <FormLabel className="text-base font-semibold">Code Examples</FormLabel>
+                                <FormLabel className="text-base font-semibold">Примеры кода</FormLabel>
                                 {codeExampleFields.map((field, index) => (
                                     <FormField
                                         key={field.id}
@@ -363,16 +365,16 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                     disabled={isSubmitting}
                                     className="mt-2"
                                 >
-                                    <PlusCircle className="mr-2 h-4 w-4" /> Add Code Example
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Добавить пример кода
                                 </Button>
                             </div>
 
                             <div className="space-y-4 rounded-md border p-4">
-                                <FormLabel className="text-base font-semibold">Tasks</FormLabel>
+                                <FormLabel className="text-base font-semibold">Задания</FormLabel>
                                 <div className="space-y-4">
                                     {taskFields.length === 0 && (
                                         <p className="text-sm text-muted-foreground px-2 py-4 text-center">
-                                            No tasks added yet.
+                                            Задания еще не добавлены.
                                         </p>
                                     )}
                                     {taskFields.map((field, index) => (
@@ -403,7 +405,7 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                     disabled={isSubmitting}
                                     className="mt-4"
                                 >
-                                    <PlusCircle className="mr-2 h-4 w-4" /> Add Task
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Добавить задание
                                 </Button>
                             </div>
 
@@ -413,7 +415,7 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel className="text-base font-semibold">
-                                            Main Attachment (Video, PDF, etc.)
+                                            Основное вложение (видео, PDF, и т.д.)
                                         </FormLabel>
                                         {field.value && (
                                             <div className="mt-1 flex items-center gap-2">
@@ -428,7 +430,7 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                                     className="text-xs text-destructive p-0 h-auto"
                                                     onClick={() => field.onChange(null)}
                                                 >
-                                                    Remove
+                                                    Удалить
                                                 </Button>
                                             </div>
                                         )}
@@ -451,7 +453,7 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                             />
 
                             <div className="space-y-2 rounded-md border p-4">
-                                <FormLabel className="text-base font-semibold">Additional Attachments</FormLabel>
+                                <FormLabel className="text-base font-semibold">Доп. вложения</FormLabel>
                                 <div className="space-y-2">
                                     {attachmentFields.map((field, index) => (
                                         <div
