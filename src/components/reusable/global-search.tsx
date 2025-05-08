@@ -33,6 +33,18 @@ const GlobalSearch = ({ className }: GlobalSearchProps) => {
 
     const abortControllerRef = useRef<AbortController | null>(null);
 
+    useEffect(() => {
+        const down = (e: KeyboardEvent) => {
+            if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                setOpen((open) => !open);
+            }
+        };
+
+        document.addEventListener('keydown', down);
+        return () => document.removeEventListener('keydown', down);
+    }, []);
+
     const runSearch = async (searchQuery: string) => {
         if (searchQuery.trim().length < 2) {
             setResults([]);
@@ -90,12 +102,17 @@ const GlobalSearch = ({ className }: GlobalSearchProps) => {
     return (
         <div className={cn('relative max-w-[400px] w-full', className)}>
             <Button
-                variant="default"
-                className="relative h-[32px] w-full justify-start rounded-[5px] px-3 text-sm md:w-64 lg:w-80"
+                variant="outline"
+                className="relative h-[32px] w-full justify-between rounded-[5px] px-3 text-sm md:w-64 lg:w-80 group"
                 onClick={() => setOpen(true)}
             >
-                <Search className="mr-2 h-4 w-4" />
-                <span>Найти курс или автора...</span>
+                <div className="flex items-center">
+                    <Search className="mr-2 h-4 w-4" />
+                    <span>Найти курс или автора...</span>
+                </div>
+                <kbd className="pointer-events-none hidden h-6 select-none items-center gap-1 rounded border bg-muted/40 group-hover:bg-primary group-hover:text-background px-1.5 font-mono text-xs font-medium opacity-100 sm:flex">
+                    <span className="text-xs">Ctrl</span>K
+                </kbd>
             </Button>
             <CommandDialog open={open} onOpenChange={setOpen}>
                 <CommandInput placeholder="Найти курс или автора..." value={query} onValueChange={setQuery} />
