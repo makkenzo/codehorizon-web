@@ -63,7 +63,7 @@ const CatalogDropdown = ({ categories, isLoading }: CatalogDropdownProps) => {
             <DropdownMenuContent className="w-72 left-12 after:right-0 after:left-7 after:-z-1" align="start">
                 <DropdownMenuGroup>
                     {linksToRender.map((category) =>
-                        category.subItems ? (
+                        category && category.subItems ? (
                             <DropdownMenuSub key={category.label}>
                                 <DropdownMenuSubTrigger>
                                     <div className="flex flex-col px-3 py-2">
@@ -75,30 +75,36 @@ const CatalogDropdown = ({ categories, isLoading }: CatalogDropdownProps) => {
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
                                     <DropdownMenuSubContent alignOffset={0} sideOffset={5}>
-                                        {category.subItems.map((subCategory) => (
-                                            <DropdownMenuItem
-                                                key={subCategory.label}
-                                                className="py-2 px-3 focus:no-underline group"
-                                            >
-                                                <div className="flex flex-col gap-0">
-                                                    <h2 className="font-medium group-focus:underline">
-                                                        {subCategory.label}
-                                                    </h2>
-                                                    <p className="text-xs text-muted-foreground ">
-                                                        {subCategory.description}
-                                                    </p>
-                                                </div>
-                                            </DropdownMenuItem>
-                                        ))}
+                                        {category.subItems.map((subCategory) => {
+                                            if (!subCategory) return null;
+                                            return (
+                                                <DropdownMenuItem
+                                                    key={subCategory.label}
+                                                    className="py-2 px-3 focus:no-underline group"
+                                                >
+                                                    <div className="flex flex-col gap-0">
+                                                        <h2 className="font-medium group-focus:underline">
+                                                            {subCategory.label}
+                                                        </h2>
+                                                        <p className="text-xs text-muted-foreground ">
+                                                            {subCategory.description}
+                                                        </p>
+                                                    </div>
+                                                </DropdownMenuItem>
+                                            );
+                                        })}
                                     </DropdownMenuSubContent>
                                 </DropdownMenuPortal>
                             </DropdownMenuSub>
                         ) : (
-                            <Link key={`${category.label}-${category.label}`} href={category.href || '#'}>
+                            <Link
+                                key={`${category?.label ?? 'category'}-${category?.label ?? 'label'}`}
+                                href={category?.href || '#'}
+                            >
                                 <DropdownMenuItem className="group focus:no-underline">
                                     <div className="flex flex-col px-3 py-2 group">
-                                        <h2 className="font-medium group-focus:underline">{category.label}</h2>
-                                        <p className="text-xs text-muted-foreground">{category.description}</p>
+                                        <h2 className="font-medium group-focus:underline">{category?.label}</h2>
+                                        <p className="text-xs text-muted-foreground">{category?.description}</p>
                                     </div>
                                 </DropdownMenuItem>
                             </Link>
