@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
 import { AnimatePresence } from 'framer-motion';
+import { Check, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { FaWandMagicSparkles } from 'react-icons/fa6';
 import { z } from 'zod';
@@ -31,20 +32,26 @@ const ANIMATION_DELAYS = {
 const formSchema = z
     .object({
         username: z
-            .string({ message: 'Обязательно для заполнения' })
-            .min(6, { message: 'Имя пользователя должно быть не менее 6 символов' })
-            .max(50, { message: 'Имя пользователя должно быть не более 50 символов' })
-            .trim(),
+            .string({ required_error: 'Обязательно для заполнения' })
+            .trim()
+            .min(3, { message: 'Имя пользователя должно быть не менее 3 символов' })
+            .max(50, { message: 'Имя пользователя должно быть не более 50 символов' }),
         email: z
-            .string({ message: 'Обязательно для заполнения' })
+            .string({ required_error: 'Обязательно для заполнения' })
             .email({ message: 'Неверный формат электронной почты' })
             .trim(),
         password: z
             .string({ message: 'Обязательно для заполнения' })
             .min(8, { message: 'Пароль должен быть не менее 8 символов' })
             .max(50, { message: 'Пароль должен быть не более 50 символов' })
-            .trim(),
-        confirmPassword: z.string({ message: 'Обязательно для заполнения' }).trim(),
+            .regex(/[A-Z]/, { message: 'Пароль должен содержать хотя бы одну заглавную букву' })
+            .regex(/[0-9]/, { message: 'Пароль должен содержать хотя бы одну цифру' })
+            .regex(/[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?]/, {
+                message: 'Пароль должен содержать хотя бы один спецсимвол',
+            })
+            .trim()
+            .refine((val) => !/\\s/.test(val), { message: 'Пароль не должен содержать пробелов' }),
+        confirmPassword: z.string({ required_error: 'Обязательно для заполнения' }).trim(),
     })
     .refine((data) => data.password === data.confirmPassword, {
         message: 'Пароли не совпадают',
@@ -77,6 +84,31 @@ const SignUpPage = () => {
             setStatus('error');
         }
     };
+
+    const formPassword = form.watch('password');
+
+    const passwordValidations = [
+        {
+            id: 'length',
+            label: 'Минимум 8 символов',
+            valid: formPassword.length >= 8,
+        },
+        {
+            id: 'digit',
+            label: 'Минимум 1 цифра',
+            valid: /\d/.test(formPassword),
+        },
+        {
+            id: 'special',
+            label: 'Минимум 1 специальный символ',
+            valid: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+/.test(formPassword),
+        },
+        {
+            id: 'uppercase',
+            label: 'Минимум 1 заглавная буква',
+            valid: /[A-Z]/.test(formPassword),
+        },
+    ];
 
     return (
         <AnimatePresence>
@@ -123,6 +155,7 @@ const SignUpPage = () => {
                                                         type="text"
                                                         className="!text-lg"
                                                         {...field}
+                                                        aria-required="true"
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -143,6 +176,7 @@ const SignUpPage = () => {
                                                         type="email"
                                                         className="!text-lg"
                                                         {...field}
+                                                        aria-required="true"
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -163,9 +197,30 @@ const SignUpPage = () => {
                                                         type="password"
                                                         className="!text-lg"
                                                         {...field}
+                                                        aria-required="true"
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
+                                                <div className="space-y-2 mt-2">
+                                                    {passwordValidations.map((validation) => (
+                                                        <div key={validation.id} className="flex items-center gap-2">
+                                                            {formPassword.length > 0 ? (
+                                                                validation.valid ? (
+                                                                    <Check className="h-4 w-4 text-success" />
+                                                                ) : (
+                                                                    <X className="h-4 w-4 text-destructive" />
+                                                                )
+                                                            ) : (
+                                                                <div className="h-4 w-4 rounded-full border border-gray-300" />
+                                                            )}
+                                                            <span
+                                                                className={`text-sm ${formPassword.length > 0 && validation.valid ? 'text-green-500' : formPassword.length > 0 ? 'text-red-500' : 'text-gray-500'}`}
+                                                            >
+                                                                {validation.label}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </FormItem>
                                         )}
                                     />
@@ -183,6 +238,7 @@ const SignUpPage = () => {
                                                         type="password"
                                                         className="!text-lg"
                                                         {...field}
+                                                        aria-required="true"
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
