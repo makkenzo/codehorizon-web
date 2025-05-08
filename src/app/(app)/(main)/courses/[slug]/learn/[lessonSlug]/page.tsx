@@ -48,8 +48,14 @@ export default function LessonPage() {
     const courseSlug = params.slug as string;
     const lessonSlug = params.lessonSlug as string;
 
+    console.log(course?.lessons.find((lesson) => lesson.slug === lessonSlug));
+
     const currentLesson = useMemo(() => {
-        return course?.lessons.find((lesson) => lesson.slug === lessonSlug) ?? null;
+        return (
+            course?.lessons.find(
+                (lesson) => decodeURIComponent(lesson.slug.trim()) === decodeURIComponent(lessonSlug.trim())
+            ) ?? null
+        );
     }, [course, lessonSlug]);
 
     const apiClient = new CoursesApiClient();
@@ -161,6 +167,8 @@ export default function LessonPage() {
             }
         });
     };
+
+    console.log(currentLesson);
 
     if (!currentLesson) {
         return (
@@ -277,7 +285,7 @@ export default function LessonPage() {
                 <>
                     <h2 className="not-prose text-xl font-semibold mt-6 mb-3">Задачи</h2>
                     {currentLesson.tasks.map((task, index) => (
-                        <TaskDisplay key={task.id || index} task={task} index={index} lessonKey={lessonKey} />
+                        <TaskDisplay key={`${task.id}-${index}`} task={task} index={index} lessonKey={lessonKey} />
                     ))}
                 </>
             )}
@@ -287,7 +295,7 @@ export default function LessonPage() {
                     <h2 className="not-prose text-xl font-semibold mt-6 mb-3">Вложения</h2>
                     <div className="not-prose flex flex-wrap gap-3">
                         {currentLesson.attachments.map((att, index) => (
-                            <AttachmentLink key={att.url || index} attachment={att} />
+                            <AttachmentLink key={`${att.url}-${Date.now()}`} attachment={att} />
                         ))}
                     </div>
                 </>

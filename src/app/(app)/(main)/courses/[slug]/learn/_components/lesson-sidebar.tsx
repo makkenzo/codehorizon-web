@@ -1,6 +1,7 @@
 'use client';
 
 import { CheckCircle2, ChevronLeft } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -19,8 +20,6 @@ const LessonSidebar = ({ course, isCourseCompleted }: LessonSidebarProps) => {
     const pathname = usePathname();
     const { courseProgress } = useCourseLearnContext();
     const completedLessons = courseProgress?.completedLessons ?? [];
-
-    console.log(completedLessons);
 
     return (
         <aside className="w-64 h-full border-r border-border p-4 overflow-y-auto shrink-0 md:block hidden bg-card">
@@ -59,7 +58,7 @@ const LessonSidebar = ({ course, isCourseCompleted }: LessonSidebarProps) => {
 
                         return (
                             <Link
-                                key={lesson.slug}
+                                key={`${lesson.slug}-${uuidv4()}`}
                                 href={lessonPath}
                                 className={cn(
                                     'text-sm p-2 rounded-md hover:bg-muted flex items-center justify-between gap-2 group',

@@ -151,9 +151,9 @@ class CoursesApiClient extends ApiClient {
     async checkCourseAccess(courseId: string): Promise<boolean> {
         const endpoint = `/users/me/courses/${courseId}/access`;
         try {
-            await this.get<boolean>(endpoint);
+            const response = await this.get<boolean>(endpoint);
 
-            return true;
+            return response.data;
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
                 const status = error.response?.status;
@@ -250,6 +250,17 @@ class CoursesApiClient extends ApiClient {
                 return null;
             }
             console.error(`Ошибка при получении прогресса для курса ${courseId}:`, error);
+            throw error;
+        }
+    }
+
+    async enrollFreeCourse(courseId: string): Promise<void> {
+        const endpoint = `/courses/${courseId}/enroll`;
+        try {
+            const response = await this.post<void>(endpoint);
+            return response.data;
+        } catch (error: unknown) {
+            console.error(`Ошибка при записи на бесплатный курс ${courseId}:`, error);
             throw error;
         }
     }

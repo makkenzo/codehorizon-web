@@ -82,6 +82,7 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
 
                 if (accessResult.status === 'fulfilled') {
                     accessGranted = accessResult.value;
+
                     setHasAccess(accessGranted);
                 } else {
                     setHasAccess(false);
@@ -107,8 +108,14 @@ export default function CourseLearnLayout({ children }: { children: React.ReactN
 
                 if (accessGranted) {
                     const fullCourse = await apiClient.getCourseLearnContent(courseId);
-                    if (fullCourse) {
-                        const lessonExists = fullCourse.lessons.some((lesson) => lesson.slug === lessonSlug);
+
+                    if (fullCourse && lessonSlug) {
+                        const lessonExists = fullCourse.lessons.some(
+                            (lesson) => decodeURIComponent(lesson.slug.trim()) === decodeURIComponent(lessonSlug.trim())
+                        );
+
+                        console.log(fullCourse.lessons[0]);
+
                         if (!lessonExists && fullCourse.lessons.length > 0) {
                             const firstLessonSlug = fullCourse.lessons[0].slug;
                             toast.info('Запрошенный урок не найден, открываем первый урок курса.');

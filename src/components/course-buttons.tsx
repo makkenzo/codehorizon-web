@@ -48,6 +48,7 @@ const CourseButtons = ({
     const user = useUserStore((state) => state.user);
     const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
     const [access, setAccess] = useState<boolean | null>(null);
+    const [isEnrolling, setIsEnrolling] = useState(false);
 
     const [isInWishlist, setIsInWishlist] = useState(false);
     const [isWishlistPending, startWishlistTransition] = useTransition();
@@ -71,15 +72,43 @@ const CourseButtons = ({
         };
 
         const fetchAccess = async () => {
-            const response = await apiClient.checkCourseAccess(course.id).catch((error) => {
-                console.error(`Ошибка при проверке доступа к курсу ${course.id}:`, error);
-            });
-            setAccess(!!response);
+            const response = await apiClient
+                .checkCourseAccess(course.id)
+                .then((data) => {
+                    setAccess(data);
+                })
+                .catch((error) => {
+                    console.error(`Ошибка при проверке доступа к курсу ${course.id}:`, error);
+                });
         };
 
         fetchAccess();
         fetchWishlistStatus();
     }, [isAuthenticated, user, course.id, apiClient]);
+
+    const handleEnrollFree = async () => {
+        if (!isAuthenticated || !user) {
+            router.push(`/sign-in?from=/courses/${course.slug}`);
+            return;
+        }
+
+        setIsEnrolling(true);
+        try {
+            const result = await apiClient.enrollFreeCourse(course.id);
+
+            toast.success('Вы успешно записаны на курс!');
+            setAccess(true);
+        } catch (error: unknown) {
+            console.error('Ошибка записи на бесплатный курс:', error);
+            let errorMsg = 'Не удалось записаться на курс.';
+            if (isAxiosError(error) && error.response?.data?.message) {
+                errorMsg = `Ошибка: ${error.response.data.message}`;
+            }
+            toast.error(errorMsg);
+        } finally {
+            setIsEnrolling(false);
+        }
+    };
 
     const handleCheckout = async () => {
         if (!isAuthenticated || !user) {
@@ -191,55 +220,97 @@ const CourseButtons = ({
         );
     }
 
-    return (
-        <div className={cn('space-y-4', className)}>
-            <div className="mb-4">
-                <Price
-                    discount={course.discount}
-                    price={course.price}
-                    isFree={course.isFree}
-                    priceClassName="text-2xl"
-                    discountPriceClassName="text-xl ml-4"
-                />
-                {course.discount ? (
-                    <div className="bg-warning text-white font-bold w-fit p-1 rounded-[2px]">
-                        СКИДКА {getPercentDifference(course.price, course.price - course.discount)}
-                    </div>
-                ) : null}
+    if (course.isFree) {
+        return (
+            <div className={cn('space-y-4', className)}>
+                <div className="mb-4">
+                    <Price price={0} isFree={true} priceClassName="text-2xl" />
+                </div>
+                <div className="w-full flex flex-col gap-4 mt-8">
+                    <Button
+                        id="course-buttons-enroll-free"
+                        size="lg"
+                        onClick={handleEnrollFree}
+                        isLoading={isEnrolling}
+                        disabled={isEnrolling}
+                    >
+                        Записаться бесплатно
+                    </Button>
+                    <Button
+                        variant={isInWishlist ? 'secondary' : 'outline'}
+                        size="lg"
+                        onClick={handleToggleWishlist}
+                        isLoading={isWishlistPending}
+                        aria-live="polite"
+                    >
+                        {isWishlistPending ? (
+                            <>
+                                <span>Обновление...</span>
+                            </>
+                        ) : isInWishlist ? (
+                            <>
+                                <FaRegHeart className="size-5" />В желаемом
+                            </>
+                        ) : (
+                            <>
+                                <FaRegHeart className="size-5" />В желаемое
+                            </>
+                        )}
+                    </Button>
+                </div>
             </div>
-            <div className="w-full flex flex-col gap-4 mt-8">
-                <Button
-                    id="course-buttons-buy-main-action"
-                    size="lg"
-                    onClick={handleCheckout}
-                    isLoading={isCheckoutLoading}
-                >
-                    {course.isFree ? 'Получить бесплатно' : 'Купить курс'}
-                </Button>
-                <Button
-                    variant={isInWishlist ? 'secondary' : 'outline'}
-                    size="lg"
-                    onClick={handleToggleWishlist}
-                    isLoading={isWishlistPending}
-                    aria-live="polite"
-                >
-                    {isWishlistPending ? (
-                        <>
-                            <span>Обновление...</span>
-                        </>
-                    ) : isInWishlist ? (
-                        <>
-                            <FaRegHeart className="size-5" />В желаемом
-                        </>
-                    ) : (
-                        <>
-                            <FaRegHeart className="size-5" />В желаемое
-                        </>
-                    )}
-                </Button>
+        );
+    } else {
+        return (
+            <div className={cn('space-y-4', className)}>
+                <div className="mb-4">
+                    <Price
+                        discount={course.discount}
+                        price={course.price}
+                        isFree={course.isFree}
+                        priceClassName="text-2xl"
+                        discountPriceClassName="text-xl ml-4"
+                    />
+                    {course.discount ? (
+                        <div className="bg-warning text-white font-bold w-fit p-1 rounded-[2px]">
+                            СКИДКА {getPercentDifference(course.price, course.price - course.discount)}
+                        </div>
+                    ) : null}
+                </div>
+                <div className="w-full flex flex-col gap-4 mt-8">
+                    <Button
+                        id="course-buttons-buy-main-action"
+                        size="lg"
+                        onClick={handleCheckout}
+                        isLoading={isCheckoutLoading}
+                    >
+                        {course.isFree ? 'Получить бесплатно' : 'Купить курс'}
+                    </Button>
+                    <Button
+                        variant={isInWishlist ? 'secondary' : 'outline'}
+                        size="lg"
+                        onClick={handleToggleWishlist}
+                        isLoading={isWishlistPending}
+                        aria-live="polite"
+                    >
+                        {isWishlistPending ? (
+                            <>
+                                <span>Обновление...</span>
+                            </>
+                        ) : isInWishlist ? (
+                            <>
+                                <FaRegHeart className="size-5" />В желаемом
+                            </>
+                        ) : (
+                            <>
+                                <FaRegHeart className="size-5" />В желаемое
+                            </>
+                        )}
+                    </Button>
+                </div>
             </div>
-        </div>
-    );
+        );
+    }
 };
 
 export default CourseButtons;
