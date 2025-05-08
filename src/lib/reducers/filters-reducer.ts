@@ -13,6 +13,7 @@ export const initialFiltersState: CatalogFiltersState = {
     categories: [],
     level: [],
     sortBy: 'popular',
+    priceStatus: 'all',
 };
 
 /**
