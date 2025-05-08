@@ -1,3 +1,5 @@
+export type PriceStatus = 'all' | 'free' | 'paid';
+
 export type FiltersActionType =
     | 'SET_RATING'
     | 'SET_PAGE'
@@ -7,6 +9,7 @@ export type FiltersActionType =
     | 'TOGGLE_CATEGORY'
     | 'TOGGLE_LEVEL'
     | 'SET_CATEGORIES'
+    | 'SET_PRICE_STATUS'
     | 'SET_LEVELS'
     | 'SET_VIDEO_DURATIONS'
     | 'RESET';
@@ -19,6 +22,7 @@ export type CatalogFiltersState = {
     categories: string[];
     level: string[];
     sortBy: string;
+    priceStatus: PriceStatus;
 };
 
 export type CatalogFiltersActions = {
@@ -30,6 +34,7 @@ export type CatalogFiltersActions = {
     toggleLevel: (level: string) => void;
     setSortBy: (sortBy: string) => void;
     setCategories: (categories: string[]) => void;
+    setPriceStatus: (status: PriceStatus) => void;
     setLevels: (levels: string[]) => void;
     setVideoDurations: (durations: string[]) => void;
     reset: () => void;

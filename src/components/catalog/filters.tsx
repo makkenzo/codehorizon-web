@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { formatNumber } from '@/lib/utils';
 import CoursesApiClient from '@/server/courses';
 import { useCatalogFiltersStore } from '@/stores/catalog-filters/catalog-filters-store-provider';
+import { PriceStatus } from '@/stores/catalog-filters/types';
 import { CourseDifficultyLevels } from '@/types';
 
 import { Skeleton } from '../ui/skeleton';
@@ -24,7 +25,8 @@ const CatalogFilters = () => {
         level,
         rating,
         videoDuration,
-
+        priceStatus = 'all',
+        setPriceStatus,
         reset,
         setRating,
         toggleCategory,
@@ -104,6 +106,47 @@ const CatalogFilters = () => {
                     Сбросить
                 </Button>
             </motion.div>
+            <Separator />
+
+            <motion.div
+                className="flex items-center justify-between px-6"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.6 }} // Увеличиваем задержку для нового элемента
+            >
+                <Accordion type="single" collapsible defaultValue="price-status" className="w-full">
+                    <AccordionItem value="price-status">
+                        <AccordionTrigger className="font-semibold">Цена</AccordionTrigger>
+                        <AccordionContent>
+                            <RadioGroup value={priceStatus} onValueChange={(val) => setPriceStatus(val as PriceStatus)}>
+                                {[
+                                    { value: 'all', label: 'Все курсы' },
+                                    { value: 'free', label: 'Бесплатные' },
+                                    { value: 'paid', label: 'Платные' },
+                                ].map((item, i) => (
+                                    <motion.div
+                                        key={item.value}
+                                        className="flex items-center gap-2"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        transition={{ duration: 0.3, delay: i * 0.05 }}
+                                    >
+                                        <RadioGroupItem value={item.value} id={`price-${item.value}`} />
+                                        <Label
+                                            htmlFor={`price-${item.value}`}
+                                            className="w-full text-black-60/60 dark:text-white/70"
+                                        >
+                                            {item.label}
+                                        </Label>
+                                    </motion.div>
+                                ))}
+                            </RadioGroup>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+            </motion.div>
+
             <Separator />
 
             {/* Рейтинг */}

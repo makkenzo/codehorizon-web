@@ -1,6 +1,6 @@
 import { createStore } from 'zustand';
 
-import { CatalogFiltersState, CatalogFiltersStore } from './types';
+import { CatalogFiltersState, CatalogFiltersStore, PriceStatus } from './types';
 
 export const defaultInitState: CatalogFiltersState = {
     page: 1,
@@ -9,6 +9,7 @@ export const defaultInitState: CatalogFiltersState = {
     videoDuration: [],
     categories: [],
     level: [],
+    priceStatus: 'all',
     sortBy: 'popular',
 };
 
@@ -30,6 +31,7 @@ export const createCatalogFiltersStore = (initState: CatalogFiltersState = defau
                     ? state.categories.filter((c) => c !== category)
                     : [...state.categories, category],
             })),
+        setPriceStatus: (status: PriceStatus) => set(() => ({ priceStatus: status, page: 1 })),
         toggleLevel: (level: string) =>
             set((state) => ({
                 level: state.level.includes(level) ? state.level.filter((l) => l !== level) : [...state.level, level],

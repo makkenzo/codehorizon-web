@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { mapFiltersToApiParams } from '@/lib/utils';
 import CoursesApiClient from '@/server/courses';
 import { useCatalogFiltersStore } from '@/stores/catalog-filters/catalog-filters-store-provider';
-import { CatalogFiltersState } from '@/stores/catalog-filters/types';
+import { CatalogFiltersState, PriceStatus } from '@/stores/catalog-filters/types';
 import { Course } from '@/types';
 
 const CoursesPageContent = () => {
@@ -28,6 +28,8 @@ const CoursesPageContent = () => {
         sortBy,
         setSortBy,
         page,
+        priceStatus,
+        setPriceStatus,
         setPage,
         totalPages,
         setTotalPages,
@@ -46,6 +48,7 @@ const CoursesPageContent = () => {
         const durationParams = searchParams.getAll('duration');
         const sortByParam = searchParams.get('sortBy');
         const pageParam = searchParams.get('page');
+        const priceStatusParam = searchParams.get('priceStatus');
 
         if (
             categoryParams.length > 0 &&
@@ -83,6 +86,12 @@ const CoursesPageContent = () => {
             setSortBy('popular');
         }
 
+        if (priceStatusParam && priceStatusParam !== priceStatus) {
+            setPriceStatus(priceStatusParam as PriceStatus);
+        } else if (!priceStatusParam && priceStatus !== 'all') {
+            setPriceStatus('all');
+        }
+
         const pageNumber = parseInt(pageParam || '1', 10);
         if (!isNaN(pageNumber) && pageNumber !== page) {
             setPage(pageNumber);
@@ -115,8 +124,8 @@ const CoursesPageContent = () => {
             }
         };
 
-        fetchCourses({ categories, level, rating, videoDuration, sortBy, page });
-    }, [categories, level, rating, videoDuration, sortBy, page, setTotalPages, totalPages]);
+        fetchCourses({ categories, level, rating, videoDuration, sortBy, page, priceStatus });
+    }, [categories, level, rating, videoDuration, priceStatus, sortBy, page, setTotalPages, totalPages]);
 
     const handlePageChange = (newPage: number) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -126,6 +135,8 @@ const CoursesPageContent = () => {
     };
 
     const handleSortChange = (value: string) => {
+        setPage(1);
+
         const params = new URLSearchParams(searchParams.toString());
         params.set('sortBy', value);
         params.set('page', '1');
@@ -145,6 +156,7 @@ const CoursesPageContent = () => {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="popular">Самые популярные</SelectItem>
+                            <SelectItem value="date_desc">Сначала новые</SelectItem>
                             <SelectItem value="price_asc">Сначала дешевые</SelectItem>
                             <SelectItem value="price_desc">Сначала дорогие</SelectItem>
                         </SelectContent>

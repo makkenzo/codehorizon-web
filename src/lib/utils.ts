@@ -31,12 +31,16 @@ export const mapFiltersToApiParams = (filters: Omit<CatalogFiltersState, 'totalP
     const minDuration = durations.length > 0 ? Math.min(...durations) : undefined;
     const maxDuration = durations.length > 1 ? Math.max(...durations) : undefined;
 
+    const isFreeParam: boolean | undefined =
+        filters.priceStatus === 'free' ? true : filters.priceStatus === 'paid' ? false : undefined;
+
     return {
         minRating: filters.rating === 'all' ? undefined : extractNumber(filters.rating),
         minDuration,
         maxDuration,
         category: filters.categories.length > 0 ? filters.categories.join(',') : undefined,
         difficulty: filters.level.length > 0 ? filters.level.map((l) => l.toUpperCase()) : undefined,
+        isFree: isFreeParam,
         sortBy: filters.sortBy,
         page: filters.page,
     };
