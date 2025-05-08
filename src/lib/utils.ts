@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 import { CatalogFiltersState } from '@/stores/catalog-filters/types';
+import { PopularAuthorDTO } from '@/types';
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -57,4 +58,28 @@ export const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     return hours > 0 ? `${hours} ч ${minutes} мин` : `${minutes} мин`;
+};
+
+export const getDisplayName = (author: PopularAuthorDTO) => {
+    if (author.firstName && author.lastName) {
+        return `${author.firstName} ${author.lastName}`;
+    } else if (author.firstName) {
+        return author.firstName;
+    } else if (author.lastName) {
+        return author.lastName;
+    } else {
+        return author.username;
+    }
+};
+
+export const getInitials = (author: PopularAuthorDTO) => {
+    if (author.firstName && author.lastName) {
+        return `${author.firstName[0]}${author.lastName[0]}`.toUpperCase();
+    } else if (author.firstName) {
+        return author.firstName[0].toUpperCase();
+    } else if (author.lastName) {
+        return author.lastName[0].toUpperCase();
+    } else {
+        return author.username[0].toUpperCase();
+    }
 };

@@ -1,8 +1,10 @@
+import { useState } from 'react';
+
 import { BookOpen } from 'lucide-react';
-import { FaUserSecret } from 'react-icons/fa6';
 
 import Link from 'next/link';
 
+import { getDisplayName, getInitials } from '@/lib/utils';
 import { PopularAuthorDTO } from '@/types';
 
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -13,42 +15,56 @@ interface AuthorCardProps {
 }
 
 const AuthorCard = ({ author }: AuthorCardProps) => {
+    const [hoveredAuthor, setHoveredAuthor] = useState<string | null>(null);
+
     const displayName =
         author.firstName || author.lastName
             ? `${author.firstName || ''} ${author.lastName || ''}`.trim()
             : author.username;
 
     return (
-        <Link href={`/u/${author.username}`} className="block group">
-            <Card className="overflow-hidden space-y-[40px] hover:shadow-lg transition-shadow duration-200 h-full bg-gradient-to-br from-primary/20 to-primary/5">
-                <div className="h-24 relative">
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2">
-                        <Avatar
-                            className="size-32 border-4 border-background group-hover:scale-105 transition-transform duration-200"
-                            style={{ backgroundColor: author.avatarColor ?? undefined }}
-                        >
-                            {author.avatarUrl && <AvatarImage src={author.avatarUrl} alt={author.username} />}
-                            <AvatarFallback className="text-2xl">
-                                {displayName?.[0]?.toUpperCase() ?? <FaUserSecret />}
+        <Link
+            href={`/u/${author.username}`}
+            onMouseEnter={() => setHoveredAuthor(author.userId)}
+            onMouseLeave={() => setHoveredAuthor(null)}
+            className="block h-full"
+        >
+            <Card
+                className={`overflow-hidden h-full p-0 transition-all duration-300 ${
+                    hoveredAuthor === author.userId ? 'shadow-lg transform -translate-y-1' : 'shadow-sm'
+                }`}
+            >
+                <CardContent className="p-6">
+                    <div className="flex flex-col items-center text-center">
+                        <Avatar className="h-24 w-24 mb-4">
+                            <AvatarImage src={author.avatarUrl || undefined} alt={getDisplayName(author)} />
+                            <AvatarFallback
+                                style={{ backgroundColor: author.avatarColor || undefined }}
+                                className="text-xl"
+                            >
+                                {getInitials(author)}
                             </AvatarFallback>
                         </Avatar>
-                    </div>
-                </div>
-                <CardContent className="pt-12 p-4 text-center">
-                    <h3 className="font-semibold text-lg truncate group-hover:text-primary transition-colors">
-                        {displayName}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">@{author.username}</p>
-                    <div className="flex items-center justify-center gap-1 mt-2 text-xs text-muted-foreground">
-                        <BookOpen className="h-3 w-3" />
-                        <span>
-                            {author.courseCount}{' '}
-                            {author.courseCount === 1
-                                ? 'курс'
-                                : author.courseCount > 1 && author.courseCount < 5
-                                  ? 'курса'
-                                  : 'курсов'}
-                        </span>
+
+                        <h3 className="font-semibold text-xl mb-1">{getDisplayName(author)}</h3>
+                        <p className="text-muted-foreground text-sm mb-4">@{author.username}</p>
+
+                        <div className="flex items-center justify-center mt-2 text-sm">
+                            <BookOpen className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <span>
+                                {author.courseCount} {author.courseCount === 1 ? 'курс' : 'курса'}
+                            </span>
+                        </div>
+
+                        <div
+                            className={`
+                        mt-4 py-2 px-4 rounded-full bg-primary text-primary-foreground
+                        font-medium text-sm transition-all duration-300
+                        ${hoveredAuthor === author.userId ? 'opacity-100' : 'opacity-0'}
+                      `}
+                        >
+                            Посмотреть профиль
+                        </div>
                     </div>
                 </CardContent>
             </Card>
