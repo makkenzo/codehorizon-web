@@ -15,7 +15,7 @@ import CourseClientPageReviews from './course-client-page';
 
 export interface CoursePageClientActionsAndTimelineProps {
     courseFromServer: Omit<
-        Pick<Course, 'id' | 'slug' | 'title' | 'price' | 'discount' | 'rating' | 'lessons'>,
+        Pick<Course, 'id' | 'slug' | 'title' | 'price' | 'discount' | 'isFree' | 'rating' | 'lessons'>,
         'lessons'
     > & {
         lessons: Array<Pick<Lesson, 'id' | 'title' | 'slug' | 'videoLength'>>;

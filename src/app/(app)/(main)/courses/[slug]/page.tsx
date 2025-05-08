@@ -107,6 +107,7 @@ const CoursePage = async ({ params }: CoursePageProps) => {
         slug: courseData.slug,
         title: courseData.title,
         price: courseData.price,
+        isFree: courseData.isFree,
         discount: courseData.discount,
         rating: courseData.rating,
         lessons: lessonsForClient,
@@ -200,6 +201,7 @@ const CoursePage = async ({ params }: CoursePageProps) => {
                                     price: courseData.price,
                                     slug: courseData.slug,
                                     lessons: lessonsForClient,
+                                    isFree: courseData.isFree,
                                 }}
                             />
                             <div className="flex flex-col gap-3 text-black-60/60 mt-6">

@@ -28,7 +28,7 @@ import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
 import { Skeleton } from '../ui/skeleton';
 
-const UNLOCKED_INITIALLY = 3;
+const UNLOCKED_INITIALLY = 0;
 
 export interface TimelineModule {
     id: string;
@@ -281,7 +281,9 @@ const CourseTimeline = ({
                                             className="h-auto p-0 text-primary text-xs"
                                             onClick={onPurchase}
                                         >
-                                            Купить для разблокировки
+                                            {courseFromServer.isFree
+                                                ? 'Получить для разблокировки'
+                                                : 'Купить для разблокировки'}
                                         </Button>
                                     </div>
                                 )}
@@ -370,7 +372,7 @@ const CourseTimeline = ({
                             className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
                             onClick={onPurchase}
                         >
-                            Купить курс
+                            {courseFromServer.isFree ? 'Получить бесплатно' : 'Купить курс'}
                         </Button>
                     </div>
                 </div>

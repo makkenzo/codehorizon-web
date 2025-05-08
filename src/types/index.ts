@@ -54,6 +54,7 @@ export interface Course {
     rating: number;
     price: number;
     discount: number;
+    isFree: boolean;
     category?: string;
     difficulty: CourseDifficultyLevels;
     videoLength?: number;

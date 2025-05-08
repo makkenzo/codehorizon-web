@@ -15,7 +15,7 @@ import { useAuth } from '@/providers/auth-provider';
 import CoursesApiClient from '@/server/courses';
 import PaymentsApiClient from '@/server/payments';
 import { useUserStore } from '@/stores/user/user-store-provider';
-import { Course, Lesson, UserCourseDTO, UserSpecificCourseProgressDetails } from '@/types';
+import { Lesson, UserSpecificCourseProgressDetails } from '@/types';
 
 import Price from './reusable/price';
 import { Button } from './ui/button';
@@ -29,6 +29,7 @@ interface CourseButtonsProps {
         slug: string;
         price: number;
         discount: number;
+        isFree: boolean;
         lessons: Pick<Lesson, 'title' | 'slug' | 'id' | 'videoLength'>[];
     };
 
@@ -196,6 +197,7 @@ const CourseButtons = ({
                 <Price
                     discount={course.discount}
                     price={course.price}
+                    isFree={course.isFree}
                     priceClassName="text-2xl"
                     discountPriceClassName="text-xl ml-4"
                 />
@@ -212,7 +214,7 @@ const CourseButtons = ({
                     onClick={handleCheckout}
                     isLoading={isCheckoutLoading}
                 >
-                    Купить курс
+                    {course.isFree ? 'Получить бесплатно' : 'Купить курс'}
                 </Button>
                 <Button
                     variant={isInWishlist ? 'secondary' : 'outline'}

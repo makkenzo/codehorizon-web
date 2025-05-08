@@ -64,6 +64,7 @@ export interface AdminCourseDetailDTO {
     authorUsername: string;
     price: number;
     discount: number;
+    isFree: boolean;
     difficulty: CourseDifficultyLevels;
     category: string | null;
     videoLength: number | null;

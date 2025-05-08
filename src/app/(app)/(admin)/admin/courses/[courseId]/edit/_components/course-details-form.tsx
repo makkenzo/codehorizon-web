@@ -13,6 +13,7 @@ import Image from 'next/image';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
@@ -47,6 +48,7 @@ const courseDetailsFormSchema = z.object({
     description: z.string().optional().or(z.literal('')),
     price: z.coerce.number().min(0, 'Цена не может быть отрицательной'),
     discount: z.coerce.number().min(0).optional().default(0),
+    isFree: z.boolean().optional().default(false),
     difficulty: z.nativeEnum(CourseDifficultyLevels),
     category: z.string().optional().or(z.literal('')),
     authorId: z.string().min(1, 'Автор обязателен'),
@@ -81,6 +83,7 @@ const defaultValues: Partial<CourseDetailsFormData> = {
     description: '',
     price: 0,
     discount: 0,
+    isFree: false,
     difficulty: CourseDifficultyLevels.BEGINNER,
     category: '',
     authorId: '',
@@ -151,7 +154,7 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
                   discount: course?.discount ?? 0,
                   difficulty: course?.difficulty ?? CourseDifficultyLevels.BEGINNER,
                   category: course?.category ?? '',
-
+                  isFree: course?.isFree ?? false,
                   imagePreview: course?.imagePreview ?? null,
                   videoPreview: course?.videoPreview ?? null,
                   featuresBadge: course.featuresBadge ?? null,
@@ -167,6 +170,8 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
             : { ...defaultValues, authorId: forcedAuthorId ?? '' },
     });
 
+    const formIsFree = form.watch('isFree');
+
     useEffect(() => {
         if (course) {
             form.reset({
@@ -177,7 +182,7 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
                 discount: course.discount ?? 0,
                 difficulty: course.difficulty ?? CourseDifficultyLevels.BEGINNER,
                 category: course.category ?? '',
-
+                isFree: course.isFree ?? false,
                 imagePreview: course.imagePreview ?? null,
                 videoPreview: course.videoPreview ?? null,
                 featuresBadge: course.featuresBadge ?? null,
@@ -203,6 +208,8 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
         try {
             const requestData: AdminCreateUpdateCourseRequestDTO = {
                 ...values,
+                price: values.isFree ? 0 : values.price,
+                discount: values.isFree ? 0 : (values.discount ?? 0),
                 description: values.description || null,
                 category: values.category || null,
                 imagePreview: values.imagePreview,
@@ -357,7 +364,7 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
                     )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-y-8 gap-x-6">
                     <FormField
                         control={form.control}
                         name="price"
@@ -370,7 +377,7 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
                                         inputMode="decimal"
                                         placeholder="49.99"
                                         {...field}
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || formIsFree}
                                     />
                                 </FormControl>
                                 <FormDescription>Сумма</FormDescription>
@@ -391,10 +398,28 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
                                         placeholder="0.00"
                                         {...field}
                                         value={field.value ?? 0}
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || formIsFree}
                                     />
                                 </FormControl>
                                 <FormDescription>Сумма отнимаемая от цены</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="isFree"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Бесплатный курс?</FormLabel>
+                                <FormControl>
+                                    <Checkbox
+                                        checked={field.value ?? false}
+                                        onCheckedChange={field.onChange}
+                                        disabled={isSubmitting}
+                                    />
+                                </FormControl>
+                                <FormDescription>Если выбрано, цена и скидка не будут учитываться.</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}

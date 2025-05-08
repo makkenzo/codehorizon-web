@@ -22,6 +22,7 @@ interface CourseInfoForCard {
     rating?: number | null;
     price?: number | null;
     discount?: number | null;
+    isFree?: boolean;
     difficulty?: CourseDifficultyLevels | null;
 }
 
@@ -68,9 +69,9 @@ const CourseCard = ({ course, progress }: CourseCardProps) => {
                     <RatingStars count={course.rating} showEmpty />
                 </div>
             ) : null}
-            {typeof course.price === 'number' ? (
+            {typeof course.price === 'number' || course.isFree ? (
                 <div className="mt-1">
-                    <Price discount={course.discount ?? 0} price={course.price} />
+                    <Price discount={course.discount ?? 0} price={course.price ?? 0} isFree={course.isFree} />
                 </div>
             ) : null}
             {typeof progress === 'number' ? (

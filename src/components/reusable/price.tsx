@@ -3,11 +3,16 @@ import { cn } from '@/lib/utils';
 interface PriceProps {
     price: number;
     discount?: number;
+    isFree?: boolean;
     priceClassName?: string;
     discountPriceClassName?: string;
 }
 
-const Price = ({ price, discount, priceClassName, discountPriceClassName }: PriceProps) => {
+const Price = ({ price, discount, isFree, priceClassName, discountPriceClassName }: PriceProps) => {
+    if (isFree) {
+        return <span className={cn('text-xl font-semibold text-success', priceClassName)}>Бесплатно</span>;
+    }
+
     if (discount) {
         return (
             <div className="flex items-start gap-1">
