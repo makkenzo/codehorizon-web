@@ -150,3 +150,13 @@ export interface AdminChartDataDTO {
     categoryDistribution: CategoryDistributionDTO[];
     topCoursesByStudents: CoursePopularityDTO[];
 }
+
+export interface StudentProgressDTO {
+    userId: string;
+    username: string;
+    email: string;
+    progressPercent: number;
+    completedLessonsCount: number;
+    totalLessonsCount: number;
+    lastAccessedLessonAt?: string;
+}

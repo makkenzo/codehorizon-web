@@ -18,6 +18,7 @@ import { AdminCourseDetailDTO, AdminLessonDTO } from '@/types/admin';
 import CourseDetailsForm from './_components/course-details-form';
 import LessonEditDialog from './_components/lesson-edit-dialog';
 import LessonList from './_components/lesson-list';
+import StudentProgressTab from './_components/student-progress-tab';
 
 export default function EditCoursePage() {
     const { user } = useUserStore((state) => state);
@@ -154,19 +155,20 @@ export default function EditCoursePage() {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
                     <h1 className="text-2xl font-bold truncate">
-                        Edit Course: <span className="text-muted-foreground">{courseData.title}</span>
+                        Редактировать курс: <span className="text-muted-foreground">{courseData.title}</span>
                     </h1>
                     <TabsList>
-                        <TabsTrigger value="details">Details</TabsTrigger>
-                        <TabsTrigger value="lessons">Lessons ({courseData.lessons.length})</TabsTrigger>
+                        <TabsTrigger value="details">Детали</TabsTrigger>
+                        <TabsTrigger value="lessons">Уроки ({courseData.lessons.length})</TabsTrigger>
+                        <TabsTrigger value="students">Студенты</TabsTrigger>
                     </TabsList>
                 </div>
 
                 <TabsContent value="details">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Course Details</CardTitle>
-                            <CardDescription>Update the main information for this course.</CardDescription>
+                            <CardTitle>Детали курса</CardTitle>
+                            <CardDescription>Обновите основную информацию для этого курса.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <CourseDetailsForm course={courseData} onSuccess={handleDetailsUpdateSuccess} />
@@ -178,8 +180,8 @@ export default function EditCoursePage() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between">
                             <div>
-                                <CardTitle>Lessons</CardTitle>
-                                <CardDescription>Manage the lessons for this course.</CardDescription>
+                                <CardTitle>Уроки</CardTitle>
+                                <CardDescription>Управляйте уроками для этого курса.</CardDescription>
                             </div>
                             <Button size="sm" onClick={() => handleOpenLessonDialog()}>
                                 <PlusCircle className="h-4 w-4 mr-2" />
@@ -193,6 +195,18 @@ export default function EditCoursePage() {
                                 onDeleteLesson={handleDeleteLesson}
                             />
                         </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="students">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Прогресс студентов</CardTitle>
+                            <CardDescription>
+                                Просмотр прогресса студентов, присутствующих в этом курсе.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>{courseId && <StudentProgressTab courseId={courseId} />}</CardContent>
                     </Card>
                 </TabsContent>
             </Tabs>

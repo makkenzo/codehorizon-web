@@ -8,6 +8,7 @@ import {
     AdminDashboardStatsDTO,
     AdminUpdateUserRequest,
     AdminUser,
+    StudentProgressDTO,
 } from '@/types/admin';
 
 import { apiClient } from './api-client';
@@ -181,6 +182,28 @@ class AdminApiClient {
             return response.data;
         } catch (error: unknown) {
             console.error('Error fetching dashboard charts:', error);
+            throw error;
+        }
+    }
+
+    async getCourseStudentsProgress(
+        courseId: string,
+        page: number = 1,
+        size: number = 10,
+        sort?: string
+    ): Promise<PagedResponse<StudentProgressDTO>> {
+        const params = new URLSearchParams();
+        params.append('page', page.toString());
+        params.append('size', size.toString());
+        if (sort) params.append('sort', sort);
+
+        try {
+            const response = await apiClient.get<PagedResponse<StudentProgressDTO>>(
+                `/admin/courses/${courseId}/students?${params.toString()}`
+            );
+            return response.data;
+        } catch (error: unknown) {
+            console.error('Error fetching admin course students:', error);
             throw error;
         }
     }
