@@ -16,7 +16,7 @@ import { NavItem } from '@/types';
 import MentorshipApplicationModal from '../mentorship/mentorship-application-modal';
 import { Button } from '../ui/button';
 import { Dialog, DialogTrigger } from '../ui/dialog';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
+import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
 
 interface MobileBurgerMenuProps {
     profile?: Profile;
@@ -98,6 +98,17 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
         },
     ];
 
+    const adminPanelItem: NavItem =
+        isAuthenticated && user && (isAdmin || isMentor)
+            ? {
+                  id: 'admin-panel-mobile',
+                  href: '/admin',
+                  className: 'text-destructive',
+                  label: 'Админ-панель',
+                  icon: <ShieldQuestion />,
+              }
+            : null;
+
     const authNavItems: NavItem[] = profile
         ? [
               {
@@ -113,6 +124,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                           icon: <RiProfileLine />,
                           className: 'text-primary',
                       },
+                      adminPanelItem,
                       {
                           id: 'certs-mobile-link',
                           href: '/me/certificates',
@@ -154,7 +166,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
               },
           ];
 
-    const becomeMentorItem: NavItem | null =
+    const becomeMentorItem: NavItem =
         isAuthenticated && user && !isMentor && !isAdmin && canApplyForMentorship && !isCheckingMentorshipStatus
             ? {
                   id: 'become-mentor-mobile',
@@ -191,112 +203,126 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                 </SheetTrigger>
                 <SheetContent side="left" className="w-full p-4">
                     <SheetTitle>Меню</SheetTitle>
+                    <SheetClose>
+                        <X size={24} className="text-primary absolute right-6 top-6" />
+                    </SheetClose>
                     <nav className="flex flex-col gap-4 mt-4">
-                        {allNavItems.map((item, index) => (
-                            <motion.div
-                                key={item.id + '-motion'}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                transition={{
-                                    delay: (index + 1) * 0.05,
-                                    duration: 0.2,
-                                }}
-                            >
-                                {item.id === 'become-mentor-mobile' ? (
-                                    <Button
-                                        variant={item.variant || 'ghost'}
-                                        className={`w-full justify-start ${item.className}`}
-                                        size="lg"
-                                        onClick={handleBecomeMentorClick}
-                                    >
-                                        {item.icon}
-                                        {item.label}
-                                    </Button>
-                                ) : item.href ? (
-                                    <Link href={item.href} onClick={closeSheetAndReset}>
+                        {allNavItems.map((item, index) => {
+                            if (!item) return null;
+                            return (
+                                <motion.div
+                                    key={item.id + '-motion'}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    transition={{
+                                        delay: (index + 1) * 0.05,
+                                        duration: 0.2,
+                                    }}
+                                >
+                                    {item.id === 'become-mentor-mobile' ? (
                                         <Button
                                             variant={item.variant || 'ghost'}
                                             className={`w-full justify-start ${item.className}`}
                                             size="lg"
+                                            onClick={handleBecomeMentorClick}
                                         >
                                             {item.icon}
                                             {item.label}
                                         </Button>
-                                    </Link>
-                                ) : (
-                                    <Button
-                                        variant={item.variant || 'ghost'}
-                                        className={`w-full justify-start group ${item.className}`}
-                                        size="lg"
-                                        onClick={() => item.subItems && toggleExpand(item.label)}
-                                    >
-                                        <div className="flex items-center justify-between w-full">
-                                            <div className="flex items-center gap-2">
+                                    ) : item.href ? (
+                                        <Link href={item.href} onClick={closeSheetAndReset}>
+                                            <Button
+                                                variant={item.variant || 'ghost'}
+                                                className={`w-full justify-start ${item.className}`}
+                                                size="lg"
+                                            >
                                                 {item.icon}
                                                 {item.label}
-                                            </div>
-                                            {item.subItems && (
-                                                <ChevronUp
-                                                    size={16}
-                                                    className={cn(
-                                                        'transition-transform duration-300',
-                                                        expandedSubmenus[item.label] && 'rotate-180'
-                                                    )}
-                                                />
-                                            )}
-                                        </div>
-                                    </Button>
-                                )}
-
-                                <AnimatePresence>
-                                    {item.subItems && expandedSubmenus[item.label] && (
-                                        <motion.div
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: 'auto' }}
-                                            exit={{ opacity: 0, height: 0 }}
-                                            transition={{ duration: 0.3 }}
-                                            className="flex flex-col gap-2 pl-4 mt-1"
+                                            </Button>
+                                        </Link>
+                                    ) : (
+                                        <Button
+                                            variant={item.variant || 'ghost'}
+                                            className={`w-full justify-start group ${item.className}`}
+                                            size="lg"
+                                            onClick={() => item.subItems && toggleExpand(item.label)}
                                         >
-                                            {item.subItems.map((subItem, subIndex) => (
-                                                <motion.div
-                                                    key={subItem.id}
-                                                    initial={{ opacity: 0, x: -20 }}
-                                                    animate={{ opacity: 1, x: 0 }}
-                                                    exit={{ opacity: 0, x: -20 }}
-                                                    transition={{ delay: subIndex * 0.05, duration: 0.2 }}
-                                                >
-                                                    <Link href={subItem.href || '#'} onClick={closeSheetAndReset}>
-                                                        <Button
-                                                            variant={subItem.variant || 'ghost'}
-                                                            className={`w-full justify-start ${subItem.className}`}
-                                                            size="lg"
-                                                        >
-                                                            {subItem.icon &&
-                                                            isValidElement(subItem.icon) &&
-                                                            React.isValidElement<{ className?: string }>(subItem.icon)
-                                                                ? React.cloneElement(
-                                                                      subItem.icon as React.ReactElement<{
-                                                                          className?: string;
-                                                                      }>,
-                                                                      {
-                                                                          className: cn(
-                                                                              subItem.icon.props.className,
-                                                                              'mr-2 h-4 w-4 opacity-70'
-                                                                          ),
-                                                                      }
-                                                                  )
-                                                                : subItem.icon}
-                                                            {subItem.label}
-                                                        </Button>
-                                                    </Link>
-                                                </motion.div>
-                                            ))}
-                                        </motion.div>
+                                            <div className="flex items-center justify-between w-full">
+                                                <div className="flex items-center gap-2">
+                                                    {item.icon}
+                                                    {item.label}
+                                                </div>
+                                                {item.subItems && (
+                                                    <ChevronUp
+                                                        size={16}
+                                                        className={cn(
+                                                            'transition-transform duration-300',
+                                                            expandedSubmenus[item.label] && 'rotate-180'
+                                                        )}
+                                                    />
+                                                )}
+                                            </div>
+                                        </Button>
                                     )}
-                                </AnimatePresence>
-                            </motion.div>
-                        ))}
+
+                                    <AnimatePresence>
+                                        {item.subItems && expandedSubmenus[item.label] && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                transition={{ duration: 0.3 }}
+                                                className="flex flex-col gap-2 pl-4 mt-1"
+                                            >
+                                                {item.subItems.map((subItem, subIndex) => {
+                                                    if (!subItem) return null;
+                                                    return (
+                                                        <motion.div
+                                                            key={subItem.id}
+                                                            initial={{ opacity: 0, x: -20 }}
+                                                            animate={{ opacity: 1, x: 0 }}
+                                                            exit={{ opacity: 0, x: -20 }}
+                                                            transition={{ delay: subIndex * 0.05, duration: 0.2 }}
+                                                        >
+                                                            <Link
+                                                                href={subItem.href || '#'}
+                                                                onClick={closeSheetAndReset}
+                                                            >
+                                                                <Button
+                                                                    variant={subItem.variant || 'ghost'}
+                                                                    className={`w-full justify-start ${subItem.className}`}
+                                                                    size="lg"
+                                                                >
+                                                                    {subItem.icon &&
+                                                                    isValidElement(subItem.icon) &&
+                                                                    React.isValidElement<{ className?: string }>(
+                                                                        subItem.icon
+                                                                    )
+                                                                        ? React.cloneElement(
+                                                                              subItem.icon as React.ReactElement<{
+                                                                                  className?: string;
+                                                                              }>,
+                                                                              {
+                                                                                  className: cn(
+                                                                                      subItem.icon.props.className,
+                                                                                      'mr-2 h-4 w-4 opacity-70'
+                                                                                  ),
+                                                                              }
+                                                                          )
+                                                                        : subItem.icon}
+                                                                    {subItem.label}
+                                                                </Button>
+                                                            </Link>
+                                                        </motion.div>
+                                                    );
+                                                })}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
+                            );
+                        })}
                     </nav>
                 </SheetContent>
             </Sheet>

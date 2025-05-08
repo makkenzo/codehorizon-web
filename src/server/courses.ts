@@ -71,8 +71,6 @@ class CoursesApiClient extends ApiClient {
                 }
             >(`/courses/${slug}`);
 
-            console.log(response.data);
-
             return response.data;
         } catch (error: unknown) {
             let errorMsg = 'Не удалось получить курс по slug';

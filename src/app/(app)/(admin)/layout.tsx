@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useMemo } from 'react';
 
 import {
     BookOpen,
@@ -18,6 +18,7 @@ import {
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
+import AdminMobileMenu from '@/components/navigation/admin-mobile-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -35,6 +36,7 @@ import { useAuth } from '@/providers/auth-provider';
 import AuthApiClient from '@/server/auth';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
+import { NavItem } from '@/types';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
     const { isAuthenticated, isPending: isAuthPending } = useAuth();
@@ -51,7 +53,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const isAdmin = hasHydrated && (user?.roles?.includes('ADMIN') || user?.roles?.includes('ROLE_ADMIN'));
     const isMentor = hasHydrated && (user?.roles?.includes('MENTOR') || user?.roles?.includes('ROLE_MENTOR'));
 
-    const canAccessAdminArea = isAdmin || isMentor;
+    const canAccessAdminArea = useMemo(() => isAdmin || isMentor, [isAdmin, isMentor]);
 
     useEffect(() => {
         if (!isLoading) {
@@ -71,26 +73,38 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         clearUser();
         clearProfile();
         await new AuthApiClient().isLoggedOut();
-        router.push('/sign-in');
+        router.replace('/sign-in');
     };
 
-    const baseNavLinks = [
-        { href: '/admin', label: 'Статистика', icon: LayoutDashboard },
-        { href: '/admin/users', label: 'Пользователи', icon: Users },
-        { href: '/admin/courses', label: 'Курсы', icon: BookOpen },
-        { href: '/admin/mentorship-applications', label: 'Заявки на менторство', icon: ShieldAlert },
-    ];
+    const baseNavLinks = useMemo(
+        () => [
+            { id: 'admin-dash', href: '/admin', label: 'Статистика', icon: LayoutDashboard },
+            { id: 'admin-users', href: '/admin/users', label: 'Пользователи', icon: Users },
+            { id: 'admin-courses', href: '/admin/courses', label: 'Курсы', icon: BookOpen },
+            {
+                id: 'admin-mentor-apps',
+                href: '/admin/mentorship-applications',
+                label: 'Заявки на менторство',
+                icon: ShieldAlert,
+            },
+        ],
+        []
+    );
 
-    const filteredNavLinks = baseNavLinks.filter((link) => {
-        if (isAdmin) {
-            return true;
-        } else if (isMentor) {
-            return link.href === '/admin/courses';
-        }
-        return false;
-    });
+    const filteredNavLinks = useMemo(
+        () =>
+            baseNavLinks.filter((link) => {
+                if (isAdmin) return true;
+                if (isMentor) return link.href === '/admin/courses';
+                return false;
+            }),
+        [isAdmin, isMentor, baseNavLinks]
+    );
 
-    const filteredMobileNavLinks = [{ href: '/', label: 'Вернуться на сайт', icon: Home }, ...filteredNavLinks];
+    const filteredMobileNavLinks = useMemo(
+        () => [{ id: 'back-to-site', href: '/', label: 'Вернуться на сайт', icon: Home }, ...filteredNavLinks],
+        [filteredNavLinks]
+    );
 
     if (isLoading) {
         return (
@@ -131,79 +145,61 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 <div className="flex h-full max-h-screen flex-col gap-2">
                     <div className="flex h-14 items-center border-b border-border px-4 lg:h-[60px] lg:px-6">
                         <Link href="/admin" className="flex items-center gap-2 font-semibold">
-                            <Package2 className="h-6 w-6 text-primary" /> {/* Иконка */}
+                            <Package2 className="h-6 w-6 text-primary" />
                             <span className="">CodeHorizon Admin</span>
                         </Link>
-                        {/* <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
-                           <Bell className="h-4 w-4" />
-                           <span className="sr-only">Toggle notifications</span>
-                         </Button> */}
                     </div>
                     <div className="flex-1 overflow-auto py-2">
                         <SidebarNav links={filteredNavLinks} />
+                    </div>
+                    <div className="mt-auto p-4 border-t">
+                        <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Выйти
+                        </Button>
                     </div>
                 </div>
             </div>
 
             <div className="flex flex-col">
                 <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <Button variant="outline" size="icon" className="shrink-0 md:hidden">
-                                <Menu className="h-5 w-5" />
-                                <span className="sr-only">Toggle navigation menu</span>
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="left" className="flex flex-col">
-                            <nav className="grid gap-2 text-lg font-medium">
-                                <Link href="/admin" className="flex items-center gap-2 text-lg font-semibold mb-4">
-                                    <Package2 className="h-6 w-6 text-primary" />
-                                    <span>CodeHorizon Admin</span>
-                                </Link>
+                    <AdminMobileMenu navLinks={filteredMobileNavLinks} />
 
-                                <SidebarNav links={filteredMobileNavLinks} />
-                            </nav>
-                        </SheetContent>
-                    </Sheet>
-                    <div className="w-full flex-1">
-                        {/* <form>
-                           <div className="relative">
-                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                             <Input
-                               type="search"
-                               placeholder="Search admin panel..."
-                               className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
-                             />
-                           </div>
-                         </form> */}
-                    </div>
+                    <div className="w-full flex-1"></div>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Avatar className="hover:cursor-pointer lg:block hidden hover:outline-4 outline-primary outline-0 ease-in-out transition-all duration-100">
+                            <Avatar className="hover:cursor-pointer h-8 w-8 hover:outline-4 outline-primary outline-0 ease-in-out transition-all duration-100">
                                 {profile?.avatarUrl ? (
-                                    <AvatarImage src={profile.avatarUrl} alt={user?.username} />
+                                    <AvatarImage src={profile.avatarUrl} alt={user?.username || 'User'} />
                                 ) : null}
                                 <AvatarFallback>{user?.username?.substring(0, 1).toUpperCase() ?? 'A'}</AvatarFallback>
                             </Avatar>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56 px-4 py-2" align="end">
                             <DropdownMenuLabel className="pl-0">
-                                {profile?.firstName || user?.username}
+                                {profile?.firstName || user?.username || 'Мой аккаунт'}
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                                <Settings className="size-4" />
-                                Settings
-                            </DropdownMenuItem>
-                            <DropdownMenuItem disabled>Support</DropdownMenuItem>
+                            <Link href="/me/profile">
+                                <DropdownMenuItem>
+                                    <Settings className="mr-2 size-4" />
+                                    Настройки профиля
+                                </DropdownMenuItem>
+                            </Link>
+                            <Link href="/">
+                                <DropdownMenuItem>
+                                    <Home className="mr-2 size-4" />
+                                    Вернуться на сайт
+                                </DropdownMenuItem>
+                            </Link>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                                 onClick={handleLogout}
                                 className="text-destructive focus:text-destructive cursor-pointer"
                             >
-                                <LogOut className="size-4" />
-                                Logout
+                                <LogOut className="mr-2 size-4" />
+                                Выйти
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

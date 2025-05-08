@@ -4,7 +4,7 @@ export type BaseMetadata = {
     keywords?: string;
 };
 
-export interface NavItem {
+export type NavItem = {
     id: string;
     href?: string;
     label: string;
@@ -13,7 +13,7 @@ export interface NavItem {
     variant?: 'ghost' | 'default';
     className?: string;
     subItems?: NavItem[];
-}
+} | null;
 
 export interface HorizontalTabNavItem {
     label: string;

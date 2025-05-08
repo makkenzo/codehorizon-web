@@ -135,14 +135,14 @@ const AdminMentorshipApplicationsPage = ({}: AdminMentorshipApplicationsPageProp
 
     return (
         <Card x-chunk="dashboard-06-chunk-0">
-            <CardHeader className="flex flex-row items-start sm:items-center justify-between gap-2">
+            <CardHeader className="flex flex-col w-full md:flex-row items-start sm:items-center justify-between gap-2">
                 <div>
                     <CardTitle>Заявки на менторство</CardTitle>
-                    <CardDescription>
+                    <CardDescription className="max-md:hidden">
                         Просмотр и управление заявками пользователей на получение роли ментора.
                     </CardDescription>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full">
                     <Select
                         value={filterStatus || 'ALL'}
                         onValueChange={(value) => {
@@ -150,7 +150,7 @@ const AdminMentorshipApplicationsPage = ({}: AdminMentorshipApplicationsPageProp
                             setCurrentPage(1);
                         }}
                     >
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-full md:w-[180px]">
                             <SelectValue placeholder="Фильтр по статусу" />
                         </SelectTrigger>
                         <SelectContent>
@@ -163,97 +163,100 @@ const AdminMentorshipApplicationsPage = ({}: AdminMentorshipApplicationsPageProp
                 </div>
             </CardHeader>
             <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Пользователь</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead className="hidden md:table-cell">Дата регистрации</TableHead>
-                            <TableHead>Статус</TableHead>
-                            <TableHead className="hidden lg:table-cell">Дата подачи</TableHead>
-                            <TableHead className="hidden xl:table-cell">Причина (от юзера)</TableHead>
-                            <TableHead className="text-right">Действия</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            renderSkeletons(pageSize)
-                        ) : applicationsData && applicationsData.totalElements > 0 ? (
-                            applicationsData.content.map((app) => (
-                                <TableRow key={app.id} className="hover:bg-muted/50">
-                                    <TableCell className="font-medium">
-                                        <Link
-                                            href={`/u/${app.username}`}
-                                            target="_blank"
-                                            className="hover:underline text-primary flex items-center gap-1"
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Пользователь</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead className="hidden md:table-cell">Дата регистрации</TableHead>
+                                <TableHead>Статус</TableHead>
+                                <TableHead className="hidden lg:table-cell">Дата подачи</TableHead>
+                                <TableHead className="hidden xl:table-cell">Причина (от юзера)</TableHead>
+                                <TableHead className="text-right">Действия</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {isLoading ? (
+                                renderSkeletons(pageSize)
+                            ) : applicationsData && applicationsData.totalElements > 0 ? (
+                                applicationsData.content.map((app) => (
+                                    <TableRow key={app.id} className="hover:bg-muted/50">
+                                        <TableCell className="font-medium">
+                                            <Link
+                                                href={`/u/${app.username}`}
+                                                target="_blank"
+                                                className="hover:underline text-primary flex items-center gap-1"
+                                            >
+                                                {app.username}
+                                                <ExternalLink className="h-3 w-3 opacity-70" />
+                                            </Link>
+                                        </TableCell>
+                                        <TableCell>{app.userEmail}</TableCell>
+                                        <TableCell className="hidden md:table-cell">
+                                            {app.userRegisteredAt
+                                                ? new Date(app.userRegisteredAt).toLocaleDateString()
+                                                : '-'}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge className={statusColors[app.status] || ''} variant="outline">
+                                                {app.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="hidden lg:table-cell">
+                                            {new Date(app.appliedAt).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell
+                                            className="hidden xl:table-cell max-w-xs truncate"
+                                            title={app.reason || ''}
                                         >
-                                            {app.username}
-                                            <ExternalLink className="h-3 w-3 opacity-70" />
-                                        </Link>
-                                    </TableCell>
-                                    <TableCell>{app.userEmail}</TableCell>
-                                    <TableCell className="hidden md:table-cell">
-                                        {app.userRegisteredAt
-                                            ? new Date(app.userRegisteredAt).toLocaleDateString()
-                                            : '-'}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge className={statusColors[app.status] || ''} variant="outline">
-                                            {app.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="hidden lg:table-cell">
-                                        {new Date(app.appliedAt).toLocaleDateString()}
-                                    </TableCell>
-                                    <TableCell
-                                        className="hidden xl:table-cell max-w-xs truncate"
-                                        title={app.reason || ''}
-                                    >
-                                        {app.reason || '-'}
-                                    </TableCell>
-                                    <TableCell className="flex justify-end">
-                                        {app.status === ApplicationStatus.PENDING && (
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        aria-haspopup="true"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        disabled={isProcessingAction}
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Меню</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent className="w-56 px-4 py-2" align="end">
-                                                    <DropdownMenuLabel>Действия</DropdownMenuLabel>
-                                                    <DropdownMenuItem
-                                                        onClick={() => handleAction('approve', app.id)}
-                                                        disabled={isProcessingAction}
-                                                    >
-                                                        <CheckCircle className="mr-2 h-4 w-4 text-green-500" /> Одобрить
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem
-                                                        onClick={() => openRejectDialog(app)}
-                                                        disabled={isProcessingAction}
-                                                    >
-                                                        <XCircle className="mr-2 h-4 w-4 text-red-500" /> Отклонить
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        )}
+                                            {app.reason || '-'}
+                                        </TableCell>
+                                        <TableCell className="flex justify-end">
+                                            {app.status === ApplicationStatus.PENDING && (
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button
+                                                            aria-haspopup="true"
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            disabled={isProcessingAction}
+                                                        >
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                            <span className="sr-only">Меню</span>
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent className="w-56 px-4 py-2" align="end">
+                                                        <DropdownMenuLabel>Действия</DropdownMenuLabel>
+                                                        <DropdownMenuItem
+                                                            onClick={() => handleAction('approve', app.id)}
+                                                            disabled={isProcessingAction}
+                                                        >
+                                                            <CheckCircle className="mr-2 h-4 w-4 text-green-500" />{' '}
+                                                            Одобрить
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() => openRejectDialog(app)}
+                                                            disabled={isProcessingAction}
+                                                        >
+                                                            <XCircle className="mr-2 h-4 w-4 text-red-500" /> Отклонить
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="h-24 text-center">
+                                        Заявок не найдено.
                                     </TableCell>
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
-                                    Заявок не найдено.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
             </CardContent>
             {applicationsData && applicationsData.totalPages > 1 && (
                 <div className="p-4">
