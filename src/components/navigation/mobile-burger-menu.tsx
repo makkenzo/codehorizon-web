@@ -1,4 +1,4 @@
-import React, { isValidElement, useEffect, useMemo, useState } from 'react';
+import React, { ElementType, createElement, isValidElement, useEffect, useMemo, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Award, Bell, Book, ChevronUp, Heart, Home, Menu, Settings, ShieldQuestion, X } from 'lucide-react';
@@ -20,6 +20,14 @@ import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '../ui
 
 interface MobileBurgerMenuProps {
     profile?: Profile;
+}
+
+function renderIcon(Icon?: ElementType) {
+    if (!Icon) return null;
+
+    return createElement(Icon, {
+        className: 'mr-2 h-4 w-4 opacity-70',
+    });
 }
 
 const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
@@ -82,19 +90,19 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
             id: '54440642-cc40-5b73-96f1-a9e67bf0884f',
             href: '/',
             label: 'Главная',
-            icon: <Home />,
+            icon: Home,
         },
         {
             id: '3c4af7c0-5a5c-5432-9b2c-a6606a0df7be',
             label: 'Каталог',
-            icon: <Book />,
+            icon: Book,
             href: '/courses',
         },
         {
             id: '53ca9885-ba7a-5957-a305-7697cd654dda',
             href: '/me/courses?tab=wishlist',
             label: 'Список желаемого',
-            icon: <Heart />,
+            icon: Heart,
         },
     ];
 
@@ -105,7 +113,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                   href: '/admin',
                   className: 'text-destructive',
                   label: 'Админ-панель',
-                  icon: <ShieldQuestion />,
+                  icon: ShieldQuestion,
               }
             : null;
 
@@ -114,14 +122,14 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
               {
                   id: '02fac1a0-9fbc-530a-8507-d6c52d54cb69',
                   label: 'Личный кабинет',
-                  icon: <RiProfileFill />,
+                  icon: RiProfileFill,
                   className: 'text-primary',
                   subItems: [
                       {
                           id: '62be7feb-62f2-5fea-b4ff-a5022d48dbfc',
                           href: '/me/profile',
                           label: 'Профиль',
-                          icon: <RiProfileLine />,
+                          icon: RiProfileLine,
                           className: 'text-primary',
                       },
                       adminPanelItem,
@@ -129,21 +137,21 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                           id: 'certs-mobile-link',
                           href: '/me/certificates',
                           label: 'Мои Сертификаты',
-                          icon: <Award />,
+                          icon: Award,
                           className: 'text-primary',
                       },
                       {
                           id: 'cb5283a9-cf5a-544d-940a-765e6a3190e0',
                           href: '/',
                           label: 'Уведомления',
-                          icon: <Bell />,
+                          icon: Bell,
                           className: 'text-primary',
                       },
                       {
                           id: '7fb21855-e088-5ee6-8a39-29afddbf10ea',
                           href: '/',
                           label: 'Настройки аккаунта',
-                          icon: <Settings />,
+                          icon: Settings,
                           className: 'text-primary',
                       },
                   ],
@@ -154,14 +162,14 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                   id: 'b4f46557-4a8e-5412-bc22-e8273f3923a8',
                   href: '/sign-in',
                   label: 'Вход',
-                  icon: <RiProgress5Line />,
+                  icon: RiProgress5Line,
                   className: 'text-primary',
               },
               {
                   id: '486367d2-e2a0-521c-a4ca-8c050977873d',
                   href: '/sign-up',
                   label: 'Регистрация',
-                  icon: <RiProgress5Line />,
+                  icon: RiProgress5Line,
                   className: 'text-primary',
               },
           ];
@@ -171,7 +179,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
             ? {
                   id: 'become-mentor-mobile',
                   label: 'Стать ментором',
-                  icon: <ShieldQuestion />,
+                  icon: ShieldQuestion,
               }
             : null;
 
@@ -209,6 +217,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                     <nav className="flex flex-col gap-4 mt-4">
                         {allNavItems.map((item, index) => {
                             if (!item) return null;
+                            const IconComponent = item.icon as ElementType;
                             return (
                                 <motion.div
                                     key={item.id + '-motion'}
@@ -227,7 +236,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                                             size="lg"
                                             onClick={handleBecomeMentorClick}
                                         >
-                                            {item.icon}
+                                            {IconComponent && <IconComponent className="h-4 w-4" />}
                                             {item.label}
                                         </Button>
                                     ) : item.href ? (
@@ -237,7 +246,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                                                 className={`w-full justify-start ${item.className}`}
                                                 size="lg"
                                             >
-                                                {item.icon}
+                                                {IconComponent && <IconComponent className="h-4 w-4" />}
                                                 {item.label}
                                             </Button>
                                         </Link>
@@ -250,7 +259,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                                         >
                                             <div className="flex items-center justify-between w-full">
                                                 <div className="flex items-center gap-2">
-                                                    {item.icon}
+                                                    {IconComponent && <IconComponent className="h-4 w-4" />}
                                                     {item.label}
                                                 </div>
                                                 {item.subItems && (
@@ -277,6 +286,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                                             >
                                                 {item.subItems.map((subItem, subIndex) => {
                                                     if (!subItem) return null;
+
                                                     return (
                                                         <motion.div
                                                             key={subItem.id}
@@ -294,23 +304,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                                                                     className={`w-full justify-start ${subItem.className}`}
                                                                     size="lg"
                                                                 >
-                                                                    {subItem.icon &&
-                                                                    isValidElement(subItem.icon) &&
-                                                                    React.isValidElement<{ className?: string }>(
-                                                                        subItem.icon
-                                                                    )
-                                                                        ? React.cloneElement(
-                                                                              subItem.icon as React.ReactElement<{
-                                                                                  className?: string;
-                                                                              }>,
-                                                                              {
-                                                                                  className: cn(
-                                                                                      subItem.icon.props.className,
-                                                                                      'mr-2 h-4 w-4 opacity-70'
-                                                                                  ),
-                                                                              }
-                                                                          )
-                                                                        : subItem.icon}
+                                                                    {renderIcon(subItem.icon)}
                                                                     {subItem.label}
                                                                 </Button>
                                                             </Link>
