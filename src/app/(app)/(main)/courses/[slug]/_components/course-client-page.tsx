@@ -42,7 +42,7 @@ export default function CourseClientPageReviews({
     const [currentRatingDistribution, setCurrentRatingDistribution] = useState(initialRatingDistribution);
     const [currentCourseRating, setCurrentCourseRating] = useState(courseRating);
 
-    const [reviewsLoading, setReviewsLoading] = useState(!initialReviewsData);
+    const [isPaginatingReviews, setIsPaginatingReviews] = useState(false);
     const [reviewsError, setReviewsError] = useState<string | null>(null);
     const [reviewsPage, setReviewsPage] = useState(1);
 
@@ -53,10 +53,20 @@ export default function CourseClientPageReviews({
     const apiClient = new ReviewsApiClient();
 
     const fetchReviewsAndDistribution = useCallback(
-        async (page: number) => {
+        async (page: number, isInitialLoad = false) => {
             if (!courseId) return;
-            setReviewsLoading(true);
+
+            if (isInitialLoad && initialReviewsData && initialRatingDistribution) {
+                setReviewsData(initialReviewsData);
+                setCurrentRatingDistribution(initialRatingDistribution);
+                setCurrentCourseRating(courseRating);
+                setIsPaginatingReviews(false);
+                return;
+            }
+
+            setIsPaginatingReviews(true);
             setReviewsError(null);
+
             try {
                 const [reviewsResponse, distributionResponse] = await Promise.all([
                     apiClient.getReviews(courseId, page - 1, 5),
@@ -87,7 +97,7 @@ export default function CourseClientPageReviews({
                 setCurrentRatingDistribution(initialRatingDistribution);
                 setCurrentCourseRating(courseRating);
             } finally {
-                setReviewsLoading(false);
+                setIsPaginatingReviews(false);
             }
         },
         [courseId, apiClient, initialReviewsData, initialRatingDistribution, courseRating]
@@ -112,22 +122,12 @@ export default function CourseClientPageReviews({
     }, [isAuthenticated, isAuthPending, courseId, apiClient]);
 
     useEffect(() => {
-        if (reviewsPage === 1 && initialReviewsData && initialRatingDistribution) {
-            setReviewsData(initialReviewsData);
-            setCurrentRatingDistribution(initialRatingDistribution);
-            setCurrentCourseRating(courseRating);
-            setReviewsLoading(false);
-        } else {
+        if (reviewsPage === 1) {
             fetchReviewsAndDistribution(reviewsPage);
+        } else if (reviewsPage === 1 && (!initialReviewsData || !initialRatingDistribution)) {
+            fetchReviewsAndDistribution(1, true);
         }
-    }, [
-        reviewsPage,
-        courseId,
-        initialReviewsData,
-        initialRatingDistribution,
-        courseRating,
-        fetchReviewsAndDistribution,
-    ]);
+    }, [reviewsPage, initialReviewsData, initialRatingDistribution]);
 
     useEffect(() => {
         fetchCurrentUserReview();
@@ -150,16 +150,58 @@ export default function CourseClientPageReviews({
         fetchReviewsAndDistribution(reviewsPage);
     };
 
-    const canWriteReview = isAuthenticated && hasCourseAccess && hasPermission('review:create');
+    const canWriteReview = isAuthenticated && hasCourseAccess && !isLoadingAccess && hasPermission('review:create');
     const isLoadingPrerequisitesForButton = isLoadingAccess || isCheckingUserReview || isAuthPending;
+
+    const ReviewSectionSkeleton = () => (
+        <section id="reviews" className="py-2 scroll-mt-20">
+            <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <Skeleton className="h-9 w-2/5" />
+                <Skeleton className="h-6 w-40" />
+            </div>
+            <div className="grid gap-8 md:grid-cols-12 mb-8">
+                <div className="md:col-span-4 lg:col-span-3 space-y-2">
+                    <Skeleton className="h-10 w-24" />
+                    <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-10 w-full max-w-[200px]" />
+                </div>
+                <div className="space-y-2 md:col-span-8 lg:col-span-9">
+                    {[...Array(5)].map((_, i) => (
+                        <div key={`dist-skel-${i}`} className="flex items-center gap-2">
+                            <Skeleton className="h-4 w-8" />
+                            <Skeleton className="h-4 w-4 rounded-full" />
+                            <Skeleton className="h-2 flex-1 max-w-[200px]" />
+                            <Skeleton className="h-4 w-20" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div className="space-y-6">
+                {[...Array(2)].map((_, i) => (
+                    <div key={`review-skel-${i}`} className="flex items-start gap-4 p-4 border rounded-lg bg-card">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="flex-1 space-y-2">
+                            <Skeleton className="h-4 w-1/4" />
+                            <Skeleton className="h-3 w-1/6" />
+                            <Skeleton className="h-4 w-full mt-1" />
+                            <Skeleton className="h-4 w-3/4" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+
+    if ((initialReviewsData === null && reviewsPage === 1) || isLoadingAccess || isAuthPending) {
+        return <ReviewSectionSkeleton />;
+    }
 
     return (
         <section id="reviews" className="py-2 scroll-mt-20">
-            {' '}
             <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <h2 className="text-3xl font-bold text-foreground">Отзывы о курсе</h2>
                 <div className="flex items-center space-x-2 flex-shrink-0">
-                    {reviewsLoading && !currentRatingDistribution ? (
+                    {isPaginatingReviews && !currentRatingDistribution ? (
                         <Skeleton className="h-6 w-40" />
                     ) : (
                         <>
@@ -175,9 +217,7 @@ export default function CourseClientPageReviews({
                 </div>
             </div>
             <div className="grid gap-8 md:grid-cols-12 mb-8">
-                {' '}
                 <div className="md:col-span-4 lg:col-span-3">
-                    {' '}
                     <p className="mb-1 text-3xl font-bold text-foreground">{currentCourseRating.toFixed(1)} из 5</p>
                     <div className="mb-4">
                         <RatingStars count={currentCourseRating} showEmpty maxStars={5} />
@@ -210,38 +250,37 @@ export default function CourseClientPageReviews({
                     ) : null}
                 </div>
                 <div className="space-y-2 md:col-span-8 lg:col-span-9">
-                    {' '}
-                    {reviewsLoading && !currentRatingDistribution ? (
-                        [...Array(5)].map((_, i) => (
-                            <div key={i} className="flex items-center gap-2">
-                                <Skeleton className="h-4 w-8" />
-                                <Skeleton className="h-4 w-4" />
-                                <Skeleton className="h-2 w-full max-w-[200px]" />
-                                <Skeleton className="h-4 w-20" />
-                            </div>
-                        ))
-                    ) : currentRatingDistribution && currentRatingDistribution.length > 0 ? (
-                        currentRatingDistribution.map((distItem) => (
-                            <div key={distItem.rating} className="flex items-center gap-2">
-                                <span className="w-8 text-sm font-medium text-foreground text-right">
-                                    {distItem.rating}
-                                </span>
-                                <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                                <Progress
-                                    value={distItem.percentage}
-                                    className="h-2 w-full max-w-[200px] sm:max-w-[250px] bg-muted"
-                                />
-                                <span className="text-sm font-medium text-muted-foreground w-24 text-left">
-                                    {distItem.count} ({distItem.percentage.toFixed(0)}%)
-                                </span>
-                            </div>
-                        ))
-                    ) : (
-                        <p className="text-sm text-muted-foreground">Нет данных о распределении оценок.</p>
-                    )}
+                    {!currentRatingDistribution && !reviewsError
+                        ? [...Array(5)].map((_, i) => (
+                              <div key={i} className="flex items-center gap-2">
+                                  <Skeleton className="h-4 w-8" />
+                                  <Skeleton className="h-4 w-4" />
+                                  <Skeleton className="h-2 w-full max-w-[200px]" />
+                                  <Skeleton className="h-4 w-20" />
+                              </div>
+                          ))
+                        : currentRatingDistribution && currentRatingDistribution.length > 0
+                          ? currentRatingDistribution.map((distItem) => (
+                                <div key={distItem.rating} className="flex items-center gap-2">
+                                    <span className="w-8 text-sm font-medium text-foreground text-right">
+                                        {distItem.rating}
+                                    </span>
+                                    <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                                    <Progress
+                                        value={distItem.percentage}
+                                        className="h-2 w-full max-w-[200px] sm:max-w-[250px] bg-muted"
+                                    />
+                                    <span className="text-sm font-medium text-muted-foreground w-24 text-left">
+                                        {distItem.count} ({distItem.percentage.toFixed(0)}%)
+                                    </span>
+                                </div>
+                            ))
+                          : !reviewsError && (
+                                <p className="text-sm text-muted-foreground">Нет данных о распределении оценок.</p>
+                            )}
                 </div>
             </div>
-            {reviewsLoading && (!reviewsData || reviewsData.content.length === 0) && (
+            {isPaginatingReviews && (!reviewsData || reviewsData.content.length === 0) && (
                 <div className="space-y-6">
                     {[...Array(3)].map((_, i) => (
                         <div key={`review-skel-${i}`} className="flex items-start gap-4 p-4 border rounded-lg bg-card">
@@ -256,18 +295,18 @@ export default function CourseClientPageReviews({
                     ))}
                 </div>
             )}
-            {!reviewsLoading && reviewsError && (
+            {!isPaginatingReviews && reviewsError && (
                 <p className="text-destructive text-center py-4 bg-destructive/10 rounded-md">{reviewsError}</p>
             )}
-            {!reviewsLoading && !reviewsError && reviewsData?.content && reviewsData.content.length > 0 && (
+            {!isPaginatingReviews && !reviewsError && reviewsData?.content && reviewsData.totalElements > 0 && (
                 <ReviewList reviews={reviewsData.content} />
             )}
-            {!reviewsLoading && !reviewsError && (!reviewsData || reviewsData.totalElements === 0) && (
+            {!isPaginatingReviews && !reviewsError && (!reviewsData || reviewsData.totalElements === 0) && (
                 <p className="text-muted-foreground text-center py-10 border rounded-lg bg-card">
                     Отзывов пока нет. Будьте первым!
                 </p>
             )}
-            {!reviewsLoading && reviewsData && reviewsData.totalPages > 1 && (
+            {!isPaginatingReviews && reviewsData && reviewsData.totalPages > 1 && (
                 <MyPagination
                     currentPage={reviewsPage}
                     totalPages={reviewsData.totalPages}
@@ -275,6 +314,7 @@ export default function CourseClientPageReviews({
                     className="mt-8"
                 />
             )}
+            {isPaginatingReviews && <Skeleton className="h-10 w-1/2 mx-auto mt-8" />}
         </section>
     );
 }

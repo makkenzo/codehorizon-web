@@ -21,6 +21,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { setUser } = useUserStore((state) => state);
 
     const fetchProfile = async () => {
+        setIsPending(true);
+
         try {
             const profile = await new ProfileApiClient().getProfile();
 

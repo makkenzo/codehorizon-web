@@ -36,8 +36,9 @@ const CoursesPageContent = () => {
         setCategories,
         setLevels,
         setVideoDurations,
-        setRating,
+        setRating: setStoreRating,
     } = useCatalogFiltersStore((state) => state);
+
     const [courses, setCourses] = useState<Omit<Course, 'lessons'>[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -66,9 +67,9 @@ const CoursesPageContent = () => {
         }
 
         if (ratingParam && ratingParam !== rating) {
-            setRating(ratingParam);
+            setStoreRating(ratingParam);
         } else if (!ratingParam && rating !== 'all') {
-            setRating('all');
+            setStoreRating('all');
         }
 
         if (
@@ -98,11 +99,33 @@ const CoursesPageContent = () => {
         } else if (!pageParam && page !== 1) {
             setPage(1);
         }
-    }, [searchParams]);
+
+        const initialCategory = searchParams.getAll('category');
+        if (initialCategory.length > 0) setCategories(initialCategory);
+
+        const initialLevel = searchParams.getAll('level');
+        if (initialLevel.length > 0) setLevels(initialLevel);
+
+        const initialRating = searchParams.get('rating');
+        if (initialRating) setStoreRating(initialRating);
+
+        const initialDuration = searchParams.getAll('duration');
+        if (initialDuration.length > 0) setVideoDurations(initialDuration);
+
+        const initialSortBy = searchParams.get('sortBy');
+        if (initialSortBy) setSortBy(initialSortBy);
+
+        const initialPriceStatus = searchParams.get('priceStatus') as PriceStatus | null;
+        if (initialPriceStatus) setPriceStatus(initialPriceStatus);
+
+        const initialPage = parseInt(searchParams.get('page') || '1', 10);
+        setPage(initialPage);
+    }, []);
 
     useEffect(() => {
         const fetchCourses = async (filters: Omit<CatalogFiltersState, 'totalPages'>) => {
             setIsLoading(true);
+            setCourses(null);
             try {
                 const data = await new CoursesApiClient().getCourses(mapFiltersToApiParams(filters));
                 if (data) {
@@ -130,19 +153,29 @@ const CoursesPageContent = () => {
     const handlePageChange = (newPage: number) => {
         const params = new URLSearchParams(searchParams.toString());
         params.set('page', newPage.toString());
-        window.history.pushState(null, '', `?${params.toString()}`);
         setPage(newPage);
+
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.pushState({ path: newUrl }, '', newUrl);
     };
 
-    // const handleSortChange = (value: string) => {
-    //     setPage(1);
-
-    //     const params = new URLSearchParams(searchParams.toString());
-    //     params.set('sortBy', value);
-    //     params.set('page', '1');
-    //     window.history.pushState(null, '', `?${params.toString()}`);
-    //     setSortBy(value);
-    // };
+    const renderCourseCardSkeletons = (count: number) => {
+        return Array.from({ length: count }).map((_, i) => (
+            <motion.div
+                key={`skeleton-course-${i}`}
+                className="flex flex-col gap-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: 'easeInOut', delay: i * 0.07 }}
+            >
+                <Skeleton className="aspect-[16/9] w-full rounded-sm md:rounded-[14px]" />
+                <Skeleton className="h-[24px] w-2/3 mt-1" />
+                <Skeleton className="h-[20px] w-1/4" />
+                <Skeleton className="h-[20px] w-1/2" />
+            </motion.div>
+        ));
+    };
 
     return (
         <PageWrapper className="md:grid md:grid-cols-4 mb-20 max-md:mt-4 gap-5">
@@ -150,7 +183,18 @@ const CoursesPageContent = () => {
             <div className="md:col-span-3">
                 <div className="md:flex hidden items-center justify-between mb-6">
                     <h2 className="font-semibold">Все курсы</h2>
-                    <Select onValueChange={(value) => setSortBy(value)}>
+                    <Select
+                        value={sortBy}
+                        onValueChange={(value) => {
+                            const params = new URLSearchParams(searchParams.toString());
+                            params.set('sortBy', value);
+                            params.set('page', '1');
+                            window.history.pushState(null, '', `?${params.toString()}`);
+                            setSortBy(value);
+                            setPage(1);
+                            setSortBy(value);
+                        }}
+                    >
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Упорядочить по" />
                         </SelectTrigger>
@@ -164,51 +208,39 @@ const CoursesPageContent = () => {
                 </div>
                 <AnimatePresence mode="wait">
                     <motion.div
-                        key={page}
+                        key={
+                            page +
+                            sortBy +
+                            categories.join(',') +
+                            level.join(',') +
+                            rating +
+                            videoDuration.join(',') +
+                            priceStatus
+                        }
                         className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                     >
-                        {courses ? (
-                            courses.length > 0 ? (
-                                courses.map((course, idx) => (
-                                    <motion.div
-                                        key={course.id}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        transition={{ duration: 0.5, ease: 'easeInOut', delay: idx * 0.05 }}
-                                    >
-                                        <CourseCard course={course} />
-                                    </motion.div>
-                                ))
-                            ) : (
-                                <div className="col-span-2 md:col-span-3 text-center py-10 text-muted-foreground">
-                                    По вашему запросу курсы не найдены. Попробуйте изменить фильтры.
-                                </div>
-                            )
-                        ) : (
-                            Array.from({ length: 6 }).map((_, i) => (
+                        {isLoading ? (
+                            renderCourseCardSkeletons(6)
+                        ) : courses && courses.length > 0 ? (
+                            courses.map((course, idx) => (
                                 <motion.div
-                                    key={`skeleton-${i}`}
-                                    className="flex flex-col gap-1"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ duration: 0.5, ease: 'easeInOut', delay: i * 0.1 }}
+                                    key={course.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                    transition={{ duration: 0.3, ease: 'easeInOut', delay: idx * 0.05 }}
                                 >
-                                    <Skeleton className="h-[162px] w-full rounded-[23px]" />
-                                    <Skeleton className="h-[24px] w-2/3" />
-                                    <Skeleton className="h-[24px] w-2/5" />
-                                    <Skeleton className="h-[20px] w-full" />
-                                    <Skeleton className="h-[20px] w-full" />
-                                    <Skeleton className="h-[20px] w-1/4" />
-                                    <Skeleton className="h-[20px] w-1/2" />
-                                    <Skeleton className="h-[26px] w-1/3" />
+                                    <CourseCard course={course} />
                                 </motion.div>
                             ))
+                        ) : (
+                            <div className="col-span-2 md:col-span-3 text-center py-10 text-muted-foreground">
+                                По вашему запросу курсы не найдены. Попробуйте изменить фильтры.
+                            </div>
                         )}
                     </motion.div>
                 </AnimatePresence>

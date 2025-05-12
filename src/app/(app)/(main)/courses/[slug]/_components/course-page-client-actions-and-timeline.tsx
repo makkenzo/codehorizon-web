@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import CourseButtons from '@/components/course-buttons';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/providers/auth-provider';
 import CoursesApiClient from '@/server/courses';
 import { useUserStore } from '@/stores/user/user-store-provider';
@@ -15,8 +16,8 @@ import CourseClientPageReviews from './course-client-page';
 
 export interface CoursePageClientActionsAndTimelineProps {
     courseFromServer: Omit<
-        Pick<Course, 'id' | 'slug' | 'title' | 'price' | 'discount' | 'isFree' | 'rating' | 'lessons'>,
-        'lessons'
+        Pick<Course, 'id' | 'slug' | 'title' | 'price' | 'discount' | 'isFree' | 'rating'>,
+        never
     > & {
         lessons: Array<Pick<Lesson, 'id' | 'title' | 'slug' | 'videoLength'>>;
     };
@@ -41,7 +42,10 @@ const CoursePageClientActionsAndTimeline: React.FC<CoursePageClientActionsAndTim
 
     useEffect(() => {
         const fetchClientSpecificData = async () => {
-            if (isAuthPending) return;
+            if (isAuthPending) {
+                setIsLoadingClientData(true);
+                return;
+            }
 
             setIsLoadingClientData(true);
             if (!isAuthenticated || !user) {
@@ -74,17 +78,25 @@ const CoursePageClientActionsAndTimeline: React.FC<CoursePageClientActionsAndTim
     return (
         <>
             <div className="md:hidden mb-6">
-                <CourseButtons
-                    course={{
-                        id: courseFromServer.id,
-                        slug: courseFromServer.slug,
-                        price: courseFromServer.price,
-                        discount: courseFromServer.discount,
-                        lessons: courseFromServer.lessons,
-                        isFree: courseFromServer.isFree,
-                    }}
-                    currentCourseProgressDetails={userCourseProgressDetails}
-                />
+                {isLoadingClientData || isAuthPending ? (
+                    <div className="space-y-4">
+                        <Skeleton className="h-10 w-28" />
+                        <Skeleton className="h-12 w-full" />
+                        <Skeleton className="h-12 w-full" />
+                    </div>
+                ) : (
+                    <CourseButtons
+                        course={{
+                            id: courseFromServer.id,
+                            slug: courseFromServer.slug,
+                            price: courseFromServer.price,
+                            discount: courseFromServer.discount,
+                            lessons: courseFromServer.lessons,
+                            isFree: courseFromServer.isFree,
+                        }}
+                        currentCourseProgressDetails={userCourseProgressDetails}
+                    />
+                )}
             </div>
 
             <CourseClientPageReviews
@@ -93,7 +105,7 @@ const CoursePageClientActionsAndTimeline: React.FC<CoursePageClientActionsAndTim
                 courseRating={courseFromServer.rating}
                 ratingDistribution={ratingDistribution}
                 hasCourseAccess={hasAccess}
-                isLoadingAccess={isLoadingClientData}
+                isLoadingAccess={isLoadingClientData || isAuthPending}
             />
         </>
     );

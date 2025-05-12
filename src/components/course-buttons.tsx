@@ -37,54 +37,56 @@ interface CourseButtonsProps {
     className?: string;
 }
 
-const CourseButtons = ({
-    course,
-
-    currentCourseProgressDetails,
-    className,
-}: CourseButtonsProps) => {
+const CourseButtons = ({ course, currentCourseProgressDetails, className }: CourseButtonsProps) => {
     const { isAuthenticated, isPending: isAuthPending } = useAuth();
     const router = useRouter();
     const user = useUserStore((state) => state.user);
+
     const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
     const [access, setAccess] = useState<boolean | null>(null);
     const [isEnrolling, setIsEnrolling] = useState(false);
+    const [isLoadingAccess, setIsLoadingAccess] = useState(true);
 
     const [isInWishlist, setIsInWishlist] = useState(false);
+    const [isWishlistLoading, setIsWishlistLoading] = useState(true);
     const [isWishlistPending, startWishlistTransition] = useTransition();
 
     const apiClient = new CoursesApiClient();
 
     useEffect(() => {
-        const fetchWishlistStatus = async () => {
+        const fetchInitialData = async () => {
+            if (isAuthPending) return;
+
+            setIsLoadingAccess(true);
+            setIsWishlistLoading(true);
+
             if (!isAuthenticated || !user) {
+                setAccess(false);
                 setIsInWishlist(false);
+                setIsLoadingAccess(false);
+                setIsWishlistLoading(false);
                 return;
             }
 
             try {
-                const status = await apiClient.isCourseInWishlist(course.id);
-                setIsInWishlist(status);
+                const [accessRes, wishlistStatusRes] = await Promise.all([
+                    apiClient.checkCourseAccess(course.id).catch(() => false),
+                    apiClient.isCourseInWishlist(course.id).catch(() => false),
+                ]);
+                setAccess(accessRes);
+                setIsInWishlist(wishlistStatusRes);
             } catch (err) {
-                console.error(`Ошибка проверки вишлиста для курса ${course.id}:`, err);
+                console.error('Ошибка при загрузке данных для кнопок курса:', err);
+                setAccess(false);
                 setIsInWishlist(false);
+            } finally {
+                setIsLoadingAccess(false);
+                setIsWishlistLoading(false);
             }
         };
 
-        const fetchAccess = async () => {
-            const response = await apiClient
-                .checkCourseAccess(course.id)
-                .then((data) => {
-                    setAccess(data);
-                })
-                .catch((error) => {
-                    console.error(`Ошибка при проверке доступа к курсу ${course.id}:`, error);
-                });
-        };
-
-        fetchAccess();
-        fetchWishlistStatus();
-    }, [isAuthenticated, user, course.id, apiClient]);
+        fetchInitialData();
+    }, [isAuthenticated, isAuthPending, user, course.id]);
 
     const handleEnrollFree = async () => {
         if (!isAuthenticated || !user) {
@@ -195,7 +197,9 @@ const CourseButtons = ({
         }
     };
 
-    if (isAuthPending) {
+    const isComponentLoading = isAuthPending || isLoadingAccess || isWishlistLoading;
+
+    if (isComponentLoading) {
         return (
             <div className="space-y-4">
                 <Skeleton className="h-10 w-28 mb-2" />
@@ -220,97 +224,57 @@ const CourseButtons = ({
         );
     }
 
-    if (course.isFree) {
-        return (
-            <div className={cn('space-y-4', className)}>
-                <div className="mb-4">
-                    <Price price={0} isFree={true} priceClassName="text-2xl" />
-                </div>
-                <div className="w-full flex flex-col gap-4 mt-8">
-                    <Button
-                        id="course-buttons-enroll-free"
-                        size="lg"
-                        onClick={handleEnrollFree}
-                        isLoading={isEnrolling}
-                        disabled={isEnrolling}
-                    >
-                        Записаться бесплатно
-                    </Button>
-                    <Button
-                        variant={isInWishlist ? 'secondary' : 'outline'}
-                        size="lg"
-                        onClick={handleToggleWishlist}
-                        isLoading={isWishlistPending}
-                        aria-live="polite"
-                    >
-                        {isWishlistPending ? (
-                            <>
-                                <span>Обновление...</span>
-                            </>
-                        ) : isInWishlist ? (
-                            <>
-                                <FaRegHeart className="size-5" />В желаемом
-                            </>
-                        ) : (
-                            <>
-                                <FaRegHeart className="size-5" />В желаемое
-                            </>
-                        )}
-                    </Button>
-                </div>
+    return (
+        <div className={cn('space-y-4', className)}>
+            <div className="mb-4">
+                <Price
+                    discount={course.discount}
+                    price={course.price}
+                    isFree={course.isFree}
+                    priceClassName="text-2xl"
+                    discountPriceClassName="text-xl ml-4"
+                />
+                {course.discount ? (
+                    <div className="bg-warning text-white font-bold w-fit p-1 rounded-[2px]">
+                        СКИДКА {getPercentDifference(course.price, course.price - course.discount)}
+                    </div>
+                ) : null}
             </div>
-        );
-    } else {
-        return (
-            <div className={cn('space-y-4', className)}>
-                <div className="mb-4">
-                    <Price
-                        discount={course.discount}
-                        price={course.price}
-                        isFree={course.isFree}
-                        priceClassName="text-2xl"
-                        discountPriceClassName="text-xl ml-4"
-                    />
-                    {course.discount ? (
-                        <div className="bg-warning text-white font-bold w-fit p-1 rounded-[2px]">
-                            СКИДКА {getPercentDifference(course.price, course.price - course.discount)}
-                        </div>
-                    ) : null}
-                </div>
-                <div className="w-full flex flex-col gap-4 mt-8">
-                    <Button
-                        id="course-buttons-buy-main-action"
-                        size="lg"
-                        onClick={handleCheckout}
-                        isLoading={isCheckoutLoading}
-                    >
-                        {course.isFree ? 'Получить бесплатно' : 'Купить курс'}
-                    </Button>
-                    <Button
-                        variant={isInWishlist ? 'secondary' : 'outline'}
-                        size="lg"
-                        onClick={handleToggleWishlist}
-                        isLoading={isWishlistPending}
-                        aria-live="polite"
-                    >
-                        {isWishlistPending ? (
-                            <>
-                                <span>Обновление...</span>
-                            </>
-                        ) : isInWishlist ? (
-                            <>
-                                <FaRegHeart className="size-5" />В желаемом
-                            </>
-                        ) : (
-                            <>
-                                <FaRegHeart className="size-5" />В желаемое
-                            </>
-                        )}
-                    </Button>
-                </div>
+            <div className="w-full flex flex-col gap-4 mt-8">
+                <Button
+                    id={course.isFree ? 'course-buttons-enroll-free' : 'course-buttons-buy-main-action'}
+                    size="lg"
+                    onClick={course.isFree ? handleEnrollFree : handleCheckout}
+                    isLoading={course.isFree ? isEnrolling : isCheckoutLoading}
+                    disabled={course.isFree ? isEnrolling : isCheckoutLoading}
+                >
+                    {course.isFree ? 'Записаться бесплатно' : 'Купить курс'}
+                </Button>
+                <Button
+                    variant={isInWishlist ? 'secondary' : 'outline'}
+                    size="lg"
+                    onClick={handleToggleWishlist}
+                    isLoading={isWishlistPending}
+                    aria-live="polite"
+                    disabled={isWishlistPending}
+                >
+                    {isWishlistPending ? (
+                        <>
+                            <span>Обновление...</span>
+                        </>
+                    ) : isInWishlist ? (
+                        <>
+                            <FaRegHeart className="size-5" />В желаемом
+                        </>
+                    ) : (
+                        <>
+                            <FaRegHeart className="size-5" />В желаемое
+                        </>
+                    )}
+                </Button>
             </div>
-        );
-    }
+        </div>
+    );
 };
 
 export default CourseButtons;
