@@ -3,14 +3,12 @@ export type User = {
     isVerified: boolean;
     username: string;
     email: string;
-    passwordHash: string;
-    refreshToken: string | null;
     roles: string[];
     courses: CourseProgress[];
     createdCourseIds: string[];
     wishlistId: string | null;
-    profileId: string | null;
     accountSettings: AccountSettings | null;
+    permissions?: string[];
 };
 
 export type Profile = {

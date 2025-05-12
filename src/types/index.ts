@@ -1,3 +1,5 @@
+import { ElementType } from 'react';
+
 export type BaseMetadata = {
     title: string;
     description: string;
@@ -9,7 +11,7 @@ export type NavItem = {
     href?: string;
     label: string;
     description?: string;
-    icon?: React.ReactNode;
+    icon?: ElementType;
     variant?: 'ghost' | 'default';
     className?: string;
     subItems?: NavItem[];

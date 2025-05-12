@@ -2,6 +2,7 @@ import { User } from '@/models';
 
 export type UserState = {
     user?: User;
+    permissions?: string[] | null;
 };
 
 export type UserActions = {

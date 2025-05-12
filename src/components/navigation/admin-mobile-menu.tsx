@@ -1,6 +1,6 @@
 'use client';
 
-import { ForwardRefExoticComponent, RefAttributes, useState } from 'react';
+import { ElementType, ForwardRefExoticComponent, RefAttributes, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { LucideProps, Menu, Package2, X } from 'lucide-react';
@@ -9,18 +9,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { cn } from '@/lib/utils';
+import { NavItem } from '@/types';
 
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 
 interface AdminMobileMenuProps {
-    navLinks: {
-        id: string;
-        href: string;
-        label: string;
-        icon: ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>;
-        className?: string;
-    }[];
+    navLinks: NavItem[];
 }
 
 const AdminMobileMenu = ({ navLinks }: AdminMobileMenuProps) => {
@@ -65,6 +60,7 @@ const AdminMobileMenu = ({ navLinks }: AdminMobileMenuProps) => {
                 </Link>
                 <nav className="flex flex-col gap-2 flex-1 overflow-y-auto">
                     {navLinks.map((item, index) => {
+                        if (!item) return null;
                         const IconComponent = item.icon as React.ElementType | undefined;
                         const isActive = pathname === item.href;
 

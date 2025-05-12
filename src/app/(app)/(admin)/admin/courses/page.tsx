@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePermissions } from '@/hooks/use-permissions';
 import { formatNumber } from '@/lib/utils';
 import { adminApiClient } from '@/server/admin-api-client';
 import { useUserStore } from '@/stores/user/user-store-provider';
@@ -33,6 +34,7 @@ export default function AdminCoursesPage() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const { hasPermission, hasAnyPermission } = usePermissions();
 
     const [data, setData] = useState<PagedResponse<AdminCourseListItemDTO> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -166,7 +168,7 @@ export default function AdminCoursesPage() {
                     </CardDescription>
                 </div>
 
-                {(isAdmin || isMentor) && (
+                {hasPermission('course:create') && (
                     <Link href="/admin/courses/new">
                         <Button size="sm">
                             <PlusCircle className="h-4 w-4 mr-2" />
@@ -192,77 +194,93 @@ export default function AdminCoursesPage() {
                         {isLoading ? (
                             renderSkeletons(pageSize)
                         ) : data && data.content.length > 0 ? (
-                            data.content.map((course: AdminCourseListItemDTO) => (
-                                <TableRow key={course.id} className="hover:bg-muted/50 transition-colors">
-                                    <TableCell className="hidden sm:table-cell">
-                                        <div className="h-10 w-16 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                                            <Image
-                                                src={course.imagePreview ?? '/image_not_available.webp'}
-                                                alt={course.title}
-                                                width={80}
-                                                height={80}
-                                            />
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="font-medium">
-                                        <Link href={`/admin/courses/${course.id}/edit`} className="hover:underline">
-                                            {course.title}
-                                        </Link>
-                                        <div className="text-xs text-muted-foreground">{course.slug}</div>
-                                    </TableCell>
-                                    <TableCell>{course.authorUsername}</TableCell>
-                                    <TableCell>
-                                        {course.discount > 0 ? (
-                                            <>
-                                                <span className="text-destructive line-through mr-1">
-                                                    ${formatNumber(course.price)}
-                                                </span>
-                                                <span>${formatNumber(course.price - course.discount)}</span>
-                                            </>
-                                        ) : (
-                                            <span>${formatNumber(course.price)}</span>
-                                        )}
-                                    </TableCell>
-                                    <TableCell>{course.lessonCount}</TableCell>
-                                    <TableCell>
-                                        <Badge variant="outline">{course.difficulty?.toString() ?? 'N/A'}</Badge>
-                                    </TableCell>
-                                    <TableCell className="flex justify-end">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button
-                                                    aria-haspopup="true"
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    className="px-3"
-                                                >
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                    <span className="sr-only">Toggle menu</span>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-56 px-4 py-2">
-                                                <DropdownMenuLabel>Действия</DropdownMenuLabel>
-                                                {(isAdmin || course.authorId === user?.id) && (
-                                                    <DropdownMenuItem
-                                                        className="cursor-pointer"
-                                                        onClick={() => router.push(`/admin/courses/${course.id}/edit`)}
+                            data.content.map((course: AdminCourseListItemDTO) => {
+                                const canEditThisCourse =
+                                    hasPermission('course:edit:any') ||
+                                    (hasPermission('course:edit:own') && course.authorId === user?.id);
+                                const canDeleteThisCourse =
+                                    hasPermission('course:delete:any') ||
+                                    (hasPermission('course:delete:own') && course.authorId === user?.id);
+
+                                return (
+                                    <TableRow key={course.id} className="hover:bg-muted/50 transition-colors">
+                                        <TableCell className="hidden sm:table-cell">
+                                            <div className="h-10 w-16 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
+                                                <Image
+                                                    src={course.imagePreview ?? '/image_not_available.webp'}
+                                                    alt={course.title}
+                                                    width={80}
+                                                    height={80}
+                                                />
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="font-medium">
+                                            <Link href={`/admin/courses/${course.id}/edit`} className="hover:underline">
+                                                {course.title}
+                                            </Link>
+                                            <div className="text-xs text-muted-foreground">{course.slug}</div>
+                                        </TableCell>
+                                        <TableCell>{course.authorUsername}</TableCell>
+                                        <TableCell>
+                                            {course.discount > 0 ? (
+                                                <>
+                                                    <span className="text-destructive line-through mr-1">
+                                                        ${formatNumber(course.price)}
+                                                    </span>
+                                                    <span>${formatNumber(course.price - course.discount)}</span>
+                                                </>
+                                            ) : (
+                                                <span>${formatNumber(course.price)}</span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>{course.lessonCount}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline">{course.difficulty?.toString() ?? 'N/A'}</Badge>
+                                        </TableCell>
+                                        <TableCell className="flex justify-end">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        aria-haspopup="true"
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="px-3"
                                                     >
-                                                        <Pencil className="mr-2 h-4 w-4" /> Редактировать
-                                                    </DropdownMenuItem>
-                                                )}
-                                                {(isAdmin || course.authorId === user?.id) && (
-                                                    <DropdownMenuItem
-                                                        className="text-destructive cursor-pointer"
-                                                        onClick={() => handleDeleteCourse(course.id, course.title)}
-                                                    >
-                                                        <Trash2 className="mr-2 h-4 w-4" /> Удалить
-                                                    </DropdownMenuItem>
-                                                )}
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                </TableRow>
-                            ))
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                        <span className="sr-only">Toggle menu</span>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-56 px-4 py-2">
+                                                    <DropdownMenuLabel>Действия</DropdownMenuLabel>
+                                                    {canEditThisCourse && (
+                                                        <DropdownMenuItem
+                                                            className="cursor-pointer"
+                                                            onClick={() =>
+                                                                router.push(`/admin/courses/${course.id}/edit`)
+                                                            }
+                                                        >
+                                                            <Pencil className="mr-2 h-4 w-4" /> Редактировать
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    {canDeleteThisCourse && (
+                                                        <DropdownMenuItem
+                                                            className="text-destructive cursor-pointer"
+                                                            onClick={() => handleDeleteCourse(course.id, course.title)}
+                                                        >
+                                                            <Trash2 className="mr-2 h-4 w-4" /> Удалить
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    {!canEditThisCourse && !canDeleteThisCourse && (
+                                                        <DropdownMenuItem disabled>
+                                                            Нет доступных действий
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={7} className="h-24 text-center">

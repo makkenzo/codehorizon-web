@@ -21,6 +21,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { usePermissions } from '@/hooks/use-permissions';
 import { heroFadeInVariants } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
@@ -42,6 +43,7 @@ import MobileBurgerMenu from './mobile-burger-menu';
 const Header = () => {
     const [categories, setCategories] = useState<string[]>([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+    const { hasPermission } = usePermissions();
 
     const { isAuthenticated, isPending } = useAuth();
     const pathname = usePathname();
@@ -141,26 +143,29 @@ const Header = () => {
                         <GlobalSearch className="pt-1 lg:block hidden mx-4 flex-grow max-w-md" />
 
                         <div className="flex items-center gap-4 w-full justify-end ml-auto">
-                            {isAuthenticated && canApplyForMentorship && !isCheckingMentorshipStatus && (
-                                <Dialog open={isApplicationModalOpen} onOpenChange={setIsApplicationModalOpen}>
-                                    <DialogTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-foreground lg:flex hidden items-center gap-1.5 hover:bg-primary/10 hover:text-primary"
-                                        >
-                                            <ShieldQuestion className="h-4 w-4" />
-                                            Стать ментором
-                                        </Button>
-                                    </DialogTrigger>
-                                    {isApplicationModalOpen && (
-                                        <MentorshipApplicationModal
-                                            onClose={() => setIsApplicationModalOpen(false)}
-                                            onSuccess={handleApplicationSuccess}
-                                        />
-                                    )}
-                                </Dialog>
-                            )}
+                            {isAuthenticated &&
+                                hasPermission('mentorship_application:apply') &&
+                                canApplyForMentorship &&
+                                !isCheckingMentorshipStatus && (
+                                    <Dialog open={isApplicationModalOpen} onOpenChange={setIsApplicationModalOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-foreground lg:flex hidden items-center gap-1.5 hover:bg-primary/10 hover:text-primary"
+                                            >
+                                                <ShieldQuestion className="h-4 w-4" />
+                                                Стать ментором
+                                            </Button>
+                                        </DialogTrigger>
+                                        {isApplicationModalOpen && (
+                                            <MentorshipApplicationModal
+                                                onClose={() => setIsApplicationModalOpen(false)}
+                                                onSuccess={handleApplicationSuccess}
+                                            />
+                                        )}
+                                    </Dialog>
+                                )}
                             {pathname.includes('courses') ? <CatalogFiltersMobile /> : null}
                             {isAuthenticated ? (
                                 <DropdownMenu>

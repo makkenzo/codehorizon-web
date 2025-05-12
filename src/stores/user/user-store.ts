@@ -7,6 +7,7 @@ import { UserState, UserStore } from './types';
 
 export const defaultInitState: UserState = {
     user: undefined,
+    permissions: undefined,
 };
 
 export const createUserStore = (initState: UserState = defaultInitState) => {
@@ -14,8 +15,8 @@ export const createUserStore = (initState: UserState = defaultInitState) => {
         persist(
             (set) => ({
                 ...initState,
-                setUser: (user: User) => set({ user }),
-                clearUser: () => set({ user: undefined }),
+                setUser: (user: User) => set({ user, permissions: user.permissions ?? null }),
+                clearUser: () => set({ user: undefined, permissions: null }),
             }),
             {
                 name: 'user-storage',

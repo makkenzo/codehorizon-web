@@ -19,17 +19,20 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useHasHydrated } from '@/hooks/use-has-hydrated';
+import { usePermissions } from '@/hooks/use-permissions';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import AuthApiClient from '@/server/auth';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
+import { NavItem } from '@/types';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
     const { isAuthenticated, isPending: isAuthPending } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
     const hasHydrated = useHasHydrated();
+    const { hasPermission } = usePermissions();
 
     const user = useUserStore((state) => state.user);
     const clearUser = useUserStore((state) => state.clearUser);
@@ -64,25 +67,34 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     };
 
     const baseNavLinks = useMemo(
-        () => [
-            { id: 'admin-dash', href: '/admin', label: 'Статистика', icon: LayoutDashboard },
-            { id: 'admin-users', href: '/admin/users', label: 'Пользователи', icon: Users },
-            { id: 'admin-courses', href: '/admin/courses', label: 'Курсы', icon: BookOpen },
-            {
-                id: 'admin-mentor-apps',
-                href: '/admin/mentorship-applications',
-                label: 'Заявки на менторство',
-                icon: ShieldAlert,
-            },
-        ],
-        []
+        () =>
+            [
+                isAdmin || isMentor
+                    ? { id: 'admin-dash', href: '/admin', label: 'Статистика', icon: LayoutDashboard }
+                    : null,
+                hasPermission('user:admin:read:any')
+                    ? { id: 'admin-users', href: '/admin/users', label: 'Пользователи', icon: Users }
+                    : null,
+                hasPermission('course:read:list:all') || hasPermission('course:read:list:own_created')
+                    ? { id: 'admin-courses', href: '/admin/courses', label: 'Курсы', icon: BookOpen }
+                    : null,
+                hasPermission('mentorship_application:admin:read:any')
+                    ? {
+                          id: 'admin-mentor-apps',
+                          href: '/admin/mentorship-applications',
+                          label: 'Заявки на менторство',
+                          icon: ShieldAlert,
+                      }
+                    : null,
+            ].filter(Boolean) as NavItem[],
+        [isAdmin, isMentor, hasPermission]
     );
 
     const filteredNavLinks = useMemo(
         () =>
             baseNavLinks.filter((link) => {
                 if (isAdmin) return true;
-                if (isMentor) return link.href === '/admin/courses';
+                if (isMentor) return link?.href === '/admin/courses';
                 return false;
             }),
         [isAdmin, isMentor, baseNavLinks]
@@ -108,18 +120,22 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const SidebarNav = ({ links }: { links: typeof baseNavLinks }) => (
         <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
             {links.map((link) => {
-                const isActive = pathname === link.href;
+                if (!link) return null;
+
+                const isActive = pathname === link?.href;
+                const IconComponent = link.icon;
+
                 return (
                     <Link
                         key={link.href}
-                        href={link.href}
+                        href={link.href ?? '#'}
                         className={cn(
                             'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
                             isActive && 'bg-muted/20 text-primary'
                         )}
                     >
-                        <link.icon className="h-4 w-4" />
-                        {link.label}
+                        {IconComponent && typeof IconComponent !== 'string' && <IconComponent className="h-4 w-4" />}
+                        {link?.label}
                     </Link>
                 );
             })}

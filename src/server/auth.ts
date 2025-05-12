@@ -22,22 +22,12 @@ class AuthApiClient extends ApiClient {
 
     async getMe() {
         try {
-            const response = await this.get<User>('/auth/me')
-                .then((res) => {
-                    return res.data;
-                })
-                .catch((error) => {
-                    console.log('Ошибка получения юзера', error.response?.status);
-                });
-
-            if (response) {
-                return response;
-            }
+            const response = await this.get<User>('/auth/me');
+            return response.data;
         } catch (error) {
-            console.log('Ошибка получения юзера', error);
+            console.log('Ошибка получения текущего пользователя', (error as any).response?.status);
+            return null;
         }
-
-        return null;
     }
 
     async isLoggedOut() {

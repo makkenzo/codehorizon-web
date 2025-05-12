@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePermissions } from '@/hooks/use-permissions';
 import { useAuth } from '@/providers/auth-provider';
 import ReviewsApiClient from '@/server/reviews';
 import { PagedResponse } from '@/types';
@@ -35,6 +36,7 @@ export default function CourseClientPageReviews({
     isLoadingAccess,
 }: CourseClientPageReviewsProps) {
     const { isAuthenticated, isPending: isAuthPending } = useAuth();
+    const { hasPermission } = usePermissions();
 
     const [reviewsData, setReviewsData] = useState(initialReviewsData);
     const [currentRatingDistribution, setCurrentRatingDistribution] = useState(initialRatingDistribution);
@@ -148,7 +150,7 @@ export default function CourseClientPageReviews({
         fetchReviewsAndDistribution(reviewsPage);
     };
 
-    const canWriteReview = isAuthenticated && hasCourseAccess;
+    const canWriteReview = isAuthenticated && hasCourseAccess && hasPermission('review:create');
     const isLoadingPrerequisitesForButton = isLoadingAccess || isCheckingUserReview || isAuthPending;
 
     return (
