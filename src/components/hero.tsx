@@ -11,6 +11,7 @@ import { fadeInVariants } from '@/lib/constants';
 import PageWrapper from './reusable/page-wrapper';
 import { Button } from './ui/button';
 import Threads from './ui/threads';
+import WrapButton from './ui/wrap-button';
 
 const Hero = () => {
     const features = [
@@ -44,7 +45,7 @@ const Hero = () => {
                     duration: 0.3,
                     delay: 0.6,
                 }}
-                className="w-full h-[1000px] absolute"
+                className="w-full h-[1000px] absolute -z-[50]"
             >
                 <Threads
                     amplitude={1}
@@ -126,15 +127,12 @@ const Hero = () => {
                                     duration: 0.3,
                                     delay: 2.2,
                                 }}
+                                className="w-fit"
                             >
                                 <Link href="/courses">
-                                    <Button
-                                        size="lg"
-                                        variant="primary-inverted"
-                                        className="bg-primary text-primary-foreground"
-                                    >
-                                        Выбрать курс
-                                    </Button>
+                                    <WrapButton className="bg-primary text-primary-foreground">
+                                        <span className="font-bold">Выбрать курс</span>
+                                    </WrapButton>
                                 </Link>
                             </motion.div>
                         </motion.div>
