@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 
+import { isAxiosError } from 'axios';
 import { AnimatePresence, motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 import { useSearchParams } from 'next/navigation';
 
@@ -17,6 +19,8 @@ import CoursesApiClient from '@/server/courses';
 import { useCatalogFiltersStore } from '@/stores/catalog-filters/catalog-filters-store-provider';
 import { CatalogFiltersState, PriceStatus } from '@/stores/catalog-filters/types';
 import { Course } from '@/types';
+
+import { Button } from '../ui/button';
 
 const CoursesPageContent = () => {
     const searchParams = useSearchParams();
@@ -41,6 +45,7 @@ const CoursesPageContent = () => {
 
     const [courses, setCourses] = useState<Omit<Course, 'lessons'>[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const categoryParams = searchParams.getAll('category');
@@ -122,33 +127,43 @@ const CoursesPageContent = () => {
         setPage(initialPage);
     }, []);
 
-    useEffect(() => {
-        const fetchCourses = async (filters: Omit<CatalogFiltersState, 'totalPages'>) => {
-            setIsLoading(true);
-            setCourses(null);
-            try {
-                const data = await new CoursesApiClient().getCourses(mapFiltersToApiParams(filters));
-                if (data) {
-                    setCourses(data.content);
+    const fetchCourses = async (filters: Omit<CatalogFiltersState, 'totalPages'>) => {
+        setIsLoading(true);
+        setCourses(null);
+        setError(null);
 
-                    if (data.totalPages !== totalPages) {
-                        setTotalPages(data.totalPages);
-                    }
-                } else {
-                    setCourses([]);
-                    if (totalPages !== 0) setTotalPages(0);
+        try {
+            const data = await new CoursesApiClient().getCourses(mapFiltersToApiParams(filters));
+            if (data) {
+                setCourses(data.content);
+
+                if (data.totalPages !== totalPages) {
+                    setTotalPages(data.totalPages);
                 }
-            } catch (error) {
-                console.error('Failed to fetch courses:', error);
+            } else {
                 setCourses([]);
                 if (totalPages !== 0) setTotalPages(0);
-            } finally {
-                setIsLoading(false);
             }
-        };
+        } catch (err: unknown) {
+            console.error('Failed to fetch courses:', err);
+            let errorMessage = 'Не удалось загрузить курсы. Попробуйте позже.';
+            if (isAxiosError(err)) {
+                errorMessage = err.response?.data?.message || err.message || errorMessage;
+            } else if (err instanceof Error) {
+                errorMessage = err.message;
+            }
+            setError(errorMessage);
+            toast.error(errorMessage);
+            setCourses([]);
+            if (totalPages !== 0) setTotalPages(0);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchCourses({ categories, level, rating, videoDuration, sortBy, page, priceStatus });
-    }, [categories, level, rating, videoDuration, priceStatus, sortBy, page, setTotalPages, totalPages]);
+    }, [categories, level, rating, videoDuration, priceStatus, sortBy, page, setTotalPages]);
 
     const handlePageChange = (newPage: number) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -206,6 +221,20 @@ const CoursesPageContent = () => {
                         </SelectContent>
                     </Select>
                 </div>
+                {error && !isLoading && (
+                    <div className="col-span-2 md:col-span-3 text-center py-10 text-destructive bg-destructive/10 p-4 rounded-md">
+                        <p>{error}</p>
+                        <Button
+                            onClick={() =>
+                                fetchCourses({ categories, level, rating, videoDuration, sortBy, page, priceStatus })
+                            }
+                            variant="link"
+                            className="mt-2"
+                        >
+                            Попробовать снова
+                        </Button>
+                    </div>
+                )}
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={
@@ -237,11 +266,11 @@ const CoursesPageContent = () => {
                                     <CourseCard course={course} />
                                 </motion.div>
                             ))
-                        ) : (
+                        ) : !error ? (
                             <div className="col-span-2 md:col-span-3 text-center py-10 text-muted-foreground">
                                 По вашему запросу курсы не найдены. Попробуйте изменить фильтры.
                             </div>
-                        )}
+                        ) : null}
                     </motion.div>
                 </AnimatePresence>
                 {!isLoading && totalPages && totalPages > 1 ? (
