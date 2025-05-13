@@ -1,6 +1,7 @@
 import { ReactNode, createContext, useContext, useRef } from 'react';
 
 import { useStore } from 'zustand';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
 
 import { createNotificationsStore } from './notifications-store';
 import { NotificationsStore } from './types';
@@ -22,12 +23,15 @@ export const NotificationsStoreProvider = ({ children }: NotificationsStoreProvi
     return <NotificationsStoreContext.Provider value={storeRef.current}>{children}</NotificationsStoreContext.Provider>;
 };
 
-export const useNotificationsStore = <T,>(selector: (store: NotificationsStore) => T): T => {
+export const useNotificationsStore = <T,>(
+    selector: (store: NotificationsStore) => T,
+    equalityFn?: (a: T, b: T) => boolean
+): T => {
     const notificationsStoreContext = useContext(NotificationsStoreContext);
 
     if (!notificationsStoreContext) {
         throw new Error(`useNotificationsStore must be used within NotificationsStoreProvider`);
     }
 
-    return useStore(notificationsStoreContext, selector);
+    return useStoreWithEqualityFn(notificationsStoreContext, selector, equalityFn);
 };

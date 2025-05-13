@@ -34,6 +34,7 @@ import { useUserStore } from '@/stores/user/user-store-provider';
 import CatalogDropdown from '../catalog-dropdown';
 import CatalogFiltersMobile from '../catalog/filters-mobile';
 import MentorshipApplicationModal from '../mentorship/mentorship-application-modal';
+import NotificationIcon from '../notifications/notification-icon';
 import GlobalSearch from '../reusable/global-search';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Dialog, DialogTrigger } from '../ui/dialog';
@@ -167,6 +168,7 @@ const Header = () => {
                                     </Dialog>
                                 )}
                             {pathname.includes('courses') ? <CatalogFiltersMobile /> : null}
+                            {isAuthenticated ? <NotificationIcon /> : null}
                             {isAuthenticated ? (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
