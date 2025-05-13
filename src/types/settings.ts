@@ -21,3 +21,29 @@ export interface UpdatePrivacySettingsRequest {
     showActivityFeedOnProfile?: boolean;
     allowDirectMessages?: boolean;
 }
+
+export interface NotificationPreferences {
+    emailGlobalOnOff: boolean;
+    emailMentorshipStatusChange: boolean;
+    emailCoursePurchaseConfirmation: boolean;
+    emailCourseCompletion: boolean;
+    emailNewReviewOnMyCourse: boolean;
+    emailStudentCompletedMyCourse: boolean;
+    emailMarketingNewCourses: boolean;
+    emailMarketingUpdates: boolean;
+    emailProgressReminders: boolean;
+    emailSecurityAlerts: boolean;
+}
+
+export interface UpdateNotificationPreferencesRequest {
+    emailGlobalOnOff?: boolean;
+    emailMentorshipStatusChange?: boolean;
+    emailCoursePurchaseConfirmation?: boolean;
+    emailCourseCompletion?: boolean;
+    emailNewReviewOnMyCourse?: boolean;
+    emailStudentCompletedMyCourse?: boolean;
+    emailMarketingNewCourses?: boolean;
+    emailMarketingUpdates?: boolean;
+    emailProgressReminders?: boolean;
+    emailSecurityAlerts?: boolean;
+}

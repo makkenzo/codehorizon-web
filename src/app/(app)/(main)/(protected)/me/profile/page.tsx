@@ -9,13 +9,8 @@ import { useSearchParams } from 'next/navigation';
 import PrivacySettingsForm from '@/components/settings/privacy-settings-form';
 
 import ProfileForm from './_components/form';
+import NotificationSettingsForm from './_components/notification-settings-form';
 
-const NotificationSettingsForm = () => (
-    <div className="p-6 bg-card border rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Настройки уведомлений</h2>
-        <p className="text-muted-foreground">Здесь будут настройки уведомлений...</p>
-    </div>
-);
 const SecuritySettingsForm = () => (
     <div className="p-6 bg-card border rounded-lg shadow-sm">
         <h2 className="text-xl font-semibold mb-4">Настройки безопасности</h2>

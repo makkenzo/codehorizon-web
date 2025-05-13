@@ -1,4 +1,9 @@
-import { PrivacySettings, UpdatePrivacySettingsRequest } from '@/types/settings';
+import {
+    NotificationPreferences,
+    PrivacySettings,
+    UpdateNotificationPreferencesRequest,
+    UpdatePrivacySettingsRequest,
+} from '@/types/settings';
 
 import ApiClient from './api-client';
 
@@ -22,6 +27,31 @@ class SettingsApiClient extends ApiClient {
             return response.data;
         } catch (error) {
             console.error('Error updating privacy settings:', error);
+            throw error;
+        }
+    }
+
+    async getNotificationPreferences(): Promise<NotificationPreferences | null> {
+        try {
+            const response = await this.get<NotificationPreferences>('/me/settings/notifications');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching notification preferences:', error);
+            return null;
+        }
+    }
+
+    async updateNotificationPreferences(
+        data: UpdateNotificationPreferencesRequest
+    ): Promise<NotificationPreferences | null> {
+        try {
+            const response = await this.put<NotificationPreferences, UpdateNotificationPreferencesRequest>(
+                '/me/settings/notifications',
+                data
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error updating notification preferences:', error);
             throw error;
         }
     }
