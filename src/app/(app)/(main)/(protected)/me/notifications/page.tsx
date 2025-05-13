@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Loader2 } from 'lucide-react';
 
@@ -11,8 +11,16 @@ import { Button } from '@/components/ui/button';
 import { useNotificationsStore } from '@/stores/notifications/notifications-store-provider';
 
 const AllNotificationsPage = () => {
-    const { notifications, isLoading, error, fetchNotifications, markAllAsRead, currentPage, totalPages } =
-        useNotificationsStore((state) => state);
+    const {
+        notifications,
+        isLoading,
+        error,
+        fetchNotifications,
+        markAllAsRead,
+        totalPages: storeTotalPages,
+    } = useNotificationsStore((state) => state);
+
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         fetchNotifications(currentPage);
@@ -21,6 +29,8 @@ const AllNotificationsPage = () => {
     const handlePageChange = (newPage: number) => {
         fetchNotifications(newPage);
     };
+
+    const totalPages = storeTotalPages ?? 1;
 
     return (
         <PageWrapper>

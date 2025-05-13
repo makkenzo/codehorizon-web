@@ -220,9 +220,11 @@ const Header = () => {
                                         )}
                                         <DropdownMenuSeparator />
                                         <DropdownMenuGroup>
-                                            <DropdownMenuItem>
-                                                <span>Уведомления</span>
-                                            </DropdownMenuItem>
+                                            <Link href="/me/notifications">
+                                                <DropdownMenuItem>
+                                                    <span>Уведомления</span>
+                                                </DropdownMenuItem>
+                                            </Link>
                                             <DropdownMenuItem>
                                                 <span>Настройки аккаунта</span>
                                             </DropdownMenuItem>

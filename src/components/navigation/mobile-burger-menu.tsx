@@ -142,7 +142,7 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                       },
                       {
                           id: 'cb5283a9-cf5a-544d-940a-765e6a3190e0',
-                          href: '/',
+                          href: '/me/notifications',
                           label: 'Уведомления',
                           icon: Bell,
                           className: 'text-primary',
