@@ -15,9 +15,14 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
             disabled: true,
         },
         {
+            label: 'Уведомления',
+            href: '/me/profile?tab=notifications',
+            disabled: false,
+        },
+        {
             label: 'Конфиденциальность',
             href: '/me/profile?tab=privacy',
-            disabled: true,
+            disabled: false,
         },
     ];
 

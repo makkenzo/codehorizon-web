@@ -21,17 +21,12 @@ const HorizontalTabNav = ({ title, tabs }: HorizontalTabNavProps) => {
     const currentTab = searchParams.get('tab');
 
     const checkIsActive = (tabHref: string): boolean => {
-        // Разбираем href таба на путь и параметры
         const [linkPathname, linkQueryString] = tabHref.split('?');
         const linkParams = new URLSearchParams(linkQueryString || '');
         const linkTab = linkParams.get('tab');
 
-        // Таб активен, если:
-        // 1. Текущий pathname совпадает с pathname таба И
-        // 2. Значение параметра 'tab' в URL совпадает со значением 'tab' в href таба
-        //    (учитываем случай, когда 'tab' отсутствует и там, и там - это базовый таб)
         const pathnameMatches = pathname === linkPathname;
-        const tabMatches = currentTab === linkTab; // Сравнивает null с null, 'wishlist' с 'wishlist' и т.д.
+        const tabMatches = currentTab === linkTab;
 
         return pathnameMatches && tabMatches;
     };
