@@ -3,6 +3,7 @@
 import { ReactNode } from 'react';
 
 import { CatalogFiltersStoreProvider } from './catalog-filters/catalog-filters-store-provider';
+import { NotificationsStoreProvider } from './notifications/notifications-store-provider';
 import { ProfileStoreProvider } from './profile/profile-store-provider';
 import { LessonTasksStoreProvider } from './tasks/tasks-store-provider';
 import { UserStoreProvider } from './user/user-store-provider';
@@ -16,7 +17,9 @@ const ZustandProvider = ({ children }: ZustandProviderProps) => {
         <ProfileStoreProvider>
             <UserStoreProvider>
                 <CatalogFiltersStoreProvider>
-                    <LessonTasksStoreProvider>{children}</LessonTasksStoreProvider>
+                    <LessonTasksStoreProvider>
+                        <NotificationsStoreProvider>{children}</NotificationsStoreProvider>
+                    </LessonTasksStoreProvider>
                 </CatalogFiltersStoreProvider>
             </UserStoreProvider>
         </ProfileStoreProvider>

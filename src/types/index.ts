@@ -153,3 +153,24 @@ export interface UserSpecificCourseProgressDetails {
     progress: number;
     lastUpdated: string;
 }
+
+export type NotificationDTO = {
+    id: string;
+    userId: string;
+    type: NotificationType;
+    message: string;
+    link?: string | null;
+    relatedEntityId?: string | null;
+    read: boolean;
+    createdAt: string;
+};
+
+export enum NotificationType {
+    MENTORSHIP_APPLICATION_NEW = 'MENTORSHIP_APPLICATION_NEW',
+    MENTORSHIP_APPLICATION_APPROVED = 'MENTORSHIP_APPLICATION_APPROVED',
+    MENTORSHIP_APPLICATION_REJECTED = 'MENTORSHIP_APPLICATION_REJECTED',
+    COURSE_PURCHASED = 'COURSE_PURCHASED',
+    COURSE_COMPLETED = 'COURSE_COMPLETED',
+    NEW_REVIEW_ON_COURSE = 'NEW_REVIEW_ON_COURSE',
+    LESSON_COMPLETED_BY_STUDENT = 'LESSON_COMPLETED_BY_STUDENT',
+}
