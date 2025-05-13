@@ -2,7 +2,18 @@
 
 import { ReactNode, useEffect, useMemo } from 'react';
 
-import { BookOpen, Home, LayoutDashboard, Loader2, LogOut, Package2, Settings, ShieldAlert, Users } from 'lucide-react';
+import {
+    BarChart3,
+    BookOpen,
+    Home,
+    LayoutDashboard,
+    Loader2,
+    LogOut,
+    Package2,
+    Settings,
+    ShieldAlert,
+    Users,
+} from 'lucide-react';
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -72,6 +83,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 isAdmin || isMentor
                     ? { id: 'admin-dash', href: '/admin', label: 'Статистика', icon: LayoutDashboard }
                     : null,
+                isAdmin || isMentor
+                    ? {
+                          id: 'my-course-analytics',
+                          href: '/admin/my-analytics',
+                          label: 'Моя аналитика',
+                          icon: BarChart3,
+                      }
+                    : null,
                 hasPermission('user:admin:read:any')
                     ? { id: 'admin-users', href: '/admin/users', label: 'Пользователи', icon: Users }
                     : null,
@@ -94,7 +113,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         () =>
             baseNavLinks.filter((link) => {
                 if (isAdmin) return true;
-                if (isMentor) return link?.href === '/admin/courses';
+                if (isMentor) return link?.href === '/admin/courses' || link?.href === '/admin/my-analytics';
                 return false;
             }),
         [isAdmin, isMentor, baseNavLinks]

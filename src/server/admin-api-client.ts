@@ -8,6 +8,8 @@ import {
     AdminDashboardStatsDTO,
     AdminUpdateUserRequest,
     AdminUser,
+    AuthorCourseAnalytics,
+    AuthorCourseListItemAnalytics,
     StudentProgressDTO,
 } from '@/types/admin';
 
@@ -204,6 +206,39 @@ class AdminApiClient {
             return response.data;
         } catch (error: unknown) {
             console.error('Error fetching admin course students:', error);
+            throw error;
+        }
+    }
+
+    async getAuthorCoursesWithAnalytics(
+        page: number = 1,
+        size: number = 10,
+        sortBy?: string
+    ): Promise<PagedResponse<AuthorCourseListItemAnalytics>> {
+        const params = new URLSearchParams();
+        params.append('page', page.toString());
+        params.append('size', size.toString());
+        if (sortBy) params.append('sortBy', sortBy);
+
+        try {
+            const response = await apiClient.get<PagedResponse<AuthorCourseListItemAnalytics>>(
+                `/author/dashboard/my-courses-analytics?${params.toString()}`
+            );
+            return response.data;
+        } catch (error: unknown) {
+            console.error('Error fetching author courses analytics:', error);
+            throw error;
+        }
+    }
+
+    async getAuthorCourseAnalytics(courseId: string): Promise<AuthorCourseAnalytics> {
+        try {
+            const response = await apiClient.get<AuthorCourseAnalytics>(
+                `/author/dashboard/courses/${courseId}/analytics`
+            );
+            return response.data;
+        } catch (error: unknown) {
+            console.error(`Error fetching analytics for course ${courseId}:`, error);
             throw error;
         }
     }

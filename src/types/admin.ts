@@ -160,3 +160,23 @@ export interface StudentProgressDTO {
     totalLessonsCount: number;
     lastAccessedLessonAt?: string;
 }
+
+export interface AuthorCourseAnalytics {
+    courseId: string;
+    courseTitle: string;
+    totalEnrolledStudents: number;
+    activeStudentsLast30Days: number;
+    averageCompletionRate: number;
+    averageRating: number;
+    totalReviews: number;
+}
+
+export interface AuthorCourseListItemAnalytics {
+    courseId: string;
+    courseTitle: string;
+    slug: string;
+    totalEnrolledStudents: number;
+    averageCompletionRate: number;
+    averageRating: number;
+    imagePreview?: string | null;
+}

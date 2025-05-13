@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { ColumnDef, FilterFn, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { ArrowUpDown } from 'lucide-react';
@@ -10,6 +11,8 @@ import { toast } from 'sonner';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import MyPagination from '@/components/reusable/my-pagination';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { LinkedChart } from '@/components/ui/linked-chart';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -17,24 +20,191 @@ import { adminApiClient } from '@/server/admin-api-client';
 import { PagedResponse } from '@/types';
 import { StudentProgressDTO } from '@/types/admin';
 
+export type DateRangeFilterValue = {
+    start?: string | Date | number | null;
+    end?: string | Date | number | null;
+};
+
+const parseToValidDate = (value: string | Date | number | null | undefined, contextForLog: string): Date | null => {
+    console.log(`[parseToValidDate] Attempting to parse for ${contextForLog}:`, value, `(type: ${typeof value})`);
+
+    if (value === null || value === undefined || value === '') {
+        console.log(
+            `[parseToValidDate] Value for ${contextForLog} is null, undefined, or empty string. Returning null.`
+        );
+        return null;
+    }
+
+    let dateObj: Date;
+
+    if (value instanceof Date) {
+        dateObj = value;
+    } else if (typeof value === 'number') {
+        const timestampMs = value > 30000000000 ? value : value * 1000;
+        dateObj = new Date(timestampMs);
+    } else if (typeof value === 'string') {
+        dateObj = new Date(value);
+    } else {
+        console.error(`[parseToValidDate] Unexpected type for ${contextForLog}: ${typeof value}. Value:`, value);
+        return null;
+    }
+
+    if (isNaN(dateObj.getTime())) {
+        console.error(
+            `[parseToValidDate] Failed to parse to valid date for ${contextForLog}. Original value:`,
+            value,
+            `Resulting Date object:`,
+            dateObj
+        );
+        return null;
+    }
+
+    console.log(`[parseToValidDate] Successfully parsed date for ${contextForLog}:`, dateObj.toISOString());
+    return dateObj;
+};
+
+export const dateRangeFilterFn: FilterFn<StudentProgressDTO> = (
+    row,
+    columnId,
+    filterValue: DateRangeFilterValue | any
+) => {
+    const rawCellValue = row.getValue<string | null | undefined>(columnId);
+    console.log(`[dateRangeFilterFn] Filtering column '${columnId}', Row ID: ${row.id}`);
+    console.log(`[dateRangeFilterFn] Raw cell value:`, rawCellValue, `(Type: ${typeof rawCellValue})`);
+    console.log(`[dateRangeFilterFn] FilterValue received:`, filterValue);
+
+    const cellDate = parseToValidDate(rawCellValue, `cellValue for column '${columnId}'`);
+
+    if (!cellDate) {
+        console.log(`[dateRangeFilterFn] Invalid or null cellDate for column '${columnId}'. Excluding row.`);
+        return false;
+    }
+
+    const filterStartInput = filterValue?.start;
+    const filterEndInput = filterValue?.end;
+
+    const filterStartDate = parseToValidDate(filterStartInput, `filterStart for column '${columnId}'`);
+    const filterEndDate = parseToValidDate(filterEndInput, `filterEnd for column '${columnId}'`);
+
+    console.log(
+        `[dateRangeFilterFn] Parsed dates - Cell: ${cellDate?.toISOString()}, FilterStart: ${filterStartDate?.toISOString()}, FilterEnd: ${filterEndDate?.toISOString()}`
+    );
+
+    if (typeof filterValue !== 'object' || filterValue === null || (!filterStartDate && !filterEndDate)) {
+        console.log(`[dateRangeFilterFn] No valid filter range for column '${columnId}'. Including row.`);
+        return true;
+    }
+
+    const cellTime = cellDate.getTime();
+
+    if (filterStartDate && filterEndDate) {
+        const startTime = filterStartDate.getTime();
+        let endTime = filterEndDate.getTime();
+
+        if (endTime < startTime) {
+            console.warn(
+                `[dateRangeFilterFn] Filter end date (${filterEndDate.toISOString()}) is before start date (${filterStartDate.toISOString()}) for column '${columnId}'. Excluding row.`
+            );
+            return false;
+        }
+        const isInRange = cellTime >= startTime && cellTime <= endTime;
+        console.log(
+            `[dateRangeFilterFn] Comparing cellTime ${cellTime} against [${startTime}, ${endTime}]. In range: ${isInRange}`
+        );
+        return isInRange;
+    }
+    if (filterStartDate) {
+        const isInRange = cellTime >= filterStartDate.getTime();
+        console.log(
+            `[dateRangeFilterFn] Comparing cellTime ${cellTime} against start ${filterStartDate.getTime()}. In range: ${isInRange}`
+        );
+        return isInRange;
+    }
+    if (filterEndDate) {
+        const isInRange = cellTime <= filterEndDate.getTime();
+        console.log(
+            `[dateRangeFilterFn] Comparing cellTime ${cellTime} against end ${filterEndDate.getTime()}. In range: ${isInRange}`
+        );
+        return isInRange;
+    }
+
+    console.log(`[dateRangeFilterFn] Filter conditions not met for column '${columnId}'. Including row by default.`);
+    return true;
+};
+
 interface StudentProgressTabProps {
     courseId: string;
 }
+
+const studentChartAggregatorConfig = {
+    activeStudents: (student: StudentProgressDTO) => (student.lastAccessedLessonAt ? 1 : 0),
+};
 
 const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const [data, setData] = useState<PagedResponse<StudentProgressDTO> | null>(null);
+    const [rawData, setRawData] = useState<StudentProgressDTO[]>([]);
+    const [pagedData, setPagedData] = useState<PagedResponse<StudentProgressDTO> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const currentPage = parseInt(searchParams.get('spage') || '1', 10);
     const pageSize = 10;
     const currentSort = searchParams.get('ssort') || 'lastAccessedLessonAt,desc';
-
     const [totalPages, setTotalPages] = useState(0);
+
+    const columns = useMemo<ColumnDef<StudentProgressDTO>[]>(
+        () => [
+            { accessorKey: 'username', header: 'Имя пользователя' },
+            { accessorKey: 'email', header: 'Email' },
+            {
+                accessorKey: 'progressPercent',
+                header: 'Прогресс',
+                cell: ({ row }) => (
+                    <div className="flex items-center justify-end gap-2">
+                        <span className="text-xs text-muted-foreground w-8">
+                            {row.original.progressPercent.toFixed(0)}%
+                        </span>
+                        <Progress value={row.original.progressPercent} className="h-1.5 w-20" />
+                    </div>
+                ),
+            },
+            {
+                accessorKey: 'completedLessonsCount',
+                header: 'Уроков пройдено',
+                cell: ({ row }) => `${row.original.completedLessonsCount} из ${row.original.totalLessonsCount}`,
+            },
+            {
+                accessorKey: 'lastAccessedLessonAt',
+                header: 'Последняя активность',
+                cell: ({ row }) => {
+                    const dateString = row.getValue<string>('lastAccessedLessonAt');
+                    if (!dateString) return 'N/A';
+                    try {
+                        return new Date(dateString).toLocaleDateString('ru-RU', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                        });
+                    } catch {
+                        return 'Invalid Date';
+                    }
+                },
+                filterFn: dateRangeFilterFn,
+            },
+        ],
+        []
+    );
+
+    const table = useReactTable({
+        data: pagedData?.content || [],
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        manualPagination: true,
+        manualSorting: true,
+    });
 
     const createUrl = (page: number, sort: string) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -49,17 +219,16 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
             setError(null);
             try {
                 const result = await adminApiClient.getCourseStudentsProgress(courseId, page, pageSize, sort);
-                if (result) {
-                    setData(result);
-                    setTotalPages(result.totalPages);
-                } else {
-                    setData(null);
-                    setTotalPages(0);
+                setPagedData(result);
+                setTotalPages(result.totalPages);
+                if (page === 1) {
+                    const allStudentsResult = await adminApiClient.getCourseStudentsProgress(courseId, 1, 10000, sort);
+                    setRawData(allStudentsResult.content);
                 }
             } catch (err: any) {
                 console.error('Failed to fetch student progress:', err);
                 setError('Не удалось загрузить прогресс студентов.');
-                setData(null);
+                setPagedData(null);
                 setTotalPages(0);
                 toast.error(
                     `Ошибка загрузки прогресса: ${err?.response?.data?.message || err?.message || 'Неизвестная ошибка'}`
@@ -121,6 +290,24 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
     return (
         <div className="space-y-4">
             {error && <p className="text-destructive text-center">{error}</p>}
+
+            {!isLoading && rawData.length > 0 && (
+                <LinkedChart
+                    data={rawData}
+                    // @ts-ignore
+                    columns={columns.filter(
+                        // @ts-ignore
+                        (col) => col.accessorKey !== 'email' && col.accessorKey !== 'username'
+                    )}
+                    dateFormat="dd/MM/yyyy"
+                    setColumnFilters={table.setColumnFilters}
+                    dateField="lastAccessedLessonAt"
+                    aggregatorConfig={studentChartAggregatorConfig}
+                    chartType="area"
+                    title="Активность студентов по дате"
+                />
+            )}
+
             <div className="overflow-x-auto border rounded-md">
                 <Table>
                     <TableHeader>
@@ -147,8 +334,8 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
                     <TableBody>
                         {isLoading ? (
                             renderSkeletons(pageSize)
-                        ) : data && data.content.length > 0 ? (
-                            data.content.map((student) => (
+                        ) : pagedData && pagedData.content.length > 0 ? (
+                            pagedData.content.map((student) => (
                                 <TableRow key={student.userId}>
                                     <TableCell className="font-medium">{student.username}</TableCell>
                                     <TableCell>{student.email}</TableCell>
@@ -182,7 +369,7 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
                     </TableBody>
                 </Table>
             </div>
-            {!isLoading && data && data.totalPages > 1 && (
+            {!isLoading && pagedData && pagedData.totalPages > 1 && (
                 <MyPagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
             )}
         </div>
