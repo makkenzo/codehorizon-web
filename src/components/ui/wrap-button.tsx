@@ -23,7 +23,7 @@ const WrapButton: React.FC<WrapButtonProps> = ({ className, children, href }) =>
                             className
                         )}
                     >
-                        <div className="border border-[#3B3A3A] bg-accent  h-[43px] rounded-full flex items-center justify-center text-white">
+                        <div className="border border-[#3B3A3A] bg-accent  h-[43px] rounded-full flex items-center justify-center text-foreground">
                             <p className="font-medium tracking-tight mr-3 ml-2 flex items-center gap-2 justify-center ">
                                 {children}
                             </p>
@@ -40,7 +40,7 @@ const WrapButton: React.FC<WrapButtonProps> = ({ className, children, href }) =>
                         className
                     )}
                 >
-                    <div className="border border-[#3B3A3A] bg-accent  h-[43px] rounded-full flex items-center justify-center text-white">
+                    <div className="border border-[#3B3A3A] bg-accent  h-[43px] rounded-full flex items-center justify-center text-foreground">
                         <BookOpen className="mx-2" />
                         <p className="font-medium tracking-tight mr-3">{children ? children : 'Get Started'}</p>
                     </div>

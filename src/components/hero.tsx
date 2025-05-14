@@ -130,7 +130,7 @@ const Hero = () => {
                                 className="w-fit"
                             >
                                 <Link href="/courses">
-                                    <WrapButton className="bg-primary text-primary-foreground">
+                                    <WrapButton className="bg-primary">
                                         <span className="font-bold">Выбрать курс</span>
                                     </WrapButton>
                                 </Link>

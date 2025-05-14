@@ -211,7 +211,7 @@ const Header = () => {
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuGroup>
                                                     <Link href="/admin">
-                                                        <DropdownMenuItem className="text-accent focus:text-accent cursor-pointer">
+                                                        <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">
                                                             Админ-панель
                                                         </DropdownMenuItem>
                                                     </Link>
