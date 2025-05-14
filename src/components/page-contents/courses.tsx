@@ -45,6 +45,7 @@ const CoursesPageContent = () => {
     } = useCatalogFiltersStore((state) => state);
 
     const [courses, setCourses] = useState<Omit<Course, 'lessons'>[] | null>(null);
+    const [totalElements, setTotalElements] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -128,18 +129,20 @@ const CoursesPageContent = () => {
     const fetchCourses = async (filters: Omit<CatalogFiltersState, 'totalPages'>) => {
         setIsLoading(true);
         setCourses(null);
+        setTotalElements(null);
         setError(null);
 
         try {
             const data = await new CoursesApiClient().getCourses(mapFiltersToApiParams(filters));
             if (data) {
                 setCourses(data.content);
-
+                setTotalElements(data.totalElements);
                 if (data.totalPages !== totalPages) {
                     setTotalPages(data.totalPages);
                 }
             } else {
                 setCourses([]);
+                setTotalElements(0);
                 if (totalPages !== 0) setTotalPages(0);
             }
         } catch (err: unknown) {
@@ -153,6 +156,7 @@ const CoursesPageContent = () => {
             setError(errorMessage);
             toast.error(errorMessage);
             setCourses([]);
+            setTotalElements(0);
             if (totalPages !== 0) setTotalPages(0);
         } finally {
             setIsLoading(false);
@@ -219,7 +223,17 @@ const CoursesPageContent = () => {
                         </SelectContent>
                     </Select>
                 </div>
+
                 <ActiveFiltersDisplay />
+
+                {!isLoading && totalElements !== null && (
+                    <div className="mb-4 text-sm text-muted-foreground">
+                        {courses && courses.length > 0
+                            ? `Показано ${courses.length} из ${totalElements} курсов`
+                            : `Найдено: ${totalElements} курсов`}
+                    </div>
+                )}
+
                 {error && !isLoading && (
                     <div className="col-span-2 md:col-span-3 text-center py-10 text-destructive bg-destructive/10 p-4 rounded-md">
                         <p>{error}</p>
