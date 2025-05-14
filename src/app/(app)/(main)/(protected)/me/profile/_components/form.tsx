@@ -15,9 +15,11 @@ import { z } from 'zod';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
+import LevelProgress from '@/components/reusable/level-progress';
 import SignatureCanvas from '@/components/reusable/signature-canvas';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -251,10 +253,33 @@ const ProfileForm = ({}) => {
         );
 
     return (
-        <div className="mb-20">
+        <div className="mb-20 md:px-[45px]">
+            {user && (
+                <motion.div variants={formVariants} custom={0.5} className="mb-8">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-lg">Ваш прогресс</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <LevelProgress
+                                level={user.level}
+                                currentXp={user.xp}
+                                xpForNextLevel={user.xpForNextLevel}
+                                dailyStreak={user.dailyStreak}
+                                className="text-base"
+                                showTooltip={true}
+                            />
+                            <p className="text-xs text-muted-foreground mt-2">
+                                Продолжайте учиться, чтобы открывать новые уровни и достижения!
+                            </p>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            )}
+
             <Form {...form}>
                 {user?.username && (
-                    <div className="flex justify-end mb-6 md:px-[45px]">
+                    <div className="flex justify-end mb-6">
                         <Button
                             type="button"
                             variant="outline"
@@ -271,7 +296,7 @@ const ProfileForm = ({}) => {
                     initial="hidden"
                     animate="visible"
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4 md:px-[45px] mt-10"
+                    className="space-y-4 mt-10"
                 >
                     <FormField
                         key="avatarUrl"

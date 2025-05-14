@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import CourseCard from '@/components/course/card';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createMetadata } from '@/lib/metadata';
 import { certificateApiClient } from '@/server/certificate';
@@ -107,11 +108,17 @@ const UserPage = async ({ params }: UserPageProps) => {
                         </AvatarFallback>
                     </Avatar>
                     <div className="pb-2 flex flex-col">
-                        <h1 className="font-bold text-xl md:text-2xl leading-tight">
+                        <h1 className="font-bold text-xl md:text-2xl leading-tight flex items-center gap-2">
                             {profile.firstName || profile.lastName
                                 ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim()
                                 : userProfile.username}
+                            {userProfile.level && (
+                                <Badge variant="secondary" className="text-xs font-semibold bg-primary/10 text-primary">
+                                    Ур. {userProfile.level}
+                                </Badge>
+                            )}
                         </h1>
+
                         {(profile.firstName || profile.lastName) && (
                             <h2 className="text-muted-foreground text-sm md:text-base">@{userProfile.username}</h2>
                         )}

@@ -8,6 +8,10 @@ export type User = {
     createdCourseIds: string[];
     wishlistId: string | null;
     accountSettings: AccountSettings | null;
+    xp: number;
+    level: number;
+    xpForNextLevel: number;
+    dailyStreak: number;
     permissions?: string[];
 };
 
@@ -61,4 +65,5 @@ export type UserProfile = {
     coursesInProgress?: PublicCourseInfo[] | null;
     completedCoursesCount: number;
     createdCourses?: PublicCourseInfo[] | null;
+    level: number;
 };

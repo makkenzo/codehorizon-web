@@ -147,13 +147,6 @@ const MobileBurgerMenu = ({ profile }: MobileBurgerMenuProps) => {
                           icon: Bell,
                           className: 'text-primary',
                       },
-                      {
-                          id: '7fb21855-e088-5ee6-8a39-29afddbf10ea',
-                          href: '/',
-                          label: 'Настройки аккаунта',
-                          icon: Settings,
-                          className: 'text-primary',
-                      },
                   ],
               },
           ]

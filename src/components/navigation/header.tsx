@@ -36,6 +36,7 @@ import CatalogFiltersMobile from '../catalog/filters-mobile';
 import MentorshipApplicationModal from '../mentorship/mentorship-application-modal';
 import NotificationIcon from '../notifications/notification-icon';
 import GlobalSearch from '../reusable/global-search';
+import LevelProgress from '../reusable/level-progress';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Dialog, DialogTrigger } from '../ui/dialog';
 import { Skeleton } from '../ui/skeleton';
@@ -168,8 +169,21 @@ const Header = () => {
                                     </Dialog>
                                 )}
                             {pathname.includes('courses') ? <CatalogFiltersMobile /> : null}
-                            {isAuthenticated ? <NotificationIcon /> : null}
-                            {isAuthenticated ? (
+                            {isAuthenticated && user ? (
+                                <>
+                                    <NotificationIcon />
+                                    <div className="lg:flex hidden items-center">
+                                        <LevelProgress
+                                            level={user.level}
+                                            currentXp={user.xp}
+                                            xpForNextLevel={user.xpForNextLevel}
+                                            dailyStreak={user.dailyStreak}
+                                            showTooltip={true}
+                                        />
+                                    </div>
+                                </>
+                            ) : null}
+                            {isAuthenticated && user ? (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Avatar className="hover:cursor-pointer lg:block hidden hover:outline-4 outline-primary outline-0 ease-in-out transition-all duration-100">
@@ -225,9 +239,6 @@ const Header = () => {
                                                     <span>Уведомления</span>
                                                 </DropdownMenuItem>
                                             </Link>
-                                            <DropdownMenuItem>
-                                                <span>Настройки аккаунта</span>
-                                            </DropdownMenuItem>
                                         </DropdownMenuGroup>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem
