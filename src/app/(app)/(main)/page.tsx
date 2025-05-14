@@ -1,3 +1,5 @@
+import { Metadata } from 'next';
+
 import CategoryRowSelect from '@/components/course/category-row-select';
 import CoursesInProgress from '@/components/course/courses-in-progress';
 import LatestCourses from '@/components/course/latest-courses';
@@ -5,10 +7,13 @@ import PopularMentors from '@/components/course/popular-mentors';
 import TrendingCourses from '@/components/course/trending-courses';
 import Hero from '@/components/hero';
 import PageWrapper from '@/components/reusable/page-wrapper';
+import { homePageMetadata } from '@/lib/metadata';
 import CoursesApiClient from '@/server/courses';
 import ProfileApiClient from '@/server/profile';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = homePageMetadata;
 
 export default async function Home() {
     const coursesApiClient = new CoursesApiClient();

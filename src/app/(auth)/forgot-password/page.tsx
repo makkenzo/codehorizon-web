@@ -1,8 +1,12 @@
 import { Suspense } from 'react';
 
 import { Loader2 } from 'lucide-react';
+import { Metadata } from 'next';
 
 import ForgotPasswordPageContent from '@/components/page-contents/forgot-password';
+import { forgotPasswordPageMetadata } from '@/lib/metadata';
+
+export const metadata: Metadata = forgotPasswordPageMetadata;
 
 const ForgotPassword = () => {
     return (

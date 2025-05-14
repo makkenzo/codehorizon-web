@@ -1,8 +1,12 @@
 import { Suspense } from 'react';
 
 import { Loader2 } from 'lucide-react';
+import { Metadata } from 'next';
 
 import SignInPageContent from '@/components/page-contents/sign-in';
+import { signInPageMetadata } from '@/lib/metadata';
+
+export const metadata: Metadata = signInPageMetadata;
 
 const SignInPage = () => {
     return (

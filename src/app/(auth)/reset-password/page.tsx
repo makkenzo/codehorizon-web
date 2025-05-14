@@ -1,8 +1,12 @@
 import { Suspense } from 'react';
 
 import { Loader2 } from 'lucide-react';
+import { Metadata } from 'next';
 
 import ResetPasswordPageContent from '@/components/page-contents/reset-password';
+import { resetPasswordPageMetadata } from '@/lib/metadata';
+
+export const metadata: Metadata = resetPasswordPageMetadata;
 
 const ResetPasswordPage = () => {
     return (

@@ -1,14 +1,44 @@
 import { LinkIcon, MapPin } from 'lucide-react';
+import { Metadata } from 'next';
 
 import { notFound } from 'next/navigation';
 
 import CourseCard from '@/components/course/card';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { createMetadata } from '@/lib/metadata';
 import ProfileApiClient from '@/server/profile';
 
 interface UserPageProps {
     params: Promise<{ username: string }>;
+}
+
+export async function generateMetadata({ params }: UserPageProps): Promise<Metadata> {
+    const username = (await params).username;
+    const profileApiClient = new ProfileApiClient();
+    const userProfile = await profileApiClient.getUserProfile(username).catch(() => null);
+
+    if (!userProfile) {
+        return createMetadata({
+            title: 'Профиль не найден',
+            description: `Профиль пользователя ${username} не найден на CodeHorizon.`,
+            path: `/u/${username}`,
+        });
+    }
+
+    const displayName =
+        userProfile.profile.firstName || userProfile.profile.lastName
+            ? `${userProfile.profile.firstName || ''} ${userProfile.profile.lastName || ''}`.trim()
+            : userProfile.username;
+
+    return createMetadata({
+        title: `Профиль ${displayName}`,
+        description:
+            userProfile.profile.bio?.substring(0, 160) ||
+            `Профиль пользователя ${displayName} на CodeHorizon. Узнайте о его курсах и достижениях.`,
+        imageUrl: userProfile.profile.avatarUrl || undefined,
+        path: `/u/${username}`,
+    });
 }
 
 const UserPage = async ({ params }: UserPageProps) => {

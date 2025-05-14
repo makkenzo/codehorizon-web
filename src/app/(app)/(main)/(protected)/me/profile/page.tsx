@@ -1,48 +1,16 @@
-'use client';
-
 import { Suspense } from 'react';
 
 import { Loader2 } from 'lucide-react';
+import { Metadata } from 'next';
 
-import { useSearchParams } from 'next/navigation';
+import ProfilePageContent from '@/components/page-contents/profile';
+import { createMetadata } from '@/lib/metadata';
 
-import PrivacySettingsForm from '@/components/settings/privacy-settings-form';
-
-import ProfileForm from './_components/form';
-import NotificationSettingsForm from './_components/notification-settings-form';
-
-const SecuritySettingsForm = () => (
-    <div className="p-6 bg-card border rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Настройки безопасности</h2>
-        <p className="text-muted-foreground">Здесь будут настройки безопасности...</p>
-    </div>
-);
-const PersonalizationSettingsForm = () => (
-    <div className="p-6 bg-card border rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Персонализация</h2>
-        <p className="text-muted-foreground">Здесь будут настройки персонализации...</p>
-    </div>
-);
-
-function ProfilePageContent() {
-    const searchParams = useSearchParams();
-    const currentTab = searchParams.get('tab');
-
-    if (currentTab === 'notifications') {
-        return <NotificationSettingsForm />;
-    }
-    if (currentTab === 'privacy') {
-        return <PrivacySettingsForm />;
-    }
-    if (currentTab === 'security') {
-        return <SecuritySettingsForm />;
-    }
-    if (currentTab === 'personalization') {
-        return <PersonalizationSettingsForm />;
-    }
-
-    return <ProfileForm />;
-}
+export const metadata: Metadata = createMetadata({
+    title: 'Мой профиль',
+    description: 'Управляйте своим профилем, настройками и подписками на CodeHorizon.',
+    path: '/me/profile',
+});
 
 const ProfilePage = () => {
     return (

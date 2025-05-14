@@ -1,3 +1,9 @@
+import { Metadata } from 'next';
+
+import { termsPageMetadata } from '@/lib/metadata';
+
+export const metadata: Metadata = termsPageMetadata;
+
 const TermsPage = () => {
     return (
         <div className="xl:px-0 px-4 max-w-[1208px] mx-auto mt-[40px]">

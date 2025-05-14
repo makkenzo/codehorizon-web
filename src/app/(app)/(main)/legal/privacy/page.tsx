@@ -1,4 +1,9 @@
+import { Metadata } from 'next';
+
 import PageWrapper from '@/components/reusable/page-wrapper';
+import { privacyPageMetadata } from '@/lib/metadata';
+
+export const metadata: Metadata = privacyPageMetadata;
 
 const PrivacyPage = () => {
     return (

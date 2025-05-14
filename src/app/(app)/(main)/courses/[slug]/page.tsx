@@ -16,6 +16,7 @@ import CourseTimeline from '@/components/course/course-timeline';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { createMetadata } from '@/lib/metadata';
 import { formatDuration } from '@/lib/utils';
 import CoursesApiClient from '@/server/courses';
 import ProfileApiClient from '@/server/profile';
@@ -36,22 +37,21 @@ export async function generateMetadata({ params }: CoursePageProps): Promise<Met
     const course = await coursesApiClient.getCourseBySlug(slug).catch(() => null);
 
     if (!course) {
-        return {
+        return createMetadata({
             title: 'Курс не найден',
             description: 'Запрошенный курс не существует или был удален.',
-        };
+            path: `/courses/${slug}`,
+        });
     }
-    return {
-        title: `${course.title} | CodeHorizon`,
+
+    const coursePath = `/courses/${slug}`;
+
+    return createMetadata({
+        title: course.title,
         description: course.description?.substring(0, 160) || `Узнайте больше о курсе ${course.title} на CodeHorizon.`,
-        openGraph: {
-            title: `${course.title} | CodeHorizon`,
-            description:
-                course.description?.substring(0, 160) || `Узнайте больше о курсе ${course.title} на CodeHorizon.`,
-            images: course.imagePreview ? [{ url: course.imagePreview }] : [],
-            type: 'website',
-        },
-    };
+        imageUrl: course.imagePreview || undefined,
+        path: coursePath,
+    });
 }
 
 const CoursePage = async ({ params }: CoursePageProps) => {

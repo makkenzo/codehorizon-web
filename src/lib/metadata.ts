@@ -1,69 +1,106 @@
-import { BaseMetadata } from '@/types';
+import { Metadata } from 'next';
 
-export const createMetadata = (path: string, pageSpecificData?: any): BaseMetadata => {
-    const baseMetadata: BaseMetadata = {
-        title: 'CodeHorizon | Онлайн-обучение программированию',
-        description:
-            'Изучайте программирование, data science и веб-разработку с помощью интерактивных курсов от ведущих экспертов',
-        keywords: 'онлайн обучение, программирование, курсы, образование',
+interface PageMetadata {
+    title: string;
+    description: string;
+    keywords?: string;
+    imageUrl?: string;
+    path: string;
+}
+
+const SITE_NAME = 'CodeHorizon';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://codehorizon.makkenzo.com';
+
+const DEFAULT_KEYWORDS = 'обучение, курсы, программирование, веб-разработка, онлайн курсы, IT, CodeHorizon';
+const DEFAULT_IMAGE_URL = `${BASE_URL}/opengraph-image.png`;
+
+export const createMetadata = ({ title, description, keywords, imageUrl, path }: PageMetadata): Metadata => {
+    const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
+    const effectiveImageUrl = imageUrl || DEFAULT_IMAGE_URL;
+    const canonicalUrl = `${BASE_URL}${path === '/' ? '' : path}`;
+
+    return {
+        metadataBase: new URL(BASE_URL),
+        title: fullTitle,
+        description: description,
+        keywords: keywords || DEFAULT_KEYWORDS,
+        openGraph: {
+            title: fullTitle,
+            description: description,
+            url: canonicalUrl,
+            siteName: SITE_NAME,
+            images: [
+                {
+                    url: effectiveImageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: fullTitle,
+                },
+            ],
+            locale: 'ru_RU',
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: fullTitle,
+            description: description,
+            images: [effectiveImageUrl],
+        },
+        alternates: {
+            canonical: canonicalUrl,
+        },
     };
-
-    switch (true) {
-        case path === '/':
-            return baseMetadata;
-
-        case path.startsWith('/courses'):
-            if (pageSpecificData?.course) {
-                return {
-                    title: `${pageSpecificData.course.title} | CodeHorizon`,
-                    description: `${pageSpecificData.course.shortDescription} Изучите ${pageSpecificData.course.title} онлайн на CodeHorizon`,
-                    keywords: `${pageSpecificData.course.keywords}, обучение, онлайн курс`,
-                };
-            }
-            return {
-                title: 'Все курсы | CodeHorizon',
-                description:
-                    'Каталог онлайн-курсов по программированию, веб-разработке и data science. Найдите свой идеальный курс',
-                keywords: 'каталог курсов, онлайн обучение, программирование',
-            };
-
-        case path.startsWith('/track'):
-            if (pageSpecificData?.track) {
-                return {
-                    title: `${pageSpecificData.track.title} | Обучающий трек | CodeHorizon`,
-                    description: `Комплексная программа обучения: ${pageSpecificData.track.description}. Станьте специалистом с CodeHorizon`,
-                    keywords: `${pageSpecificData.track.keywords}, обучающий трек, карьера`,
-                };
-            }
-            return {
-                title: 'Обучающие треки | CodeHorizon',
-                description:
-                    'Структурированные программы обучения для построения карьеры в IT. Выберите свой путь развития',
-                keywords: 'обучающие треки, карьера в IT, программы обучения',
-            };
-
-        case path.startsWith('/profile'):
-            return {
-                title: 'Личный кабинет | CodeHorizon',
-                description: 'Управляйте своим обучением, отслеживайте прогресс и достижения на CodeHorizon',
-                keywords: 'личный кабинет, прогресс обучения, достижения',
-            };
-
-        case path.startsWith('/blog'):
-            if (pageSpecificData?.article) {
-                return {
-                    title: `${pageSpecificData.article.title} | Блог CodeHorizon`,
-                    description: pageSpecificData.article.excerpt,
-                    keywords: `${pageSpecificData.article.tags}, блог, образование`,
-                };
-            }
-            return {
-                title: 'Блог об IT и программировании | CodeHorizon',
-                description: 'Актуальные статьи, туториалы и новости из мира программирования и IT-образования',
-                keywords: 'блог, статьи, программирование, IT-образование',
-            };
-
-        default:
-            return baseMetadata;
-    }
 };
+
+export const homePageMetadata = createMetadata({
+    title: 'Главная',
+    description:
+        'CodeHorizon - современная платформа для изучения программирования. Качественные курсы, тесты и интерактивные материалы для вашего обучения.',
+    path: '/',
+});
+
+export const coursesPageMetadata = createMetadata({
+    title: 'Каталог курсов',
+    description:
+        'Найдите идеальный курс для изучения программирования и веб-разработки на CodeHorizon. Широкий выбор тем и уровней сложности.',
+    keywords: `${DEFAULT_KEYWORDS}, каталог курсов, найти курс`,
+    path: '/courses',
+});
+
+export const signInPageMetadata = createMetadata({
+    title: 'Вход',
+    description: 'Войдите в свой аккаунт на CodeHorizon, чтобы продолжить обучение и получить доступ к своим курсам.',
+    path: '/sign-in',
+});
+
+export const signUpPageMetadata = createMetadata({
+    title: 'Регистрация',
+    description:
+        'Присоединяйтесь к CodeHorizon! Зарегистрируйтесь, чтобы начать свой путь в мир программирования с нашими курсами.',
+    path: '/sign-up',
+});
+
+export const forgotPasswordPageMetadata = createMetadata({
+    title: 'Восстановление пароля',
+    description: 'Забыли пароль от вашего аккаунта на CodeHorizon? Восстановите доступ здесь.',
+    path: '/forgot-password',
+});
+
+export const resetPasswordPageMetadata = createMetadata({
+    title: 'Сброс пароля',
+    description: 'Установите новый пароль для вашего аккаунта на CodeHorizon.',
+    path: '/reset-password',
+});
+
+// Для юридических страниц
+export const termsPageMetadata = createMetadata({
+    title: 'Условия использования',
+    description: `Ознакомьтесь с условиями использования платформы CodeHorizon.`,
+    path: '/legal/terms',
+});
+
+export const privacyPageMetadata = createMetadata({
+    title: 'Политика конфиденциальности',
+    description: `Узнайте, как CodeHorizon обрабатывает и защищает ваши персональные данные.`,
+    path: '/legal/privacy',
+});
