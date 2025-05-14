@@ -242,6 +242,20 @@ class AdminApiClient {
             throw error;
         }
     }
+
+    async runRetroactiveAchievementGrant(achievementKeys?: string[]): Promise<{ message: string }> {
+        try {
+            const payload = achievementKeys && achievementKeys.length > 0 ? achievementKeys : undefined;
+            const response = await apiClient.post<{ message: string }>(
+                `/admin/jobs/achievements/retroactive-grant`,
+                payload ? { achievementKeys: payload } : undefined
+            );
+            return response.data;
+        } catch (error: unknown) {
+            console.error('Error running retroactive achievement grant:', error);
+            throw error;
+        }
+    }
 }
 
 export const adminApiClient = new AdminApiClient();

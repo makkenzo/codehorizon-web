@@ -3,10 +3,11 @@
 import React, { useEffect, useState } from 'react';
 
 import { isAxiosError } from 'axios';
-import { Activity, BookOpen, DollarSign, Users } from 'lucide-react';
+import { Activity, BookOpen, DollarSign, Loader2, RefreshCw, Users } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, Line, LineChart, Pie, PieChart, XAxis, YAxis } from 'recharts';
 import { toast } from 'sonner';
 
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     ChartConfig,
@@ -17,6 +18,7 @@ import {
     ChartTooltipContent,
 } from '@/components/ui/chart';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePermissions } from '@/hooks/use-permissions';
 import { adminApiClient } from '@/server/admin-api-client';
 import { AdminChartDataDTO, AdminDashboardStatsDTO } from '@/types/admin';
 
@@ -39,8 +41,38 @@ const AdminDashboardPageContent = () => {
     const [stats, setStats] = useState<AdminDashboardStatsDTO | null>(null);
     const [chartData, setChartData] = useState<AdminChartDataDTO | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isRetroGrantLoading, setIsRetroGrantLoading] = useState(false);
+    const { hasPermission } = usePermissions();
 
     const [categoryChartConfig, setCategoryChartConfig] = useState<ChartConfig>({});
+
+    const handleRetroactiveGrant = async () => {
+        if (
+            !confirm(
+                'Вы уверены, что хотите запустить полную перепроверку достижений для всех пользователей? Это может занять некоторое время.'
+            )
+        ) {
+            return;
+        }
+        setIsRetroGrantLoading(true);
+        try {
+            const response = await adminApiClient.runRetroactiveAchievementGrant();
+            toast.success(
+                response.message || 'Задача ретроактивной выдачи достижений успешно запущена в фоновом режиме.'
+            );
+        } catch (error: unknown) {
+            console.error('Failed to run retroactive achievement grant:', error);
+            let errorMsg = 'Неизвестная ошибка при запуске задачи.';
+            if (isAxiosError(error)) {
+                errorMsg = error?.response?.data?.message || error.message || errorMsg;
+            } else if (error instanceof Error) {
+                errorMsg = error.message;
+            }
+            toast.error(`Ошибка: ${errorMsg}`);
+        } finally {
+            setIsRetroGrantLoading(false);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -336,6 +368,24 @@ const AdminDashboardPageContent = () => {
                     </CardContent>
                 </Card>
             </div>
+            {hasPermission('admin:job:run') && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Административные задачи</CardTitle>
+                        <CardDescription>Запуск служебных операций для поддержания системы.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col sm:flex-row gap-4">
+                        <Button onClick={handleRetroactiveGrant} disabled={isRetroGrantLoading} variant="outline">
+                            {isRetroGrantLoading ? (
+                                <Loader2 className="animate-spin" />
+                            ) : (
+                                <RefreshCw className="h-4 w-4" />
+                            )}
+                            Запустить пересчет достижений
+                        </Button>
+                    </CardContent>
+                </Card>
+            )}
         </div>
     );
 };
