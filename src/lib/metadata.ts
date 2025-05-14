@@ -12,7 +12,7 @@ const SITE_NAME = 'CodeHorizon';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://codehorizon.makkenzo.com';
 
 const DEFAULT_KEYWORDS = 'обучение, курсы, программирование, веб-разработка, онлайн курсы, IT, CodeHorizon';
-const DEFAULT_IMAGE_URL = `${BASE_URL}/opengraph-image.png`;
+const DEFAULT_IMAGE_URL = `${BASE_URL}/opengraph-image.jpg`;
 
 export const createMetadata = ({ title, description, keywords, imageUrl, path }: PageMetadata): Metadata => {
     const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
