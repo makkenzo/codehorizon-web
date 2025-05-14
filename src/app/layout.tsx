@@ -23,8 +23,8 @@ export default function RootLayout({
     return (
         <html lang="ru" suppressHydrationWarning>
             <head>
-                <meta property="og:image" content="/opengraph-image.png" />
-                <meta property="og:image:type" content="image/png" />
+                <meta property="og:image" content="/opengraph-image.jpg" />
+                <meta property="og:image:type" content="image/jpeg" />
                 <meta property="og:image:width" content="<generated>" />
                 <meta property="og:image:height" content="<generated>" />
                 <meta name="apple-mobile-web-app-title" content="CodeHorizon" />
