@@ -6,18 +6,13 @@ import { createMetadata } from '@/lib/metadata';
 import './globals.css';
 
 export async function generateMetadata(): Promise<Metadata> {
-    const metadata = createMetadata('/');
+    const metadata = createMetadata({
+        path: '/',
+        title: 'CodeHorizon',
+        description: 'CodeHorizon - современная платформа для изучения программирования.',
+    });
 
-    return {
-        title: metadata.title,
-        description: metadata.description,
-        keywords: metadata.keywords,
-        openGraph: {
-            title: metadata.title,
-            description: metadata.description,
-            type: 'website',
-        },
-    };
+    return metadata;
 }
 
 export default function RootLayout({
