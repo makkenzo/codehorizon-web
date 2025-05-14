@@ -151,12 +151,7 @@ const UserPage = async ({ params }: UserPageProps) => {
                                 <span className="text-muted-foreground">Завершено курсов:</span>
                                 <span className="font-medium">{completedCoursesCount}</span>
                             </div>
-                            {userAchievements && userAchievements.length > 0 && (
-                                <div className="mt-8">
-                                    <h3 className="font-semibold mb-4 text-xl">Достижения</h3>
-                                    <AchievementsList achievements={userAchievements} itemsPerRow={3} />
-                                </div>
-                            )}
+
                             {showCertificates && (
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Получено сертификатов:</span>
@@ -170,6 +165,12 @@ const UserPage = async ({ params }: UserPageProps) => {
                                 </div>
                             )}
                         </div>
+                        {userAchievements && userAchievements.length > 0 && (
+                            <div className="mt-8">
+                                <h3 className="font-semibold mb-3 text-lg">Достижения</h3>
+                                <AchievementsList achievements={userAchievements} itemsPerRow={3} compact />
+                            </div>
+                        )}
                     </div>
 
                     {(profile.location || profile.website) && (

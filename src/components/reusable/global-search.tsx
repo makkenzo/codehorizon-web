@@ -100,14 +100,14 @@ const GlobalSearch = ({ className }: GlobalSearchProps) => {
         <div className={cn('relative max-w-[400px] w-full', className)}>
             <Button
                 variant="outline"
-                className="relative h-[32px] w-full justify-between rounded-[5px] px-3 text-sm md:w-64 lg:w-80 group"
+                className="relative h-[32px] w-full justify-between rounded-[5px] px-3 text-sm md:w-64 lg:w-80 group transition-all duration-200 ease-in-out"
                 onClick={() => setOpen(true)}
             >
                 <div className="flex items-center">
                     <Search className="mr-2 h-4 w-4" />
                     <span>Найти курс или автора...</span>
                 </div>
-                <kbd className="pointer-events-none hidden h-6 select-none items-center gap-1 rounded border bg-muted/40 group-hover:bg-primary group-hover:text-background px-1.5 font-mono text-xs font-medium opacity-100 sm:flex">
+                <kbd className="pointer-events-none hidden h-6 select-none items-center gap-1 rounded border bg-muted/40 group-hover:bg-primary group-hover:text-background px-1.5 font-mono text-xs font-medium opacity-100 sm:flex transition-all duration-200 ease-in-out">
                     <span className="text-xs">Ctrl</span>K
                 </kbd>
             </Button>

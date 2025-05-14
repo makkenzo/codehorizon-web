@@ -39,19 +39,25 @@ export const createUserStore = (initState: UserState = defaultInitState) => {
                 clearUser: () => set({ user: undefined, permissions: null, achievements: null }),
                 setAchievements: (achievements: Achievement[]) => set({ achievements }),
                 fetchUserAchievements: async () => {
+                    console.log('Fetching user achievements');
                     if (!get().user?.id) {
+                        console.log('No user ID, clearing achievements');
                         set({ achievements: [] });
                         return;
                     }
                     try {
                         const myAchievements = await achievementsApiClient.getMyAchievements();
+                        console.log('Fetched user achievements', myAchievements);
                         if (myAchievements) {
+                            console.log('Setting achievements');
                             set({ achievements: myAchievements });
                         } else {
+                            console.log('No achievements found, clearing');
                             set({ achievements: [] });
                         }
                     } catch (error) {
                         console.error('Failed to fetch user achievements', error);
+                        console.log('Clearing achievements');
                         set({ achievements: [] });
                     }
                 },

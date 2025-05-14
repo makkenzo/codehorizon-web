@@ -7,9 +7,15 @@ interface AchievementsListProps {
     achievements: Achievement[] | null | undefined;
     isLoading?: boolean;
     itemsPerRow?: 2 | 3 | 4;
+    compact?: boolean;
 }
 
-const AchievementsList: React.FC<AchievementsListProps> = ({ achievements, isLoading, itemsPerRow = 2 }) => {
+const AchievementsList: React.FC<AchievementsListProps> = ({
+    achievements,
+    isLoading,
+    itemsPerRow = 2,
+    compact = false,
+}) => {
     if (isLoading) {
         return (
             <div className={`grid grid-cols-1 md:grid-cols-${itemsPerRow} gap-4`}>
@@ -42,7 +48,7 @@ const AchievementsList: React.FC<AchievementsListProps> = ({ achievements, isLoa
     return (
         <div className={`grid grid-cols-1 md:grid-cols-${itemsPerRow} gap-4 md:gap-6`}>
             {achievements.map((ach) => (
-                <AchievementItem key={ach.id || ach.key} achievement={ach} />
+                <AchievementItem key={ach.id || ach.key} achievement={ach} compact={compact} />
             ))}
         </div>
     );
