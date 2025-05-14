@@ -54,27 +54,35 @@ const CoursesPageContent = () => {
         const durationParams = searchParams.getAll('duration');
         const sortByParam = searchParams.get('sortBy');
         const pageParam = searchParams.get('page');
-        const priceStatusParam = searchParams.get('priceStatus');
+        const priceStatusParam = searchParams.get('priceStatus') as PriceStatus | null;
+
+        let filtersChanged = false;
 
         if (
             categoryParams.length > 0 &&
             JSON.stringify(categoryParams.sort()) !== JSON.stringify([...categories].sort())
         ) {
             setCategories(categoryParams);
+            filtersChanged = true;
         } else if (categoryParams.length === 0 && categories.length > 0) {
             setCategories([]);
+            filtersChanged = true;
         }
 
         if (levelParams.length > 0 && JSON.stringify(levelParams.sort()) !== JSON.stringify([...level].sort())) {
             setLevels(levelParams);
+            filtersChanged = true;
         } else if (levelParams.length === 0 && level.length > 0) {
             setLevels([]);
+            filtersChanged = true;
         }
 
         if (ratingParam && ratingParam !== rating) {
             setStoreRating(ratingParam);
+            filtersChanged = true;
         } else if (!ratingParam && rating !== 'all') {
             setStoreRating('all');
+            filtersChanged = true;
         }
 
         if (
@@ -82,20 +90,26 @@ const CoursesPageContent = () => {
             JSON.stringify(durationParams.sort()) !== JSON.stringify([...videoDuration].sort())
         ) {
             setVideoDurations(durationParams);
+            filtersChanged = true;
         } else if (durationParams.length === 0 && videoDuration.length > 0) {
             setVideoDurations([]);
+            filtersChanged = true;
+        }
+
+        if (priceStatusParam && priceStatusParam !== priceStatus) {
+            setPriceStatus(priceStatusParam);
+            filtersChanged = true;
+        } else if (!priceStatusParam && priceStatus !== 'all') {
+            setPriceStatus('all');
+            filtersChanged = true;
         }
 
         if (sortByParam && sortByParam !== sortBy) {
             setSortBy(sortByParam);
+            filtersChanged = true;
         } else if (!sortByParam && sortBy !== 'popular') {
             setSortBy('popular');
-        }
-
-        if (priceStatusParam && priceStatusParam !== priceStatus) {
-            setPriceStatus(priceStatusParam as PriceStatus);
-        } else if (!priceStatusParam && priceStatus !== 'all') {
-            setPriceStatus('all');
+            filtersChanged = true;
         }
 
         const pageNumber = parseInt(pageParam || '1', 10);
@@ -105,27 +119,26 @@ const CoursesPageContent = () => {
             setPage(1);
         }
 
-        const initialCategory = searchParams.getAll('category');
-        if (initialCategory.length > 0) setCategories(initialCategory);
-
-        const initialLevel = searchParams.getAll('level');
-        if (initialLevel.length > 0) setLevels(initialLevel);
-
-        const initialRating = searchParams.get('rating');
-        if (initialRating) setStoreRating(initialRating);
-
-        const initialDuration = searchParams.getAll('duration');
-        if (initialDuration.length > 0) setVideoDurations(initialDuration);
-
-        const initialSortBy = searchParams.get('sortBy');
-        if (initialSortBy) setSortBy(initialSortBy);
-
-        const initialPriceStatus = searchParams.get('priceStatus') as PriceStatus | null;
-        if (initialPriceStatus) setPriceStatus(initialPriceStatus);
-
-        const initialPage = parseInt(searchParams.get('page') || '1', 10);
-        setPage(initialPage);
-    }, []);
+        if (filtersChanged && page !== 1) {
+            setPage(1);
+        }
+    }, [
+        searchParams,
+        categories,
+        level,
+        rating,
+        videoDuration,
+        sortBy,
+        page,
+        priceStatus,
+        setCategories,
+        setLevels,
+        setStoreRating,
+        setVideoDurations,
+        setSortBy,
+        setPage,
+        setPriceStatus,
+    ]);
 
     const fetchCourses = async (filters: Omit<CatalogFiltersState, 'totalPages'>) => {
         setIsLoading(true);
