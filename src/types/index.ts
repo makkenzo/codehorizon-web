@@ -174,3 +174,8 @@ export enum NotificationType {
     NEW_REVIEW_ON_COURSE = 'NEW_REVIEW_ON_COURSE',
     LESSON_COMPLETED_BY_STUDENT = 'LESSON_COMPLETED_BY_STUDENT',
 }
+
+export interface PublicCertificateInfoDTO {
+    courseTitle: string;
+    completionDate: string;
+}

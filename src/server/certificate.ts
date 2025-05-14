@@ -1,3 +1,4 @@
+import { PublicCertificateInfoDTO } from '@/types';
 import { CertificateDTO } from '@/types/certificate';
 
 import ApiClient from './api-client';
@@ -21,6 +22,16 @@ class CertificateApiClient extends ApiClient {
             return response.data;
         } catch (error) {
             console.error(`Ошибка скачивания сертификата ${certificateId}:`, error);
+            return null;
+        }
+    }
+
+    async getPublicUserCertificates(username: string): Promise<PublicCertificateInfoDTO[] | null> {
+        try {
+            const response = await this.get<PublicCertificateInfoDTO[]>(`/users/${username}/certificates/public`);
+            return response.data;
+        } catch (error) {
+            console.error(`Ошибка получения публичных сертификатов для пользователя ${username}:`, error);
             return null;
         }
     }

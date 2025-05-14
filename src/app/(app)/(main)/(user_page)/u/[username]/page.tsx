@@ -1,4 +1,4 @@
-import { LinkIcon, MapPin } from 'lucide-react';
+import { Award, LinkIcon, MapPin } from 'lucide-react';
 import { Metadata } from 'next';
 
 import { notFound } from 'next/navigation';
@@ -6,8 +6,11 @@ import { notFound } from 'next/navigation';
 import CourseCard from '@/components/course/card';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createMetadata } from '@/lib/metadata';
+import { certificateApiClient } from '@/server/certificate';
 import ProfileApiClient from '@/server/profile';
+import { PublicCertificateInfoDTO } from '@/types';
 
 interface UserPageProps {
     params: Promise<{ username: string }>;
@@ -41,15 +44,54 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
     });
 }
 
+const UserCertificatesList = ({ certificates }: { certificates: PublicCertificateInfoDTO[] }) => {
+    if (!certificates || certificates.length === 0) {
+        return <p className="text-sm text-muted-foreground">У этого пользователя пока нет сертификатов.</p>;
+    }
+
+    return (
+        <div className="space-y-3">
+            {certificates.map((cert, index) => (
+                <div key={index} className="flex items-center gap-3 p-3 border rounded-md bg-card/50">
+                    <Award className="h-5 w-5 text-primary flex-shrink-0" />
+                    <div className="flex-grow">
+                        <p className="font-medium text-sm">{cert.courseTitle}</p>
+                        <p className="text-xs text-muted-foreground">Получен: {cert.completionDate}</p>
+                    </div>
+                    {/* Если будет ссылка на валидацию:
+                    {cert.uniqueCertificateId && (
+                        <Link href={`/verify-certificate/${cert.uniqueCertificateId}`} passHref>
+                            <Button variant="outline" size="sm" className="text-xs">Проверить</Button>
+                        </Link>
+                    )}
+                    */}
+                </div>
+            ))}
+        </div>
+    );
+};
+
 const UserPage = async ({ params }: UserPageProps) => {
     const { username } = await params;
-    const userProfile = await new ProfileApiClient().getUserProfile(username);
+    const profileApiClient = new ProfileApiClient();
+
+    const userProfilePromise = profileApiClient.getUserProfile(username);
+    const userCertificatesPromise = certificateApiClient.getPublicUserCertificates(username);
+
+    const [userProfile, userCertificates] = await Promise.all([userProfilePromise, userCertificatesPromise]).catch(
+        (error) => {
+            console.error(`Ошибка при загрузке данных для профиля ${username}:`, error);
+            return [null, null];
+        }
+    );
 
     if (!userProfile) {
         notFound();
     }
 
     const { profile, coursesInProgress, completedCoursesCount, createdCourses } = userProfile;
+
+    const showCertificates = userCertificates && userCertificates.length > 0;
 
     return (
         <PageWrapper className="mb-10">
@@ -97,6 +139,12 @@ const UserPage = async ({ params }: UserPageProps) => {
                                 <span className="text-muted-foreground">Завершено курсов:</span>
                                 <span className="font-medium">{completedCoursesCount}</span>
                             </div>
+                            {showCertificates && (
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Получено сертификатов:</span>
+                                    <span className="font-medium">{userCertificates?.length ?? 0}</span>
+                                </div>
+                            )}
                             {createdCourses && createdCourses.length > 0 && (
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Создано курсов:</span>
@@ -159,6 +207,17 @@ const UserPage = async ({ params }: UserPageProps) => {
                                 ))}
                             </div>
                         </div>
+                    )}
+
+                    {showCertificates && userCertificates && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-xl">Полученные сертификаты</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <UserCertificatesList certificates={userCertificates} />
+                            </CardContent>
+                        </Card>
                     )}
 
                     {(!coursesInProgress || coursesInProgress.length === 0) &&
