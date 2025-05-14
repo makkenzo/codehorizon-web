@@ -287,8 +287,8 @@ const ProfileForm = ({}) => {
                             onClick={() => router.push(`/u/${user.username}`)}
                             title="Посмотреть как профиль видят другие"
                         >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Просмотр
+                            <Eye className="h-4 w-4" />
+                            <span>Просмотр</span>
                         </Button>
                     </div>
                 )}

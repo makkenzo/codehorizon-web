@@ -10,6 +10,11 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
             disabled: false,
         },
         {
+            label: 'Достижения',
+            href: '/me/profile?tab=achievements',
+            disabled: false,
+        },
+        {
             label: 'Персонализация',
             href: '/me/profile?tab=personalization',
             disabled: true,

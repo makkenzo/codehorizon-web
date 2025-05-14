@@ -3,6 +3,7 @@
 import { type ReactNode, createContext, useContext, useRef } from 'react';
 
 import { useStore } from 'zustand';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
 
 import { UserStore } from './types';
 import { createUserStore } from './user-store';
@@ -24,12 +25,12 @@ export const UserStoreProvider = ({ children }: UserStoreProviderProps) => {
     return <UserStoreContext.Provider value={storeRef.current}>{children}</UserStoreContext.Provider>;
 };
 
-export const useUserStore = <T,>(selector: (store: UserStore) => T): T => {
+export const useUserStore = <T,>(selector: (store: UserStore) => T, equalityFn?: (a: T, b: T) => boolean): T => {
     const userStoreContext = useContext(UserStoreContext);
 
     if (!userStoreContext) {
         throw new Error(`useUserStore must be used within UserStoreProvider`);
     }
 
-    return useStore(userStoreContext, selector);
+    return useStoreWithEqualityFn(userStoreContext, selector, equalityFn);
 };

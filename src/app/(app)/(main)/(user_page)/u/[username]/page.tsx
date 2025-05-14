@@ -3,12 +3,14 @@ import { Metadata } from 'next';
 
 import { notFound } from 'next/navigation';
 
+import AchievementsList from '@/components/achievements/achievement-list';
 import CourseCard from '@/components/course/card';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createMetadata } from '@/lib/metadata';
+import { achievementsApiClient } from '@/server/achievements';
 import { certificateApiClient } from '@/server/certificate';
 import ProfileApiClient from '@/server/profile';
 import { PublicCertificateInfoDTO } from '@/types';
@@ -78,13 +80,16 @@ const UserPage = async ({ params }: UserPageProps) => {
 
     const userProfilePromise = profileApiClient.getUserProfile(username);
     const userCertificatesPromise = certificateApiClient.getPublicUserCertificates(username);
+    const userAchievementsPromise = achievementsApiClient.getPublicUserAchievements(username);
 
-    const [userProfile, userCertificates] = await Promise.all([userProfilePromise, userCertificatesPromise]).catch(
-        (error) => {
-            console.error(`Ошибка при загрузке данных для профиля ${username}:`, error);
-            return [null, null];
-        }
-    );
+    const [userProfile, userCertificates, userAchievements] = await Promise.all([
+        userProfilePromise,
+        userCertificatesPromise,
+        userAchievementsPromise,
+    ]).catch((error) => {
+        console.error(`Ошибка при загрузке данных для профиля ${username}:`, error);
+        return [null, null, null];
+    });
 
     if (!userProfile) {
         notFound();
@@ -146,6 +151,12 @@ const UserPage = async ({ params }: UserPageProps) => {
                                 <span className="text-muted-foreground">Завершено курсов:</span>
                                 <span className="font-medium">{completedCoursesCount}</span>
                             </div>
+                            {userAchievements && userAchievements.length > 0 && (
+                                <div className="mt-8">
+                                    <h3 className="font-semibold mb-4 text-xl">Достижения</h3>
+                                    <AchievementsList achievements={userAchievements} itemsPerRow={3} />
+                                </div>
+                            )}
                             {showCertificates && (
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Получено сертификатов:</span>

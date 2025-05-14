@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 
 import ProfileForm from '@/app/(app)/(main)/(protected)/me/profile/_components/form';
+import MyAchievements from '@/app/(app)/(main)/(protected)/me/profile/_components/my-achievements';
 import NotificationSettingsForm from '@/app/(app)/(main)/(protected)/me/profile/_components/notification-settings-form';
 
 import PrivacySettingsForm from '../settings/privacy-settings-form';
@@ -35,6 +36,9 @@ export default function ProfilePageContent() {
     }
     if (currentTab === 'personalization') {
         return <PersonalizationSettingsForm />;
+    }
+    if (currentTab === 'achievements') {
+        return <MyAchievements />;
     }
 
     return <ProfileForm />;
