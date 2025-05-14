@@ -394,8 +394,6 @@ export function LinkedChart<TData extends object>({
     const [selectedFormat, setSelectedFormat] = useState<DateFormat>(dateFormat);
     const [selectedChartType, setSelectedChartType] = useState<ChartType>(chartType);
 
-    if (!data?.length) return null;
-
     const { timeRange, refAreaLeft, refAreaRight, handleMouseDown, handleMouseMove, handleMouseUp, handleReset } =
         useChartInteraction({
             dateField: dateField as string,
@@ -403,7 +401,6 @@ export function LinkedChart<TData extends object>({
             setColumnFilters,
         });
 
-    // Validations
     if (!isValidDataField<TData>(data, dateField)) {
         throw new Error('Invalid date field');
     }
@@ -411,7 +408,6 @@ export function LinkedChart<TData extends object>({
     if (!isValidDateFormat(dateFormat)) throw new Error('Invalid date format');
     if (!isValidChartType(chartType)) throw new Error('Invalid chart type');
 
-    // Filter data based on mode (external vs internal filtering)
     const filteredData = useMemo(() => {
         if (setColumnFilters || !timeRange) return data;
 
@@ -426,10 +422,11 @@ export function LinkedChart<TData extends object>({
         [filteredData, selectedFormat, dateField, aggregatorConfig]
     );
 
-    // Find the selected chart configuration
     const selectedChartConfig = useMemo(() => CHART_TYPES[selectedChartType], [selectedChartType]);
 
     const chartRef = useRef<HTMLDivElement>(null);
+
+    if (!data?.length) return null;
 
     return (
         <Card className="w-full h-full">
