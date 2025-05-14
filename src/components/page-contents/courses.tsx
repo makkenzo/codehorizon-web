@@ -20,6 +20,7 @@ import { useCatalogFiltersStore } from '@/stores/catalog-filters/catalog-filters
 import { CatalogFiltersState, PriceStatus } from '@/stores/catalog-filters/types';
 import { Course } from '@/types';
 
+import ActiveFiltersDisplay from '../catalog/active-filters';
 import { Button } from '../ui/button';
 
 const CoursesPageContent = () => {
@@ -122,23 +123,7 @@ const CoursesPageContent = () => {
         if (filtersChanged && page !== 1) {
             setPage(1);
         }
-    }, [
-        searchParams,
-        categories,
-        level,
-        rating,
-        videoDuration,
-        sortBy,
-        page,
-        priceStatus,
-        setCategories,
-        setLevels,
-        setStoreRating,
-        setVideoDurations,
-        setSortBy,
-        setPage,
-        setPriceStatus,
-    ]);
+    }, [searchParams]);
 
     const fetchCourses = async (filters: Omit<CatalogFiltersState, 'totalPages'>) => {
         setIsLoading(true);
@@ -234,6 +219,7 @@ const CoursesPageContent = () => {
                         </SelectContent>
                     </Select>
                 </div>
+                <ActiveFiltersDisplay />
                 {error && !isLoading && (
                     <div className="col-span-2 md:col-span-3 text-center py-10 text-destructive bg-destructive/10 p-4 rounded-md">
                         <p>{error}</p>
