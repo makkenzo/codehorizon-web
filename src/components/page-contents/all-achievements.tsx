@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 import debounce from 'lodash.debounce';
-import { Award, ListFilter, Loader2, SearchX, ShieldAlert, Trophy } from 'lucide-react';
+import { ListFilter, SearchX, ShieldAlert, Trophy } from 'lucide-react';
 
 import AchievementsFiltersMobile from '@/components/achievements/achievements-filters-mobile';
 import MyPagination from '@/components/reusable/my-pagination';
