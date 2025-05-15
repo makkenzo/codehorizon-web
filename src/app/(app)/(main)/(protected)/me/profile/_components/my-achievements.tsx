@@ -3,9 +3,12 @@
 import { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
-import { Award, Trophy } from 'lucide-react';
+import { ArrowRight, Award, Trophy } from 'lucide-react';
+
+import Link from 'next/link';
 
 import AchievementItem from '@/components/achievements/achievement-item';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserStore } from '@/stores/user/user-store-provider';
@@ -53,13 +56,21 @@ const MyAchievements = () => {
                 >
                     <Card className="backdrop-blur-sm bg-white/90 dark:bg-gray-950/90 border border-gray-200/50 dark:border-gray-800/50 shadow-md overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-r from-[#3eccb2]/5 via-[hsl(58,83%,62%)]/5 to-[hsl(173,58%,39%)]/5 opacity-50"></div>
-                        <CardHeader className="relative z-10">
+                        <CardHeader className="relative z-10 flex justify-between items-center">
                             <CardTitle className="text-xl font-bold flex items-center gap-2">
                                 <Trophy className="h-6 w-6 text-[#3eccb2]" />
                                 <span className="bg-gradient-to-r from-[#3eccb2] to-[hsl(173,58%,39%)] bg-clip-text text-transparent">
                                     Мои достижения
                                 </span>
                             </CardTitle>
+                            <div className="text-center">
+                                <Link href="/achievements">
+                                    <Button variant="link">
+                                        Посмотреть все достижения
+                                        <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </Link>
+                            </div>
                         </CardHeader>
                         <CardContent className="relative z-10">
                             {isLoadingAchievements ? (

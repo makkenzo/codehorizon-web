@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import debounce from 'lodash.debounce';
 import { Award, ListFilter, Loader2, SearchX, ShieldAlert, Trophy } from 'lucide-react';
 
-import AchievementCard from '@/components/achievements/achievement-card';
 import AchievementsFiltersMobile from '@/components/achievements/achievements-filters-mobile';
 import MyPagination from '@/components/reusable/my-pagination';
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAllAchievementsStore } from '@/stores/achievements/achievements-store-provider';
 import { AchievementsFilterStatus } from '@/stores/achievements/types';
+
+import AchievementItem from '../achievements/achievement-item';
 
 const AllAchievementsPageContent = () => {
     const {
@@ -222,7 +223,7 @@ const AllAchievementsPageContent = () => {
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             transition={{ duration: 0.3, delay: index * 0.05 }}
                         >
-                            <AchievementCard achievement={achievement} />
+                            <AchievementItem achievement={achievement} />
                         </motion.div>
                     ))}
                 </div>
