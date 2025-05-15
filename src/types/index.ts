@@ -214,3 +214,19 @@ export interface UserAchievement {
     earnedAt: string;
     details?: Achievement;
 }
+
+export interface GlobalAchievementDTO {
+    id: string;
+    key: string;
+    name: string;
+    description: string;
+    iconUrl: string | null;
+    xpBonus: number;
+    order: number;
+    category?: string | null;
+    isEarnedByUser: boolean;
+    earnedAt?: string | null;
+    triggerType?: AchievementTriggerType;
+    triggerThreshold?: number;
+    isGlobal?: boolean;
+}
