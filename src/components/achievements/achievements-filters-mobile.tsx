@@ -13,16 +13,17 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet';
+import { AchievementsFilterStatus } from '@/stores/achievements/types';
 
 interface AchievementsFiltersMobileProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    filterStatus: 'all' | 'earned' | 'unearned';
-    setFilterStatus: (status: 'all' | 'earned' | 'unearned') => void;
+    filterStatus: AchievementsFilterStatus;
+    setFilterStatus: (status: AchievementsFilterStatus) => void;
     filterCategory: string;
     setFilterCategory: (category: string) => void;
-    availableCategories: string[]; // Список доступных категорий
-    // Добавьте другие пропсы для фильтров по мере необходимости
+    availableCategories: string[];
+    isLoadingCategories: boolean;
 }
 
 const AchievementsFiltersMobile: React.FC<AchievementsFiltersMobileProps> = ({
@@ -33,6 +34,7 @@ const AchievementsFiltersMobile: React.FC<AchievementsFiltersMobileProps> = ({
     filterCategory,
     setFilterCategory,
     availableCategories,
+    isLoadingCategories,
 }) => {
     return (
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -49,7 +51,10 @@ const AchievementsFiltersMobile: React.FC<AchievementsFiltersMobileProps> = ({
                         <label htmlFor="status-filter-mobile" className="text-sm font-medium mb-1.5 block">
                             Статус
                         </label>
-                        <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value as any)}>
+                        <Select
+                            value={filterStatus}
+                            onValueChange={(value) => setFilterStatus(value as AchievementsFilterStatus)}
+                        >
                             <SelectTrigger id="status-filter-mobile" className="w-full h-10 text-sm">
                                 <SelectValue placeholder="Статус" />
                             </SelectTrigger>
@@ -61,29 +66,39 @@ const AchievementsFiltersMobile: React.FC<AchievementsFiltersMobileProps> = ({
                         </Select>
                     </div>
 
-                    {/* TODO: Динамический список категорий */}
-                    {availableCategories.length > 0 && (
-                        <div>
-                            <label htmlFor="category-filter-mobile" className="text-sm font-medium mb-1.5 block">
-                                Категория
-                            </label>
-                            <Select value={filterCategory} onValueChange={setFilterCategory}>
-                                <SelectTrigger id="category-filter-mobile" className="w-full h-10 text-sm">
-                                    <SelectValue placeholder="Категория" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Все категории</SelectItem>
-                                    {availableCategories.map((cat) => (
-                                        <SelectItem key={cat} value={cat.toLowerCase()}>
+                    <div>
+                        <label htmlFor="category-filter-mobile" className="text-sm font-medium mb-1.5 block">
+                            Категория
+                        </label>
+                        <Select
+                            value={filterCategory}
+                            onValueChange={setFilterCategory}
+                            disabled={isLoadingCategories || availableCategories.length === 0}
+                        >
+                            <SelectTrigger id="category-filter-mobile" className="w-full h-10 text-sm">
+                                <SelectValue placeholder={isLoadingCategories ? 'Загрузка...' : 'Категория'} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Все категории</SelectItem>
+                                {isLoadingCategories && (
+                                    <SelectItem value="loading_cats_mobile" disabled>
+                                        Загрузка...
+                                    </SelectItem>
+                                )}
+                                {!isLoadingCategories && availableCategories.length === 0 && (
+                                    <SelectItem value="no_cats_mobile" disabled>
+                                        Нет категорий
+                                    </SelectItem>
+                                )}
+                                {!isLoadingCategories &&
+                                    availableCategories.map((cat) => (
+                                        <SelectItem key={`mob-${cat}`} value={cat}>
                                             {cat}
                                         </SelectItem>
                                     ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    )}
-
-                    {/* TODO: Добавьте другие фильтры здесь, если они нужны */}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
                 <SheetFooter className="px-4 py-4 border-t">
                     <SheetClose asChild>

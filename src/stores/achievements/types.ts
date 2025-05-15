@@ -5,7 +5,8 @@ export type AchievementsFilterStatus = 'all' | 'earned' | 'unearned';
 
 export interface AllAchievementsState {
     achievementsData: PagedResponse<GlobalAchievementDTO> | null;
-    isLoading: boolean;
+    isLoadingAchievements: boolean;
+    isLoadingCategories: boolean;
     error: string | null;
     currentPage: number;
     sortBy: string;
@@ -23,12 +24,12 @@ export interface AllAchievementsActions {
         category?: string;
         q?: string;
     }) => Promise<void>;
+    fetchAvailableCategories: () => Promise<void>;
     setCurrentPage: (page: number) => void;
     setSortBy: (sort: string) => void;
     setFilterStatus: (status: AchievementsFilterStatus) => void;
     setFilterCategory: (category: string) => void;
     setSearchQuery: (query: string) => void;
-    fetchAvailableCategories: () => Promise<void>;
     resetFilters: () => void;
 }
 

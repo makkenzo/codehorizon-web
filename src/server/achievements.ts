@@ -36,7 +36,7 @@ class AchievementsApiClient extends ApiClient {
     ): Promise<PagedResponse<GlobalAchievementDTO> | null> {
         const queryParams = new URLSearchParams();
 
-        if (params.page) queryParams.append('page', (params.page - 1).toString());
+        if (params.page) queryParams.append('page', params.page.toString());
         if (params.size) queryParams.append('size', params.size.toString());
         if (params.sortBy) queryParams.append('sortBy', params.sortBy);
         if (params.status && params.status !== 'all') queryParams.append('status', params.status);
@@ -48,15 +48,24 @@ class AchievementsApiClient extends ApiClient {
                 `/achievements/all?${queryParams.toString()}`
             );
             if (response.data) {
-                return {
-                    ...response.data,
-                    pageNumber: response.data.pageNumber + 1,
-                };
+                if (params.page) queryParams.set('page', params.page.toString());
+
+                return response.data;
             }
             return null;
         } catch (error) {
             console.error('Error fetching all achievement definitions:', error);
             throw error;
+        }
+    }
+
+    async getAchievementCategories(): Promise<string[] | null> {
+        try {
+            const response = await this.get<string[]>('/achievements/categories');
+            return response.data ?? [];
+        } catch (error) {
+            console.error('Error fetching achievement categories:', error);
+            return null;
         }
     }
 }

@@ -16,11 +16,13 @@ import { useAllAchievementsStore } from '@/stores/achievements/achievements-stor
 import { AchievementsFilterStatus } from '@/stores/achievements/types';
 
 import AchievementItem from '../achievements/achievement-item';
+import AchievementsFilters from '../achievements/achievements-filters';
 
 const AllAchievementsPageContent = () => {
     const {
         achievementsData,
-        isLoading,
+        isLoadingAchievements,
+        isLoadingCategories,
         error,
         currentPage,
         sortBy,
@@ -44,7 +46,7 @@ const AllAchievementsPageContent = () => {
     const debouncedSetStoreSearchQuery = useCallback(
         debounce((value: string) => {
             setStoreSearchQuery(value);
-        }, 500),
+        }, 300),
         [setStoreSearchQuery]
     );
 
@@ -54,14 +56,13 @@ const AllAchievementsPageContent = () => {
     }, [localSearchQuery, debouncedSetStoreSearchQuery]);
 
     useEffect(() => {
-        fetchAvailableCategories();
-    }, [fetchAvailableCategories]);
+        if (availableCategories.length === 0) {
+            fetchAvailableCategories();
+        }
+    }, [fetchAvailableCategories, availableCategories.length]);
 
     useEffect(() => {
-        if (currentPage !== 1 && (filterStatus !== 'all' || filterCategory !== 'all' || searchQuery !== '')) {
-        } else {
-            fetchAchievements();
-        }
+        fetchAchievements();
     }, [currentPage, sortBy, filterStatus, filterCategory, searchQuery, fetchAchievements]);
 
     const handlePageChange = (newPage: number) => {
@@ -104,7 +105,6 @@ const AllAchievementsPageContent = () => {
             transition={{ duration: 0.5 }}
             className="space-y-8"
         >
-            {/* ... (Заголовок страницы остается тем же) ... */}
             <div className="text-center">
                 <h1 className="text-3xl font-bold flex items-center justify-center gap-2.5">
                     <Trophy className="h-8 w-8 text-[#3eccb2]" />
@@ -141,32 +141,14 @@ const AllAchievementsPageContent = () => {
                         </Button>
 
                         <div className="hidden md:flex items-center gap-2">
-                            <Select
-                                value={filterStatus}
-                                onValueChange={(val) => setFilterStatus(val as AchievementsFilterStatus)}
-                            >
-                                <SelectTrigger className="w-auto min-w-[130px] h-9 text-xs bg-background">
-                                    <SelectValue placeholder="Статус" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Все статусы</SelectItem>
-                                    <SelectItem value="earned">Полученные</SelectItem>
-                                    <SelectItem value="unearned">Неполученные</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <Select value={filterCategory} onValueChange={setFilterCategory}>
-                                <SelectTrigger className="w-auto min-w-[150px] h-9 text-xs bg-background">
-                                    <SelectValue placeholder="Категория" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Все категории</SelectItem>
-                                    {availableCategories.map((cat) => (
-                                        <SelectItem key={cat} value={cat.toLowerCase()}>
-                                            {cat}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <AchievementsFilters
+                                filterStatus={filterStatus}
+                                setFilterStatus={setFilterStatus}
+                                filterCategory={filterCategory}
+                                setFilterCategory={setFilterCategory}
+                                availableCategories={availableCategories}
+                                isLoadingCategories={isLoadingAchievements}
+                            />
                         </div>
                         <Select value={sortBy} onValueChange={setSortBy}>
                             <SelectTrigger className="w-full md:w-auto md:min-w-[160px] h-9 text-xs bg-background">
@@ -192,11 +174,12 @@ const AllAchievementsPageContent = () => {
                 filterCategory={filterCategory}
                 setFilterCategory={setFilterCategory}
                 availableCategories={availableCategories}
+                isLoadingCategories={isLoadingAchievements}
             />
 
-            {isLoading && renderSkeletons()}
+            {isLoadingAchievements && renderSkeletons()}
 
-            {!isLoading && error && (
+            {!isLoadingAchievements && error && (
                 <div className="rounded-xl border border-destructive/30 bg-destructive/5 backdrop-blur-sm p-6 text-center">
                     <ShieldAlert className="h-12 w-12 mx-auto text-destructive/60 mb-3" />
                     <h3 className="text-lg font-semibold text-destructive mb-1">Не удалось загрузить достижения</h3>
@@ -204,7 +187,7 @@ const AllAchievementsPageContent = () => {
                 </div>
             )}
 
-            {!isLoading && !error && achievementsData && achievementsData.content.length === 0 && (
+            {!isLoadingAchievements && !error && achievementsData && achievementsData.content.length === 0 && (
                 <div className="text-center py-16 px-4 rounded-xl bg-card/50 dark:bg-background/50 backdrop-blur-sm border border-border/20 shadow-sm">
                     <SearchX className="h-16 w-16 mx-auto text-[#3eccb2]/40 mb-4" />
                     <h3 className="text-xl font-semibold mb-1 text-foreground">Достижения не найдены</h3>
@@ -214,7 +197,7 @@ const AllAchievementsPageContent = () => {
                 </div>
             )}
 
-            {!isLoading && !error && achievementsData && achievementsData.content.length > 0 && (
+            {!isLoadingAchievements && !error && achievementsData && achievementsData.content.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {achievementsData.content.map((achievement, index) => (
                         <motion.div
@@ -229,7 +212,7 @@ const AllAchievementsPageContent = () => {
                 </div>
             )}
 
-            {!isLoading && achievementsData && achievementsData.totalPages > 1 && (
+            {!isLoadingAchievements && achievementsData && achievementsData.totalPages > 1 && (
                 <MyPagination
                     className="mt-10"
                     currentPage={achievementsData.pageNumber}
