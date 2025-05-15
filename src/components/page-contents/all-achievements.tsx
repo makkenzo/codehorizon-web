@@ -13,10 +13,19 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAllAchievementsStore } from '@/stores/achievements/achievements-store-provider';
-import { AchievementsFilterStatus } from '@/stores/achievements/types';
 
 import AchievementItem from '../achievements/achievement-item';
 import AchievementsFilters from '../achievements/achievements-filters';
+
+const container = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.05,
+        },
+    },
+};
 
 const AllAchievementsPageContent = () => {
     const {
@@ -78,7 +87,6 @@ const AllAchievementsPageContent = () => {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5, delay: i * 0.05 }}
                 >
-                    {/* Используем стилизованный Skeleton под AchievementCard */}
                     <div className="flex flex-col h-full bg-card/70 dark:bg-background/70 backdrop-blur-sm border border-border/20 shadow-sm rounded-xl p-4 space-y-3">
                         <div className="flex items-center gap-3">
                             <Skeleton className="h-10 w-10 rounded-full bg-muted/70 dark:bg-muted/20" />
@@ -107,8 +115,8 @@ const AllAchievementsPageContent = () => {
         >
             <div className="text-center">
                 <h1 className="text-3xl font-bold flex items-center justify-center gap-2.5">
-                    <Trophy className="h-8 w-8 text-[#3eccb2]" />
-                    <span className="bg-gradient-to-r from-[#3eccb2] to-[hsl(173,58%,39%)] bg-clip-text text-transparent">
+                    <Trophy className="h-8 w-8 text-primary" />
+                    <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                         Все Достижения
                     </span>
                 </h1>
@@ -118,8 +126,9 @@ const AllAchievementsPageContent = () => {
                 </p>
             </div>
 
-            <div className="sticky top-[var(--header-height,60px)] z-10 py-4 bg-background/80 dark:bg-background/80 backdrop-blur-md -mx-4 px-4 md:-mx-0 md:px-0 md:relative md:bg-transparent md:dark:bg-transparent md:backdrop-blur-none md:shadow-none md:border-none md:rounded-none shadow-sm border-b border-border/20 md:p-0">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4 ">
+            {/* Filters and Search Section */}
+            <div className="sticky top-[var(--header-height,60px)] z-10 py-4 bg-background/80 dark:bg-background/80 backdrop-blur-md -mx-4 px-4 md:mx-0 md:px-0 md:relative md:bg-transparent md:dark:bg-transparent md:backdrop-blur-none md:shadow-none md:border-none md:rounded-none shadow-sm border-b border-border/20 md:p-0">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="w-full md:max-w-xs">
                         <Input
                             type="search"
@@ -147,7 +156,7 @@ const AllAchievementsPageContent = () => {
                                 filterCategory={filterCategory}
                                 setFilterCategory={setFilterCategory}
                                 availableCategories={availableCategories}
-                                isLoadingCategories={isLoadingAchievements}
+                                isLoadingCategories={isLoadingCategories}
                             />
                         </div>
                         <Select value={sortBy} onValueChange={setSortBy}>
@@ -174,9 +183,10 @@ const AllAchievementsPageContent = () => {
                 filterCategory={filterCategory}
                 setFilterCategory={setFilterCategory}
                 availableCategories={availableCategories}
-                isLoadingCategories={isLoadingAchievements}
+                isLoadingCategories={isLoadingCategories}
             />
 
+            {/* Achievements Grid */}
             {isLoadingAchievements && renderSkeletons()}
 
             {!isLoadingAchievements && error && (
@@ -189,7 +199,7 @@ const AllAchievementsPageContent = () => {
 
             {!isLoadingAchievements && !error && achievementsData && achievementsData.content.length === 0 && (
                 <div className="text-center py-16 px-4 rounded-xl bg-card/50 dark:bg-background/50 backdrop-blur-sm border border-border/20 shadow-sm">
-                    <SearchX className="h-16 w-16 mx-auto text-[#3eccb2]/40 mb-4" />
+                    <SearchX className="h-16 w-16 mx-auto text-primary/40 mb-4" />
                     <h3 className="text-xl font-semibold mb-1 text-foreground">Достижения не найдены</h3>
                     <p className="text-muted-foreground max-w-md mx-auto">
                         По вашему запросу ничего не найдено. Попробуйте изменить фильтры или поисковый запрос.
@@ -198,18 +208,16 @@ const AllAchievementsPageContent = () => {
             )}
 
             {!isLoadingAchievements && !error && achievementsData && achievementsData.content.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <motion.div
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                    variants={container}
+                    initial="hidden"
+                    animate="show"
+                >
                     {achievementsData.content.map((achievement, index) => (
-                        <motion.div
-                            key={achievement.id || `ach-${index}`}
-                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            transition={{ duration: 0.3, delay: index * 0.05 }}
-                        >
-                            <AchievementItem achievement={achievement} />
-                        </motion.div>
+                        <AchievementItem key={achievement.id || `ach-${index}`} achievement={achievement} />
                     ))}
-                </div>
+                </motion.div>
             )}
 
             {!isLoadingAchievements && achievementsData && achievementsData.totalPages > 1 && (

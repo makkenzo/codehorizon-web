@@ -13,7 +13,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet';
-import { AchievementsFilterStatus } from '@/stores/achievements/types';
+import type { AchievementsFilterStatus } from '@/stores/achievements/types';
 
 interface AchievementsFiltersMobileProps {
     isOpen: boolean;
@@ -38,13 +38,13 @@ const AchievementsFiltersMobile: React.FC<AchievementsFiltersMobileProps> = ({
 }) => {
     return (
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
-            <SheetContent side="bottom" className="max-h-[80vh] flex flex-col">
+            <SheetContent side="bottom" className="max-h-[80vh] flex flex-col rounded-t-2xl">
                 <SheetHeader className="px-4 pt-4 pb-2">
-                    <SheetTitle className="flex items-center gap-2">
+                    <SheetTitle className="flex items-center gap-2 text-lg">
                         <Filter className="h-5 w-5 text-primary" />
                         Фильтры достижений
                     </SheetTitle>
-                    <SheetDescription>Настройте отображение списка достижений.</SheetDescription>
+                    <SheetDescription className="text-sm">Настройте отображение списка достижений.</SheetDescription>
                 </SheetHeader>
                 <div className="flex-grow overflow-y-auto px-4 space-y-6 py-4">
                     <div>
@@ -100,9 +100,9 @@ const AchievementsFiltersMobile: React.FC<AchievementsFiltersMobileProps> = ({
                         </Select>
                     </div>
                 </div>
-                <SheetFooter className="px-4 py-4 border-t">
+                <SheetFooter className="px-4 py-4 border-t border-border/20">
                     <SheetClose asChild>
-                        <Button type="button" className="w-full">
+                        <Button type="button" className="w-full bg-primary hover:bg-primary/90">
                             Применить
                         </Button>
                     </SheetClose>

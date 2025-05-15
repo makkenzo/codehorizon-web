@@ -12,7 +12,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AchievementsFilterStatus } from '@/stores/achievements/types';
+import type { AchievementsFilterStatus } from '@/stores/achievements/types';
 
 interface AchievementsFiltersProps {
     filterStatus: AchievementsFilterStatus;
