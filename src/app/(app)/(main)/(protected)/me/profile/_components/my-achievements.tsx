@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserStore } from '@/stores/user/user-store-provider';
-import { GlobalAchievementDTO } from '@/types';
+import { GlobalAchievementDTO } from '@/types/achievements';
 
 const MyAchievements = () => {
     const { earnedAchievements, fetchUserEarnedAchievements } = useUserStore((state) => ({

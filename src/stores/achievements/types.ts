@@ -1,4 +1,5 @@
-import { GlobalAchievementDTO, PagedResponse } from '@/types';
+import { PagedResponse } from '@/types';
+import { GlobalAchievementDTO } from '@/types/achievements';
 
 export type AchievementsFilterStatus = 'all' | 'earned' | 'unearned';
 

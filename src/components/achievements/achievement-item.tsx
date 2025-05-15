@@ -6,7 +6,7 @@ import { CheckCircle, Lock, Star } from 'lucide-react';
 
 import AchievementIcon from '@/components/reusable/achievement-icon';
 import { cn } from '@/lib/utils';
-import { AchievementRarity, GlobalAchievementDTO } from '@/types';
+import { AchievementRarity, GlobalAchievementDTO } from '@/types/achievements';
 
 import { Badge } from '../ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';

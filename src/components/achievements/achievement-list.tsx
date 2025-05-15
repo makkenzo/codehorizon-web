@@ -7,7 +7,7 @@ import { Award } from 'lucide-react';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { GlobalAchievementDTO } from '@/types';
+import { GlobalAchievementDTO } from '@/types/achievements';
 
 import AchievementItem from './achievement-item';
 

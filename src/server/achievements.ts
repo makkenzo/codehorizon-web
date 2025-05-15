@@ -1,4 +1,5 @@
-import { Achievement, GlobalAchievementDTO, PagedResponse } from '@/types';
+import { PagedResponse } from '@/types';
+import { Achievement, GlobalAchievementDTO } from '@/types/achievements';
 
 import ApiClient from './api-client';
 

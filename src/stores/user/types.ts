@@ -1,5 +1,5 @@
 import { User } from '@/models';
-import { Achievement } from '@/types';
+import { Achievement } from '@/types/achievements';
 
 export type UserState = {
     user?: User;

@@ -3,7 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { User } from '@/models';
 import { achievementsApiClient } from '@/server/achievements';
-import { Achievement } from '@/types';
+import { Achievement } from '@/types/achievements';
 
 import { UserState, UserStore } from './types';
 
