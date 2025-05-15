@@ -68,10 +68,6 @@ const AchievementsList = ({
             {achievements.map((achievement, index) => (
                 <motion.div
                     key={achievement.id}
-                    variants={{
-                        hidden: { opacity: 0, y: 20 },
-                        visible: { opacity: 1, y: 0 },
-                    }}
                     className={cn(
                         'group relative overflow-hidden rounded-xl p-4 transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-[#3eccb2]/30 dark:border-[#3eccb2]/20 hover:border-[#3eccb2]/50 dark:hover:border-[#3eccb2]/40 hover:shadow-md'
                     )}
