@@ -1,8 +1,17 @@
+'use client';
+
+import { useSearchParams } from 'next/navigation';
+
 import HorizontalTabNav from '@/components/horizontal-tab-nav';
 import PageWrapper from '@/components/reusable/page-wrapper';
+import { tabMeta } from '@/lib/reducers/my-courses-reducer';
 import { HorizontalTabNavItem } from '@/types';
 
-export default function ProfileLayout({ children }: { children: React.ReactNode }) {
+export default function MyCoursesLayout({ children }: { children: React.ReactNode }) {
+    const searchParams = useSearchParams();
+    const currentTabKey = (searchParams.get('tab') ?? 'default') as keyof typeof tabMeta;
+    const currentMetaData = tabMeta[currentTabKey] ?? tabMeta.default;
+
     const navLinks: HorizontalTabNavItem[] = [
         {
             label: 'Все курсы',
@@ -10,12 +19,12 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
             disabled: false,
         },
         {
-            label: 'Желаемое',
+            label: tabMeta.wishlist.title,
             href: '/me/courses?tab=wishlist',
             disabled: false,
         },
         {
-            label: 'Пройденные',
+            label: tabMeta.completed.title,
             href: '/me/courses?tab=completed',
             disabled: true,
         },
@@ -24,10 +33,10 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
     return (
         <PageWrapper>
             <div className="flex flex-col">
-                <div className="gap-4 flex flex-col">
-                    <HorizontalTabNav title="Мои курсы" tabs={navLinks} />
+                <div className="gap-4 flex flex-col mb-6 md:mb-8">
+                    <HorizontalTabNav title={currentMetaData.title} tabs={navLinks} />
                 </div>
-                <div className="p-4">{children}</div>
+                {children}
             </div>
         </PageWrapper>
     );
