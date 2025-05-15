@@ -6,19 +6,24 @@ import ProfileForm from '@/app/(app)/(main)/(protected)/me/profile/_components/f
 import MyAchievements from '@/app/(app)/(main)/(protected)/me/profile/_components/my-achievements';
 import NotificationSettingsForm from '@/app/(app)/(main)/(protected)/me/profile/_components/notification-settings-form';
 
+import PageWrapper from '../reusable/page-wrapper';
 import PrivacySettingsForm from '../settings/privacy-settings-form';
 
 const SecuritySettingsForm = () => (
-    <div className="p-6 bg-card border rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Настройки безопасности</h2>
-        <p className="text-muted-foreground">Здесь будут настройки безопасности...</p>
-    </div>
+    <PageWrapper>
+        <div className="p-6 bg-card border rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">Настройки безопасности</h2>
+            <p className="text-muted-foreground">Здесь будут настройки безопасности...</p>
+        </div>
+    </PageWrapper>
 );
 const PersonalizationSettingsForm = () => (
-    <div className="p-6 bg-card border rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Персонализация</h2>
-        <p className="text-muted-foreground">Здесь будут настройки персонализации...</p>
-    </div>
+    <PageWrapper>
+        <div className="p-6 bg-card border rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">Персонализация</h2>
+            <p className="text-muted-foreground">Здесь будут настройки персонализации...</p>
+        </div>
+    </PageWrapper>
 );
 
 export default function ProfilePageContent() {

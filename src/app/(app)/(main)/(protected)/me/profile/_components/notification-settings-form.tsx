@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+import PageWrapper from '@/components/reusable/page-wrapper';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
@@ -151,14 +152,16 @@ const NotificationSettingsForm = () => {
 
     if (isLoading) {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Настройки уведомлений</CardTitle>
-                </CardHeader>
-                <CardContent className="flex justify-center items-center py-20">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                </CardContent>
-            </Card>
+            <PageWrapper>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Настройки уведомлений</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex justify-center items-center py-20">
+                        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                    </CardContent>
+                </Card>
+            </PageWrapper>
         );
     }
 
@@ -196,77 +199,87 @@ const NotificationSettingsForm = () => {
     );
 
     return (
-        <Card className="mb-12">
-            <CardHeader>
-                <CardTitle>Настройки уведомлений</CardTitle>
-                <CardDescription>Выберите, какие уведомления вы хотите получать по электронной почте.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                        {renderSwitchField(
-                            'emailGlobalOnOff',
-                            preferenceFields.find((f) => f.name === 'emailGlobalOnOff')!.label,
-                            preferenceFields.find((f) => f.name === 'emailGlobalOnOff')!.description
-                        )}
-                        {globalEmailEnabled && (
-                            <>
-                                <Separator className="my-6" />
-                                <h3 className="text-lg font-medium text-muted-foreground">Основные уведомления</h3>
-                                <div className="space-y-4">
-                                    {preferenceFields
-                                        .filter((f) => f.name !== 'emailGlobalOnOff' && !f.isMarketing && !f.isSecurity)
-                                        .map((item) =>
-                                            renderSwitchField(
-                                                item.name,
-                                                item.label,
-                                                item.description,
-                                                !globalEmailEnabled
+        <PageWrapper>
+            <Card className="mb-12">
+                <CardHeader>
+                    <CardTitle>Настройки уведомлений</CardTitle>
+                    <CardDescription>
+                        Выберите, какие уведомления вы хотите получать по электронной почте.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                            {renderSwitchField(
+                                'emailGlobalOnOff',
+                                preferenceFields.find((f) => f.name === 'emailGlobalOnOff')!.label,
+                                preferenceFields.find((f) => f.name === 'emailGlobalOnOff')!.description
+                            )}
+                            {globalEmailEnabled && (
+                                <>
+                                    <Separator className="my-6" />
+                                    <h3 className="text-lg font-medium text-muted-foreground">Основные уведомления</h3>
+                                    <div className="space-y-4">
+                                        {preferenceFields
+                                            .filter(
+                                                (f) => f.name !== 'emailGlobalOnOff' && !f.isMarketing && !f.isSecurity
                                             )
-                                        )}
-                                </div>
+                                            .map((item) =>
+                                                renderSwitchField(
+                                                    item.name,
+                                                    item.label,
+                                                    item.description,
+                                                    !globalEmailEnabled
+                                                )
+                                            )}
+                                    </div>
 
-                                <Separator className="my-6" />
-                                <h3 className="text-lg font-medium text-muted-foreground">Маркетинговые уведомления</h3>
-                                <div className="space-y-4">
-                                    {preferenceFields
-                                        .filter((f) => f.isMarketing)
-                                        .map((item) =>
-                                            renderSwitchField(
-                                                item.name,
-                                                item.label,
-                                                item.description,
-                                                !globalEmailEnabled
-                                            )
-                                        )}
-                                </div>
+                                    <Separator className="my-6" />
+                                    <h3 className="text-lg font-medium text-muted-foreground">
+                                        Маркетинговые уведомления
+                                    </h3>
+                                    <div className="space-y-4">
+                                        {preferenceFields
+                                            .filter((f) => f.isMarketing)
+                                            .map((item) =>
+                                                renderSwitchField(
+                                                    item.name,
+                                                    item.label,
+                                                    item.description,
+                                                    !globalEmailEnabled
+                                                )
+                                            )}
+                                    </div>
 
-                                <Separator className="my-6" />
-                                <h3 className="text-lg font-medium text-muted-foreground">Оповещения безопасности</h3>
-                                <div className="space-y-4">
-                                    {preferenceFields
-                                        .filter((f) => f.isSecurity)
-                                        .map((item) =>
-                                            renderSwitchField(
-                                                item.name,
-                                                item.label,
-                                                item.description,
-                                                !globalEmailEnabled
-                                            )
-                                        )}
-                                </div>
-                            </>
-                        )}
+                                    <Separator className="my-6" />
+                                    <h3 className="text-lg font-medium text-muted-foreground">
+                                        Оповещения безопасности
+                                    </h3>
+                                    <div className="space-y-4">
+                                        {preferenceFields
+                                            .filter((f) => f.isSecurity)
+                                            .map((item) =>
+                                                renderSwitchField(
+                                                    item.name,
+                                                    item.label,
+                                                    item.description,
+                                                    !globalEmailEnabled
+                                                )
+                                            )}
+                                    </div>
+                                </>
+                            )}
 
-                        <div className="flex justify-end pt-6 border-t">
-                            <Button type="submit" isLoading={isSubmitting} disabled={isSubmitting}>
-                                Сохранить настройки уведомлений
-                            </Button>
-                        </div>
-                    </form>
-                </Form>
-            </CardContent>
-        </Card>
+                            <div className="flex justify-end pt-6 border-t">
+                                <Button type="submit" isLoading={isSubmitting} disabled={isSubmitting}>
+                                    Сохранить настройки уведомлений
+                                </Button>
+                            </div>
+                        </form>
+                    </Form>
+                </CardContent>
+            </Card>
+        </PageWrapper>
     );
 };
 

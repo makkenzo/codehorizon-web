@@ -11,6 +11,7 @@ import { z } from 'zod';
 import { settingsApiClient } from '@/server/settings';
 import { ProfileVisibility, UpdatePrivacySettingsRequest } from '@/types/settings';
 
+import PageWrapper from '../reusable/page-wrapper';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
@@ -95,130 +96,137 @@ const PrivacySettingsForm = () => {
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Настройки конфиденциальности</CardTitle>
-                <CardDescription>Управляйте тем, какую информацию о вас видят другие пользователи.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                        <FormField
-                            control={form.control}
-                            name="profileVisibility"
-                            render={({ field }) => (
-                                <FormItem className="space-y-3">
-                                    <FormLabel className="text-base font-medium">Видимость профиля</FormLabel>
-                                    <FormDescription>Кто может просматривать вашу страницу профиля.</FormDescription>
-                                    <FormControl>
-                                        <RadioGroup
-                                            onValueChange={field.onChange}
-                                            value={field.value}
-                                            className="flex flex-col space-y-2 pt-2"
-                                            disabled={isSubmitting}
-                                        >
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                    <RadioGroupItem value={ProfileVisibility.PUBLIC} />
-                                                </FormControl>
-                                                <FormLabel className="font-normal cursor-pointer">
-                                                    Публичный (виден всем, включая незарегистрированных пользователей)
-                                                </FormLabel>
-                                            </FormItem>
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                    <RadioGroupItem value={ProfileVisibility.REGISTERED_USERS} />
-                                                </FormControl>
-                                                <FormLabel className="font-normal cursor-pointer">
-                                                    Зарегистрированные пользователи (виден только тем, кто вошел в
-                                                    систему)
-                                                </FormLabel>
-                                            </FormItem>
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                    <RadioGroupItem value={ProfileVisibility.PRIVATE} />
-                                                </FormControl>
-                                                <FormLabel className="font-normal cursor-pointer">
-                                                    Приватный (виден только вам и администраторам)
-                                                </FormLabel>
-                                            </FormItem>
-                                        </RadioGroup>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <Separator />
-
-                        <FormField
-                            control={form.control}
-                            name="showEmailOnProfile"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
-                                    <div className="space-y-0.5">
-                                        <FormLabel>Показывать Email в профиле</FormLabel>
+        <PageWrapper>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Настройки конфиденциальности</CardTitle>
+                    <CardDescription>Управляйте тем, какую информацию о вас видят другие пользователи.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                            <FormField
+                                control={form.control}
+                                name="profileVisibility"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-3">
+                                        <FormLabel className="text-base font-medium">Видимость профиля</FormLabel>
                                         <FormDescription>
-                                            Если включено, ваш email будет виден на вашей публичной странице профиля.
+                                            Кто может просматривать вашу страницу профиля.
                                         </FormDescription>
-                                    </div>
-                                    <FormControl>
-                                        <Switch
-                                            checked={field.value}
-                                            onCheckedChange={field.onChange}
-                                            disabled={isSubmitting}
-                                            aria-readonly={isSubmitting}
-                                        />
-                                    </FormControl>
-                                </FormItem>
-                            )}
-                        />
+                                        <FormControl>
+                                            <RadioGroup
+                                                onValueChange={field.onChange}
+                                                value={field.value}
+                                                className="flex flex-col space-y-2 pt-2"
+                                                disabled={isSubmitting}
+                                            >
+                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                    <FormControl>
+                                                        <RadioGroupItem value={ProfileVisibility.PUBLIC} />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal cursor-pointer">
+                                                        Публичный (виден всем, включая незарегистрированных
+                                                        пользователей)
+                                                    </FormLabel>
+                                                </FormItem>
+                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                    <FormControl>
+                                                        <RadioGroupItem value={ProfileVisibility.REGISTERED_USERS} />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal cursor-pointer">
+                                                        Зарегистрированные пользователи (виден только тем, кто вошел в
+                                                        систему)
+                                                    </FormLabel>
+                                                </FormItem>
+                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                    <FormControl>
+                                                        <RadioGroupItem value={ProfileVisibility.PRIVATE} />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal cursor-pointer">
+                                                        Приватный (виден только вам и администраторам)
+                                                    </FormLabel>
+                                                </FormItem>
+                                            </RadioGroup>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                        <FormField
-                            control={form.control}
-                            name="showCoursesInProgressOnProfile"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
-                                    <div className="space-y-0.5">
-                                        <FormLabel>Показывать курсы в процессе</FormLabel>
-                                        <FormDescription>
-                                            Отображать на вашей публичной странице курсы, которые вы сейчас проходите.
-                                        </FormDescription>
-                                    </div>
-                                    <FormControl>
-                                        <Switch
-                                            checked={field.value}
-                                            onCheckedChange={field.onChange}
-                                            disabled={isSubmitting}
-                                        />
-                                    </FormControl>
-                                </FormItem>
-                            )}
-                        />
+                            <Separator />
 
-                        <FormField
-                            control={form.control}
-                            name="showCompletedCoursesOnProfile"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
-                                    <div className="space-y-0.5">
-                                        <FormLabel>Показывать пройденные курсы</FormLabel>
-                                        <FormDescription>
-                                            Отображать на вашей публичной странице курсы, которые вы успешно завершили.
-                                        </FormDescription>
-                                    </div>
-                                    <FormControl>
-                                        <Switch
-                                            checked={field.value}
-                                            onCheckedChange={field.onChange}
-                                            disabled={isSubmitting}
-                                        />
-                                    </FormControl>
-                                </FormItem>
-                            )}
-                        />
+                            <FormField
+                                control={form.control}
+                                name="showEmailOnProfile"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                                        <div className="space-y-0.5">
+                                            <FormLabel>Показывать Email в профиле</FormLabel>
+                                            <FormDescription>
+                                                Если включено, ваш email будет виден на вашей публичной странице
+                                                профиля.
+                                            </FormDescription>
+                                        </div>
+                                        <FormControl>
+                                            <Switch
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                                disabled={isSubmitting}
+                                                aria-readonly={isSubmitting}
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
 
-                        {/* <FormField
+                            <FormField
+                                control={form.control}
+                                name="showCoursesInProgressOnProfile"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                                        <div className="space-y-0.5">
+                                            <FormLabel>Показывать курсы в процессе</FormLabel>
+                                            <FormDescription>
+                                                Отображать на вашей публичной странице курсы, которые вы сейчас
+                                                проходите.
+                                            </FormDescription>
+                                        </div>
+                                        <FormControl>
+                                            <Switch
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                                disabled={isSubmitting}
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="showCompletedCoursesOnProfile"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                                        <div className="space-y-0.5">
+                                            <FormLabel>Показывать пройденные курсы</FormLabel>
+                                            <FormDescription>
+                                                Отображать на вашей публичной странице курсы, которые вы успешно
+                                                завершили.
+                                            </FormDescription>
+                                        </div>
+                                        <FormControl>
+                                            <Switch
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                                disabled={isSubmitting}
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* <FormField
                             control={form.control}
                             name="showActivityFeedOnProfile"
                             render={({ field }) => (
@@ -263,15 +271,16 @@ const PrivacySettingsForm = () => {
                             )}
                         /> */}
 
-                        <div className="flex justify-end pt-4">
-                            <Button type="submit" isLoading={isSubmitting} disabled={isLoading}>
-                                Сохранить изменения
-                            </Button>
-                        </div>
-                    </form>
-                </Form>
-            </CardContent>
-        </Card>
+                            <div className="flex justify-end pt-4">
+                                <Button type="submit" isLoading={isSubmitting} disabled={isLoading}>
+                                    Сохранить изменения
+                                </Button>
+                            </div>
+                        </form>
+                    </Form>
+                </CardContent>
+            </Card>
+        </PageWrapper>
     );
 };
 

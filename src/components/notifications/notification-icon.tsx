@@ -47,7 +47,7 @@ const NotificationIcon = () => {
                     )}
                 </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-80 md:w-96 p-0" align="end">
+            <DropdownMenuContent className="w-80 md:w-96 p-0 rounded-xl" align="end">
                 <NotificationDropdownContent />
             </DropdownMenuContent>
         </DropdownMenu>

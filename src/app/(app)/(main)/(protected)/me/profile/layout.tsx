@@ -1,5 +1,4 @@
 import HorizontalTabNav from '@/components/horizontal-tab-nav';
-import PageWrapper from '@/components/reusable/page-wrapper';
 import { HorizontalTabNavItem } from '@/types';
 
 export default function ProfileLayout({ children }: { children: React.ReactNode }) {
@@ -15,11 +14,6 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
             disabled: false,
         },
         {
-            label: 'Персонализация',
-            href: '/me/profile?tab=personalization',
-            disabled: true,
-        },
-        {
             label: 'Уведомления',
             href: '/me/profile?tab=notifications',
             disabled: false,
@@ -32,13 +26,11 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
     ];
 
     return (
-        <PageWrapper className="max-w-[845px]">
-            <div className="flex flex-col">
-                <div className="gap-4 flex flex-col">
-                    <HorizontalTabNav title="Личный кабинет" tabs={profileNavLinks} />
-                </div>
-                <div className="p-4">{children}</div>
+        <div className="flex flex-col mt-[40px]">
+            <div className="gap-4 flex flex-col">
+                <HorizontalTabNav title="Личный кабинет" tabs={profileNavLinks} />
             </div>
-        </PageWrapper>
+            <div className="p-4">{children}</div>
+        </div>
     );
 }

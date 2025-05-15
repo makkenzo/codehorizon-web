@@ -1,11 +1,25 @@
 'use client';
 
+import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { isAxiosError } from 'axios';
 import { motion } from 'framer-motion';
-import { Eye, Hourglass, Loader2, Shield, ShieldAlert, ShieldCheck, Signature, Trash2 } from 'lucide-react';
+import {
+    Eye,
+    FileText,
+    Globe,
+    Hourglass,
+    Loader2,
+    MapPin,
+    Shield,
+    ShieldAlert,
+    ShieldCheck,
+    FilePenLineIcon as Signature,
+    Trash2,
+    User,
+} from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { FaUserSecret } from 'react-icons/fa6';
 import { MdAddAPhoto } from 'react-icons/md';
@@ -15,6 +29,7 @@ import { z } from 'zod';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
+import HorizontalTabNav from '@/components/horizontal-tab-nav';
 import LevelProgress from '@/components/reusable/level-progress';
 import SignatureCanvas from '@/components/reusable/signature-canvas';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -25,12 +40,11 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Profile } from '@/models';
 import { mentorshipApiClient } from '@/server/mentorship';
 import ProfileApiClient from '@/server/profile';
 import S3ApiClient from '@/server/s3';
 import { useUserStore } from '@/stores/user/user-store-provider';
-import { ApplicationStatus, MentorshipApplication } from '@/types/mentorship';
+import { ApplicationStatus, type MentorshipApplication } from '@/types/mentorship';
 
 const profileSchema = z.object({
     avatarUrl: z.string().nullable(),
@@ -50,19 +64,19 @@ const formVariants = {
     visible: (i: number) => ({
         opacity: 1,
         y: 0,
-        transition: { duration: 0.4, ease: 'easeInOut', delay: (i + 3) * 0.1 },
+        transition: { duration: 0.4, ease: 'easeInOut', delay: i * 0.1 },
     }),
 };
 
 const fields: Record<
     Exclude<keyof z.infer<typeof profileSchema>, 'avatarUrl' | 'signatureUrl'>,
-    { label: string | null; placeholder: string | null }
+    { label: string | null; placeholder: string | null; icon: React.ReactNode }
 > = {
-    firstName: { label: 'Имя', placeholder: 'Иван' },
-    lastName: { label: 'Фамилия', placeholder: 'Кандинский' },
-    bio: { label: 'Биография', placeholder: 'Расскажите о себе' },
-    location: { label: 'Местоположение', placeholder: 'Москва, Россия' },
-    website: { label: 'Веб-сайт', placeholder: 'https://example.com' },
+    firstName: { label: 'Имя', placeholder: 'Иван', icon: <User className="h-4 w-4" /> },
+    lastName: { label: 'Фамилия', placeholder: 'Кандинский', icon: <User className="h-4 w-4" /> },
+    bio: { label: 'Биография', placeholder: 'Расскажите о себе', icon: <FileText className="h-4 w-4" /> },
+    location: { label: 'Местоположение', placeholder: 'Москва, Россия', icon: <MapPin className="h-4 w-4" /> },
+    website: { label: 'Веб-сайт', placeholder: 'https://example.com', icon: <Globe className="h-4 w-4" /> },
 };
 
 const ProfileForm = ({}) => {
@@ -238,297 +252,450 @@ const ProfileForm = ({}) => {
 
     if (isLoading)
         return (
-            <div className="space-y-4 px-[45px] mt-10">
-                <div className="relative mx-auto w-fit">
-                    <Skeleton className="size-[60px] rounded-full" />
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 p-6">
+                <div className="md:col-span-4 lg:col-span-3">
+                    <Skeleton className="h-[120px] w-[120px] rounded-full mx-auto" />
+                    <Skeleton className="h-8 w-3/4 mx-auto mt-4" />
+                    <Skeleton className="h-20 w-full mt-6" />
                 </div>
-                {Array.from({ length: 5 }).map((_, index) => (
-                    <div key={index} className="flex flex-col gap-2">
-                        <Skeleton className="h-[14px] w-[60px]" />
-                        <Skeleton className="h-[36px]" />
+                <div className="md:col-span-8 lg:col-span-9">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {Array.from({ length: 4 }).map((_, index) => (
+                            <div key={index} className="space-y-2">
+                                <Skeleton className="h-5 w-24" />
+                                <Skeleton className="h-10 w-full" />
+                            </div>
+                        ))}
+                        <div className="md:col-span-2 space-y-2">
+                            <Skeleton className="h-5 w-24" />
+                            <Skeleton className="h-32 w-full" />
+                        </div>
                     </div>
-                ))}
-                <Skeleton className="w-[179px] h-[41px] mx-auto mt-10" />
+                </div>
             </div>
         );
 
     return (
-        <div className="mb-20 md:px-[45px]">
-            {user && (
-                <motion.div variants={formVariants} custom={0.5} className="mb-8">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Ваш прогресс</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <LevelProgress
-                                level={user.level}
-                                currentXp={user.xp}
-                                xpForNextLevel={user.xpForNextLevel}
-                                dailyStreak={user.dailyStreak}
-                                className="text-base"
-                                showTooltip={true}
-                            />
-                            <p className="text-xs text-muted-foreground mt-2">
-                                Продолжайте учиться, чтобы открывать новые уровни и достижения!
-                            </p>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            )}
+        <div className="relative min-h-screen">
+            <div className="fixed inset-0 -z-10 overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#3eccb2]/5 via-transparent to-transparent"></div>
+                <div className="absolute top-1/4 right-0 w-[40vw] h-[40vw] bg-gradient-to-bl from-[hsl(58,83%,62%)]/5 via-[hsl(68,27%,74%)]/5 to-transparent rounded-full blur-3xl"></div>
+                <div className="absolute bottom-0 left-1/3 w-[30vw] h-[30vw] bg-gradient-to-tr from-[hsl(173,58%,39%)]/5 via-[hsl(197,37%,24%)]/5 to-transparent rounded-full blur-3xl"></div>
+            </div>
 
-            <Form {...form}>
-                {user?.username && (
-                    <div className="flex justify-end mb-6">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => router.push(`/u/${user.username}`)}
-                            title="Посмотреть как профиль видят другие"
-                        >
-                            <Eye className="h-4 w-4" />
-                            <span>Просмотр</span>
-                        </Button>
-                    </div>
-                )}
-                <motion.form
-                    initial="hidden"
-                    animate="visible"
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4 mt-10"
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 p-6">
+                <motion.div
+                    className="md:col-span-4 lg:col-span-3 space-y-6"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5 }}
                 >
-                    <FormField
-                        key="avatarUrl"
-                        control={form.control}
-                        name="avatarUrl"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormControl>
-                                    <motion.div className="relative mx-auto" variants={formVariants} custom={0}>
-                                        <Avatar className="size-[60px]">
-                                            <AvatarImage src={field.value ?? ''} />
-                                            <AvatarFallback>
-                                                <FaUserSecret className="size-8" />
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <label
-                                            htmlFor="avatar-upload"
-                                            className="size-[28px] absolute flex items-center justify-center bg-[#050505] rounded-full -bottom-1 -right-2 opacity-75 z-50 hover:bg-[#050505]/80 cursor-pointer"
-                                        >
-                                            <MdAddAPhoto className="text-gray-200 size-[14px]" />
-                                            <input
-                                                id="avatar-upload"
-                                                type="file"
-                                                className="hidden"
-                                                onChange={(e) => handleFileChange(e, 'avatarUrl', 'avatars')}
-                                                accept={ALLOWED_TYPES.join(', ')}
-                                                disabled={pending}
-                                            />
-                                        </label>
-                                    </motion.div>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    {Object.entries(fields).map(([key, { label, placeholder }], index) => (
+                    <Form {...form}>
                         <FormField
-                            key={key}
+                            key="avatarUrl"
                             control={form.control}
-                            name={key as keyof typeof fields}
+                            name="avatarUrl"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>
-                                        <motion.label variants={formVariants} custom={index + 1}>
-                                            {label}
-                                        </motion.label>
-                                    </FormLabel>
                                     <FormControl>
-                                        <motion.div variants={formVariants} custom={index + 1}>
-                                            <Input
-                                                placeholder={placeholder!}
-                                                {...field}
-                                                value={field.value ?? ''}
-                                                disabled={pending}
-                                            />
-                                        </motion.div>
+                                        <div className="flex flex-col items-center">
+                                            <div className="relative group">
+                                                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#3eccb2]/80 via-[hsl(58,83%,62%)]/80 to-[hsl(173,58%,39%)]/80 blur-[2px] scale-[1.02] opacity-70 group-hover:opacity-100 transition-all duration-300"></div>
+                                                <div className="relative size-[120px] rounded-full p-1 bg-gradient-to-r from-[#3eccb2] via-[hsl(58,83%,62%)] to-[hsl(173,58%,39%)]">
+                                                    <Avatar className="size-full">
+                                                        <AvatarImage src={field.value ?? ''} />
+                                                        <AvatarFallback className="bg-white dark:bg-gray-900">
+                                                            <FaUserSecret className="size-12" />
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <label
+                                                        htmlFor="avatar-upload"
+                                                        className="size-[36px] absolute flex items-center justify-center bg-gradient-to-r from-[#3eccb2] to-[hsl(173,58%,39%)] rounded-full -bottom-1 -right-1 opacity-90 z-50 hover:opacity-100 cursor-pointer shadow-lg transition-all duration-300 hover:scale-105"
+                                                    >
+                                                        <MdAddAPhoto className="text-white size-[18px]" />
+                                                        <input
+                                                            id="avatar-upload"
+                                                            type="file"
+                                                            className="hidden"
+                                                            onChange={(e) =>
+                                                                handleFileChange(e, 'avatarUrl', 'avatars')
+                                                            }
+                                                            accept={ALLOWED_TYPES.join(', ')}
+                                                            disabled={pending}
+                                                        />
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <h2 className="mt-4 text-xl font-semibold">
+                                                {form.watch('firstName') || form.watch('lastName')
+                                                    ? `${form.watch('firstName') || ''} ${form.watch('lastName') || ''}`
+                                                    : 'Ваш профиль'}
+                                            </h2>
+                                            {user?.username && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => router.push(`/u/${user.username}`)}
+                                                    title="Посмотреть как профиль видят другие"
+                                                    className="mt-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-[#3eccb2]/30 dark:border-[#3eccb2]/20 hover:bg-white/90 dark:hover:bg-gray-900/90 hover:border-[#3eccb2]/50 transition-all"
+                                                >
+                                                    <Eye className="h-4 w-4 mr-2" />
+                                                    <span>Просмотр профиля</span>
+                                                </Button>
+                                            )}
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                    ))}
+                    </Form>
 
-                    <motion.div variants={formVariants} className="mt-8 pt-6 border-t">
-                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <Shield className="size-5 text-primary" />
-                            Статус ментора
-                        </h3>
-
-                        {isCheckingApplication && !isMentor && (
-                            <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                Проверяем статус вашей заявки...
-                            </div>
-                        )}
-
-                        {!isCheckingApplication && isMentor && (
-                            <div className="flex items-center gap-2 text-sm mb-4 text-green-600 dark:text-green-400 p-3 bg-green-500/10 rounded-md">
-                                <ShieldCheck className="h-5 w-5" />
-                                Вы являетесь ментором.
-                            </div>
-                        )}
-
-                        {!isCheckingApplication && !isMentor && applicationStatus === ApplicationStatus.PENDING && (
-                            <div className="flex items-center gap-2 text-sm mb-4 text-blue-600 dark:text-blue-400 p-3 bg-blue-500/10 rounded-md">
-                                <Hourglass className="h-5 w-5" />
-                                Ваша заявка на менторство находится на рассмотрении.
-                            </div>
-                        )}
-
-                        {!isCheckingApplication && !isMentor && applicationStatus === ApplicationStatus.REJECTED && (
-                            <div className="flex flex-col gap-2 text-sm text-red-600 mb-4 dark:text-red-400 p-3 bg-red-500/10 rounded-md">
-                                <div className="flex items-center gap-2">
-                                    <ShieldAlert className="h-5 w-5" />
-                                    Ваша заявка на менторство была отклонена.
-                                </div>
-                                {applicationDetails?.rejectionReason && (
-                                    <p className="text-xs pl-7">Причина: {applicationDetails.rejectionReason}</p>
-                                )}
-                            </div>
-                        )}
-
-                        {!isCheckingApplication && !isMentor && !applicationStatus && (
-                            <>
-                                <p className="text-sm text-muted-foreground mb-4">
-                                    Хотите делиться своими знаниями и создавать курсы? Подайте заявку!
-                                </p>
-
-                                <Textarea
-                                    placeholder="Расскажите, почему вы хотите стать ментором (необязательно)"
-                                    value={applicationReason}
-                                    onChange={(e) => setApplicationReason(e.target.value)}
-                                    className="mb-3"
-                                    rows={3}
-                                    disabled={isSubmittingApplication}
+                    {user && (
+                        <Card className="backdrop-blur-sm bg-white/90 dark:bg-gray-950/90 border border-gray-200/50 dark:border-gray-800/50 shadow-md overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#3eccb2]/5 via-[hsl(58,83%,62%)]/5 to-[hsl(173,58%,39%)]/5 opacity-50"></div>
+                            <CardHeader className="relative z-10 pb-2">
+                                <CardTitle className="text-lg font-bold text-[#3eccb2]">Ваш прогресс</CardTitle>
+                            </CardHeader>
+                            <CardContent className="relative z-10">
+                                <LevelProgress
+                                    level={user.level}
+                                    currentXp={user.xp}
+                                    xpForNextLevel={user.xpForNextLevel}
+                                    dailyStreak={user.dailyStreak}
+                                    className="text-base"
+                                    showTooltip={true}
                                 />
-                                <Button
-                                    onClick={handleApplyForMentorship}
-                                    isLoading={isSubmittingApplication}
-                                    disabled={isSubmittingApplication}
-                                >
-                                    Подать заявку на менторство
-                                </Button>
-                            </>
-                        )}
+                                <p className="text-xs text-muted-foreground mt-2">
+                                    Продолжайте учиться, чтобы открывать новые уровни и достижения!
+                                </p>
+                            </CardContent>
+                        </Card>
+                    )}
+                </motion.div>
 
-                        {isMentor && (
-                            <motion.div
-                                variants={formVariants}
-                                custom={Object.keys(fields).length + 1}
-                                className="space-y-3"
-                            >
-                                <FormLabel className="flex items-center gap-2 text-base">
-                                    <Signature className="size-5" />
-                                    Ваша подпись (для сертификатов)
-                                </FormLabel>
-                                <Tabs
-                                    value={signatureSource}
-                                    onValueChange={(value) => setSignatureSource(value as 'draw' | 'upload')}
-                                    className="w-full"
-                                >
-                                    <TabsList className="grid w-full grid-cols-2">
-                                        <TabsTrigger value="draw">Нарисовать</TabsTrigger>
-                                        <TabsTrigger value="upload">Загрузить файл</TabsTrigger>
-                                    </TabsList>
-                                    <TabsContent value="draw" className="mt-4">
-                                        <SignatureCanvas
-                                            onSave={handleSaveSignatureFromCanvas}
-                                            initialDataUrl={
-                                                currentSignatureUrl?.startsWith('data:image/')
-                                                    ? currentSignatureUrl
-                                                    : null
-                                            }
-                                            disabled={pending}
-                                            width={450}
-                                            height={180}
-                                        />
-                                    </TabsContent>
-                                    <TabsContent value="upload" className="mt-4 space-y-2">
-                                        <FormField
-                                            control={form.control}
-                                            name="signatureUrl"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormControl>
-                                                        <>
-                                                            <div className="flex items-center gap-2">
+                {/* Main content area */}
+                <motion.div
+                    className="md:col-span-8 lg:col-span-9"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                    <Card className="backdrop-blur-sm bg-white/90 dark:bg-gray-950/90 border border-gray-200/50 dark:border-gray-800/50 shadow-md">
+                        <CardHeader>
+                            <CardTitle className="text-xl font-bold text-[#3eccb2]">Личная информация</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Form {...form}>
+                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {Object.entries(fields)
+                                            .slice(0, 2)
+                                            .map(([key, { label, placeholder, icon }], index) => (
+                                                <FormField
+                                                    key={key}
+                                                    control={form.control}
+                                                    name={key as keyof typeof fields}
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                                                                {icon}
+                                                                {label}
+                                                            </FormLabel>
+                                                            <FormControl>
                                                                 <Input
-                                                                    id="signature-file-upload"
-                                                                    type="file"
-                                                                    accept={ALLOWED_TYPES.join(', ')}
-                                                                    onChange={(e) => {
-                                                                        handleFileChange(
-                                                                            e,
-                                                                            'signatureUrl',
-                                                                            'signatures'
-                                                                        );
-                                                                    }}
-                                                                    disabled={pending || isUploadingSignatureFile}
-                                                                    className="flex-1"
+                                                                    placeholder={placeholder!}
+                                                                    {...field}
+                                                                    value={field.value ?? ''}
+                                                                    disabled={pending}
+                                                                    className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b-2 border-b-gray-200/50 dark:border-gray-800/50 focus-visible:border-b-[#3eccb2]/50 transition-all"
                                                                 />
-                                                                {isUploadingSignatureFile && (
-                                                                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                                                                )}
-                                                            </div>
-                                                            {field.value && !isUploadingSignatureFile && (
-                                                                <div className="mt-2 p-2 border rounded-md bg-muted/50">
-                                                                    <p className="text-xs text-muted-foreground mb-1">
-                                                                        Текущая подпись (файл):
-                                                                    </p>
-                                                                    <Image
-                                                                        src={field.value}
-                                                                        alt="Предпросмотр подписи"
-                                                                        width={150}
-                                                                        height={50}
-                                                                        className="rounded border bg-white object-contain"
-                                                                    />
-                                                                    <Button
-                                                                        type="button"
-                                                                        variant="link"
-                                                                        size="sm"
-                                                                        className="text-xs text-destructive p-0 h-auto mt-1"
-                                                                        onClick={() => field.onChange(null)}
-                                                                        disabled={pending || isUploadingSignatureFile}
-                                                                    >
-                                                                        <Trash2 className="mr-1 h-3 w-3" />
-                                                                        Удалить подпись
-                                                                    </Button>
-                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            ))}
+                                    </div>
+
+                                    {Object.entries(fields)
+                                        .slice(2, 4)
+                                        .map(([key, { label, placeholder, icon }], index) => (
+                                            <FormField
+                                                key={key}
+                                                control={form.control}
+                                                name={key as keyof typeof fields}
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                                                            {icon}
+                                                            {label}
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            {key === 'bio' ? (
+                                                                <Textarea
+                                                                    placeholder={placeholder!}
+                                                                    {...field}
+                                                                    value={field.value ?? ''}
+                                                                    disabled={pending}
+                                                                    className="min-h-[120px] bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 focus-visible:ring-2 focus-visible:ring-[#3eccb2]/50 transition-all resize-none"
+                                                                />
+                                                            ) : (
+                                                                <Input
+                                                                    placeholder={placeholder!}
+                                                                    {...field}
+                                                                    value={field.value ?? ''}
+                                                                    disabled={pending}
+                                                                    className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b-2 border-b-gray-200/50 dark:border-gray-800/50 focus-visible:border-b-[#3eccb2]/50 transition-all"
+                                                                />
                                                             )}
-                                                        </>
-                                                    </FormControl>
-                                                    <FormDescription>
-                                                        Загрузите изображение вашей подписи (прозрачный фон
-                                                        рекомендуется, .png). Макс. размер 1MB.
-                                                    </FormDescription>
-                                                    <FormMessage />
-                                                </FormItem>
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        ))}
+
+                                    {Object.entries(fields)
+                                        .slice(4)
+                                        .map(([key, { label, placeholder, icon }], index) => (
+                                            <FormField
+                                                key={key}
+                                                control={form.control}
+                                                name={key as keyof typeof fields}
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                                                            {icon}
+                                                            {label}
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder={placeholder!}
+                                                                {...field}
+                                                                value={field.value ?? ''}
+                                                                disabled={pending}
+                                                                className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b-2 border-b-gray-200/50 dark:border-gray-800/50 focus-visible:border-b-[#3eccb2]/50 transition-all"
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        ))}
+
+                                    <div className="pt-4 border-t border-gray-200/50 dark:border-gray-800/50">
+                                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-[#3eccb2]">
+                                            <Shield className="size-5" />
+                                            Статус ментора
+                                        </h3>
+
+                                        {isCheckingApplication && !isMentor && (
+                                            <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground p-4 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-200/30 dark:border-gray-800/30 shadow-sm">
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                Проверяем статус вашей заявки...
+                                            </div>
+                                        )}
+
+                                        {!isCheckingApplication && isMentor && (
+                                            <div className="flex items-center gap-2 text-sm mb-4 text-green-600 dark:text-green-400 p-4 bg-gradient-to-r from-green-500/5 to-emerald-500/5 backdrop-blur-sm rounded-xl border border-green-200/30 dark:border-green-800/30 shadow-sm">
+                                                <ShieldCheck className="h-5 w-5" />
+                                                Вы являетесь ментором.
+                                            </div>
+                                        )}
+
+                                        {!isCheckingApplication &&
+                                            !isMentor &&
+                                            applicationStatus === ApplicationStatus.PENDING && (
+                                                <div className="flex items-center gap-2 text-sm mb-4 text-[hsl(173,58%,39%)] dark:text-[#3eccb2] p-4 bg-gradient-to-r from-[#3eccb2]/5 to-[hsl(173,58%,39%)]/5 backdrop-blur-sm rounded-xl border border-[#3eccb2]/30 dark:border-[#3eccb2]/20 shadow-sm">
+                                                    <Hourglass className="h-5 w-5" />
+                                                    Ваша заявка на менторство находится на рассмотрении.
+                                                </div>
                                             )}
-                                        />
-                                    </TabsContent>
-                                </Tabs>
-                            </motion.div>
-                        )}
-                    </motion.div>
-                    <motion.div variants={formVariants} custom={Object.keys(fields).length + 1}>
-                        <Button type="submit" className="max-w-[179px] w-full mx-auto mt-10" isLoading={pending}>
-                            {pending ? 'Загрузка...' : 'Сохранить'}
-                        </Button>
-                    </motion.div>
-                </motion.form>
-            </Form>
+
+                                        {!isCheckingApplication &&
+                                            !isMentor &&
+                                            applicationStatus === ApplicationStatus.REJECTED && (
+                                                <div className="flex flex-col gap-2 text-sm text-red-600 mb-4 dark:text-red-400 p-4 bg-gradient-to-r from-red-500/5 to-rose-500/5 backdrop-blur-sm rounded-xl border border-red-200/30 dark:border-red-800/30 shadow-sm">
+                                                    <div className="flex items-center gap-2">
+                                                        <ShieldAlert className="h-5 w-5" />
+                                                        Ваша заявка на менторство была отклонена.
+                                                    </div>
+                                                    {applicationDetails?.rejectionReason && (
+                                                        <p className="text-xs pl-7">
+                                                            Причина: {applicationDetails.rejectionReason}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                        {!isCheckingApplication && !isMentor && !applicationStatus && (
+                                            <>
+                                                <p className="text-sm text-muted-foreground mb-4">
+                                                    Хотите делиться своими знаниями и создавать курсы? Подайте заявку!
+                                                </p>
+
+                                                <Textarea
+                                                    placeholder="Расскажите, почему вы хотите стать ментором (необязательно)"
+                                                    value={applicationReason}
+                                                    onChange={(e) => setApplicationReason(e.target.value)}
+                                                    className="mb-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 focus-visible:ring-2 focus-visible:ring-[#3eccb2]/50 transition-all resize-none"
+                                                    rows={3}
+                                                    disabled={isSubmittingApplication}
+                                                />
+                                                <Button
+                                                    onClick={handleApplyForMentorship}
+                                                    isLoading={isSubmittingApplication}
+                                                    disabled={isSubmittingApplication}
+                                                    className="bg-gradient-to-r from-[#3eccb2] to-[hsl(173,58%,39%)] hover:from-[hsl(173,58%,39%)] hover:to-[#3eccb2] text-white shadow-md hover:shadow-[#3eccb2]/20 transition-all duration-300"
+                                                >
+                                                    Подать заявку на менторство
+                                                </Button>
+                                            </>
+                                        )}
+
+                                        {isMentor && (
+                                            <div className="space-y-3 mt-6">
+                                                <h4 className="flex items-center gap-2 text-base font-medium text-[#3eccb2]">
+                                                    <Signature className="size-5" />
+                                                    Ваша подпись (для сертификатов)
+                                                </h4>
+                                                <Tabs
+                                                    value={signatureSource}
+                                                    onValueChange={(value) =>
+                                                        setSignatureSource(value as 'draw' | 'upload')
+                                                    }
+                                                    className="w-full"
+                                                >
+                                                    <TabsList className="grid w-full grid-cols-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm p-1 rounded-xl">
+                                                        <TabsTrigger
+                                                            value="draw"
+                                                            className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3eccb2] data-[state=active]:to-[hsl(173,58%,39%)] data-[state=active]:text-white"
+                                                        >
+                                                            Нарисовать
+                                                        </TabsTrigger>
+                                                        <TabsTrigger
+                                                            value="upload"
+                                                            className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3eccb2] data-[state=active]:to-[hsl(173,58%,39%)] data-[state=active]:text-white"
+                                                        >
+                                                            Загрузить файл
+                                                        </TabsTrigger>
+                                                    </TabsList>
+                                                    <TabsContent value="draw" className="mt-4">
+                                                        <div className="p-[1px] bg-gradient-to-r from-[#3eccb2] via-[hsl(58,83%,62%)] to-[hsl(173,58%,39%)]">
+                                                            <div className="bg-white dark:bg-gray-900 overflow-hidden py-4">
+                                                                <SignatureCanvas
+                                                                    onSave={handleSaveSignatureFromCanvas}
+                                                                    initialDataUrl={
+                                                                        currentSignatureUrl?.startsWith('data:image/')
+                                                                            ? currentSignatureUrl
+                                                                            : null
+                                                                    }
+                                                                    disabled={pending}
+                                                                    width={450}
+                                                                    height={180}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </TabsContent>
+                                                    <TabsContent value="upload" className="mt-4 space-y-2">
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="signatureUrl"
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormControl>
+                                                                        <>
+                                                                            <div className="flex items-center gap-2">
+                                                                                <Input
+                                                                                    id="signature-file-upload"
+                                                                                    type="file"
+                                                                                    accept={ALLOWED_TYPES.join(', ')}
+                                                                                    onChange={(e) => {
+                                                                                        handleFileChange(
+                                                                                            e,
+                                                                                            'signatureUrl',
+                                                                                            'signatures'
+                                                                                        );
+                                                                                    }}
+                                                                                    disabled={
+                                                                                        pending ||
+                                                                                        isUploadingSignatureFile
+                                                                                    }
+                                                                                    className="flex-1 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 focus-visible:ring-2 focus-visible:ring-[#3eccb2]/50 transition-all"
+                                                                                />
+                                                                                {isUploadingSignatureFile && (
+                                                                                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                                                                                )}
+                                                                            </div>
+                                                                            {field.value &&
+                                                                                !isUploadingSignatureFile && (
+                                                                                    <div className="mt-2 p-3 border rounded-xl bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-gray-200/30 dark:border-gray-800/30 shadow-sm">
+                                                                                        <p className="text-xs text-muted-foreground mb-1">
+                                                                                            Текущая подпись (файл):
+                                                                                        </p>
+                                                                                        <div className="p-[1px] bg-gradient-to-r from-[#3eccb2] via-[hsl(58,83%,62%)] to-[hsl(173,58%,39%)] rounded-lg inline-block">
+                                                                                            <Image
+                                                                                                src={
+                                                                                                    field.value ||
+                                                                                                    '/placeholder.svg'
+                                                                                                }
+                                                                                                alt="Предпросмотр подписи"
+                                                                                                width={150}
+                                                                                                height={50}
+                                                                                                className="rounded border bg-white object-contain"
+                                                                                            />
+                                                                                        </div>
+                                                                                        <Button
+                                                                                            type="button"
+                                                                                            variant="link"
+                                                                                            size="sm"
+                                                                                            className="text-xs text-destructive p-0 h-auto mt-1"
+                                                                                            onClick={() =>
+                                                                                                field.onChange(null)
+                                                                                            }
+                                                                                            disabled={
+                                                                                                pending ||
+                                                                                                isUploadingSignatureFile
+                                                                                            }
+                                                                                        >
+                                                                                            <Trash2 className="mr-1 h-3 w-3" />
+                                                                                            Удалить подпись
+                                                                                        </Button>
+                                                                                    </div>
+                                                                                )}
+                                                                        </>
+                                                                    </FormControl>
+                                                                    <FormDescription>
+                                                                        Загрузите изображение вашей подписи (прозрачный
+                                                                        фон рекомендуется, .png). Макс. размер 1MB.
+                                                                    </FormDescription>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                    </TabsContent>
+                                                </Tabs>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex justify-end pt-4">
+                                        <Button
+                                            type="submit"
+                                            className="px-8 bg-gradient-to-r from-[#3eccb2] to-[hsl(173,58%,39%)] hover:from-[hsl(173,58%,39%)] hover:to-[#3eccb2] text-white shadow-md hover:shadow-[#3eccb2]/20 transition-all duration-300 ease-in-out font-semibold hover:text-white"
+                                            isLoading={pending}
+                                        >
+                                            {pending ? 'Сохранение...' : 'Сохранить изменения'}
+                                        </Button>
+                                    </div>
+                                </form>
+                            </Form>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            </div>
         </div>
     );
 };
