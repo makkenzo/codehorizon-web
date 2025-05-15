@@ -13,9 +13,9 @@ class AchievementsApiClient extends ApiClient {
         }
     }
 
-    async getPublicUserAchievements(username: string): Promise<Achievement[] | null> {
+    async getPublicUserAchievements(username: string): Promise<GlobalAchievementDTO[] | null> {
         try {
-            const response = await this.get<Achievement[]>(`/users/${username}/achievements/public`);
+            const response = await this.get<GlobalAchievementDTO[]>(`/users/${username}/achievements/public`);
             return response.data;
         } catch (error) {
             console.error(`Error fetching public achievements for ${username}:`, error);

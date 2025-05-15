@@ -2,19 +2,17 @@
 
 import React from 'react';
 
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
 import { motion } from 'framer-motion';
-import { Award, Calendar } from 'lucide-react';
+import { Award } from 'lucide-react';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { Achievement } from '@/types';
+import { GlobalAchievementDTO } from '@/types';
 
-import AchievementIcon from '../reusable/achievement-icon';
+import AchievementItem from './achievement-item';
 
 interface AchievementsListProps {
-    achievements?: Achievement[] | null;
+    achievements?: GlobalAchievementDTO[] | null;
     isLoading?: boolean;
     itemsPerRow?: 1 | 2 | 3 | 4;
     compact?: boolean;
@@ -28,23 +26,47 @@ const AchievementsList = ({
 }: AchievementsListProps) => {
     const gridCols = {
         1: 'grid-cols-1',
-        2: 'grid-cols-1 md:grid-cols-2',
-        3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-        4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
+        2: 'grid-cols-1 sm:grid-cols-2',
+        3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+        4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
     };
 
     if (isLoading) {
         return (
-            <div className={cn('grid gap-4', gridCols[itemsPerRow])}>
-                {Array.from({ length: 6 }).map((_, index) => (
+            <div className={cn('grid gap-4 md:gap-5', gridCols[itemsPerRow])}>
+                {Array.from({ length: compact ? itemsPerRow * 2 : 6 }).map((_, index) => (
                     <div
-                        key={index}
-                        className="flex gap-3 p-4 rounded-xl border border-gray-200/50 dark:border-gray-800/50"
+                        key={`skeleton-list-${index}`}
+                        className="flex flex-col h-full bg-card/70 dark:bg-background/70 backdrop-blur-sm border border-border/20 shadow-sm rounded-xl p-4 space-y-3"
                     >
-                        <Skeleton className="h-12 w-12 rounded-full flex-shrink-0" />
-                        <div className="space-y-2 flex-1">
-                            <Skeleton className="h-4 w-3/4" />
-                            <Skeleton className="h-3 w-full" />
+                        <div className="flex items-center gap-3">
+                            <Skeleton
+                                className={cn(
+                                    'rounded-lg flex-shrink-0',
+                                    compact ? 'h-10 w-10 p-2' : 'h-12 w-12 p-2.5'
+                                )}
+                            />
+                            {!compact && (
+                                <div className="flex-1 space-y-1.5">
+                                    <Skeleton className="h-5 w-3/4 rounded" />
+                                    <Skeleton className="h-3 w-1/2 rounded" />
+                                </div>
+                            )}
+                            {compact && <Skeleton className="h-4 w-12 rounded ml-1" />}
+                        </div>
+                        {!compact && (
+                            <>
+                                <Skeleton className="h-3 w-full rounded" />
+                                <Skeleton className="h-3 w-5/6 rounded" />
+                            </>
+                        )}
+                        <div
+                            className={cn(
+                                'pt-2 mt-auto border-t border-border/10 dark:border-border/20',
+                                compact && 'flex justify-center'
+                            )}
+                        >
+                            <Skeleton className="h-5 w-1/3 rounded mt-2" />
                         </div>
                     </div>
                 ))}
@@ -57,52 +79,24 @@ const AchievementsList = ({
             <div className="text-center py-8 px-4 rounded-xl bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border border-gray-200/30 dark:border-gray-800/30">
                 <Award className="h-12 w-12 mx-auto text-[#3eccb2]/50 mb-3" />
                 <p className="text-muted-foreground">
-                    У вас пока нет достижений. Продолжайте обучение, чтобы получить их!
+                    {compact
+                        ? 'Достижений пока нет.'
+                        : 'У вас пока нет достижений. Продолжайте обучение, чтобы получить их!'}
                 </p>
             </div>
         );
     }
 
     return (
-        <div className={cn('grid gap-4', gridCols[itemsPerRow])}>
+        <div className={cn('grid gap-4 md:gap-5', gridCols[itemsPerRow])}>
             {achievements.map((achievement, index) => (
                 <motion.div
-                    key={achievement.id}
-                    className={cn(
-                        'group relative overflow-hidden rounded-xl p-4 transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-[#3eccb2]/30 dark:border-[#3eccb2]/20 hover:border-[#3eccb2]/50 dark:hover:border-[#3eccb2]/40 hover:shadow-md'
-                    )}
+                    key={achievement.id || `ach-list-item-${index}`}
+                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#3eccb2]/5 to-[hsl(58,83%,62%)]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                    <div className="flex gap-3 relative z-10">
-                        <div
-                            className={cn(
-                                'flex-shrink-0 h-12 w-12 rounded-full flex items-center justify-center bg-gradient-to-r from-[#3eccb2] to-[hsl(173,58%,39%)]',
-                                compact && 'mx-auto'
-                            )}
-                        >
-                            <AchievementIcon
-                                iconName={achievement.iconUrl}
-                                className={cn('size-6 shrink-0 text-white')}
-                            />
-                        </div>
-                        {!compact && (
-                            <div className="flex-1">
-                                <h3 className={cn('font-medium mb-1 text-foreground')}>{achievement.name}</h3>
-                                <p className="text-sm text-muted-foreground line-clamp-2">{achievement.description}</p>
-
-                                {achievement.earnedAt && (
-                                    <div className="flex items-center gap-1 mt-2 text-xs text-[#3eccb2]">
-                                        <Calendar className="h-3 w-3" />
-                                        <span>
-                                            Получено{' '}
-                                            {format(new Date(achievement.earnedAt), 'dd MMMM yyyy', { locale: ru })}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                    <AchievementItem achievement={achievement} compact={compact} />
                 </motion.div>
             ))}
         </div>

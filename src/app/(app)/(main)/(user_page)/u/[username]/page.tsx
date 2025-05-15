@@ -13,7 +13,7 @@ import { createMetadata } from '@/lib/metadata';
 import { achievementsApiClient } from '@/server/achievements';
 import { certificateApiClient } from '@/server/certificate';
 import ProfileApiClient from '@/server/profile';
-import { PublicCertificateInfoDTO } from '@/types';
+import { GlobalAchievementDTO, PublicCertificateInfoDTO } from '@/types';
 
 interface UserPageProps {
     params: Promise<{ username: string }>;

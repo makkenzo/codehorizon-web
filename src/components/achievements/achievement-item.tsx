@@ -126,7 +126,7 @@ const AchievementItem: React.FC<AchievementItemProps> = ({ achievement, compact 
     const cardContent = (
         <div
             className={cn(
-                'flex flex-col h-full overflow-hidden transition-all duration-300 rounded-xl shadow-sm p-4 relative group',
+                'flex flex-col h-full gap-2 overflow-hidden transition-all duration-300 rounded-xl shadow-sm p-4 relative group',
                 styles.cardDynamic
             )}
         >
@@ -146,26 +146,29 @@ const AchievementItem: React.FC<AchievementItemProps> = ({ achievement, compact 
                     className={cn(
                         'flex-shrink-0 p-2.5 rounded-lg border transition-all duration-300 group-hover:scale-105',
                         styles.iconWrapperBg,
-                        isEarnedByUser ? 'border-current/30' : 'border-transparent opacity-80 group-hover:opacity-100'
+                        isEarnedByUser ? 'border-current/30' : 'border-transparent opacity-80 group-hover:opacity-100',
+                        compact && 'mx-auto'
                     )}
                 >
                     <AchievementIcon iconName={iconUrl} className={cn('size-6', styles.iconColor)} />
                 </div>
-                <div className="flex-1 min-w-0">
-                    <h3 className={cn('text-sm font-semibold line-clamp-2', styles.titleColor)}>{name}</h3>
-                    {category && (
-                        <Badge
-                            variant={'outline'}
-                            className={cn(
-                                'text-[10px] px-1.5 py-0 mt-1 font-normal leading-tight',
-                                styles.categoryBadge
-                            )}
-                        >
-                            {category}
-                        </Badge>
-                    )}
-                </div>
-                {isLockedByPrerequisites && (
+                {!compact ? (
+                    <div className="flex-1 min-w-0">
+                        <h3 className={cn('font-semibold line-clamp-2', styles.titleColor)}>{name}</h3>
+                        {category && (
+                            <Badge
+                                variant={'outline'}
+                                className={cn(
+                                    'text-[10px] px-1.5 py-0 mt-1 font-normal leading-tight',
+                                    styles.categoryBadge
+                                )}
+                            >
+                                {category}
+                            </Badge>
+                        )}
+                    </div>
+                ) : null}
+                {isLockedByPrerequisites && !compact && (
                     <TooltipProvider delayDuration={100}>
                         <Tooltip>
                             <TooltipTrigger className="absolute top-2 right-2 cursor-help">
@@ -180,48 +183,54 @@ const AchievementItem: React.FC<AchievementItemProps> = ({ achievement, compact 
                 )}
             </div>
 
-            <p
-                className={cn(
-                    'text-xs text-muted-foreground line-clamp-3 min-h-[42px] flex-grow',
-                    isLockedByPrerequisites && 'blur-[1px]'
-                )}
-            >
-                {description}
-            </p>
+            {!compact ? (
+                <p
+                    className={cn(
+                        'text-sm text-muted-foreground line-clamp-3 min-h-[42px] flex-grow',
+                        isLockedByPrerequisites && 'blur-[1px]'
+                    )}
+                >
+                    {description}
+                </p>
+            ) : null}
 
-            <div
-                className="mt-3 pt-3 border-t flex justify-between items-center border-dashed"
-                style={{ borderColor: styles.border.split(' ').pop()?.replace('hover:', '')?.replace('/30', '/15') }}
-            >
-                <Badge variant={'secondary'} className={cn('text-xs py-0.5 px-2', styles.xpBadgeBg)}>
-                    <Star className="mr-1 h-3 w-3" />
-                    {xpBonus} XP
-                </Badge>
-                {isEarnedByUser && earnedDateFormatted ? (
-                    <TooltipProvider delayDuration={100}>
-                        <Tooltip>
-                            <TooltipTrigger className="flex items-center text-[10px] text-green-600 dark:text-green-400 cursor-default">
-                                <CheckCircle className="mr-1 h-3 w-3" />
-                                {earnedDateFormatted}
-                            </TooltipTrigger>
-                            <TooltipContent side="top">
-                                <p>
-                                    Достижение получено{' '}
-                                    {new Date(earnedAt!).toLocaleString('ru-RU', {
-                                        dateStyle: 'long',
-                                        timeStyle: 'short',
-                                    })}
-                                </p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                ) : (
-                    !isEarnedByUser &&
-                    !isLockedByPrerequisites && (
-                        <span className="text-xs text-blue-500 dark:text-blue-400 italic">Еще не получено</span>
-                    )
-                )}
-            </div>
+            {!compact ? (
+                <div
+                    className="mt-3 pt-3 border-t flex justify-between items-center border-dashed"
+                    style={{
+                        borderColor: styles.border.split(' ').pop()?.replace('hover:', '')?.replace('/30', '/15'),
+                    }}
+                >
+                    <Badge variant={'secondary'} className={cn('text-xs py-0.5 px-2', styles.xpBadgeBg)}>
+                        <Star className="mr-1 h-3 w-3" />
+                        {xpBonus} XP
+                    </Badge>
+                    {isEarnedByUser && earnedDateFormatted ? (
+                        <TooltipProvider delayDuration={100}>
+                            <Tooltip>
+                                <TooltipTrigger className="flex items-center text-[10px] text-green-600 dark:text-green-400 cursor-default">
+                                    <CheckCircle className="mr-1 h-3 w-3" />
+                                    {earnedDateFormatted}
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                    <p>
+                                        Достижение получено{' '}
+                                        {new Date(earnedAt!).toLocaleString('ru-RU', {
+                                            dateStyle: 'long',
+                                            timeStyle: 'short',
+                                        })}
+                                    </p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    ) : (
+                        !isEarnedByUser &&
+                        !isLockedByPrerequisites && (
+                            <span className="text-xs text-blue-500 dark:text-blue-400 italic">Еще не получено</span>
+                        )
+                    )}
+                </div>
+            ) : null}
         </div>
     );
 
