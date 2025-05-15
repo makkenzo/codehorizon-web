@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCourseLearnContext } from '@/contexts/course-learn-context';
 import { cn } from '@/lib/utils';
+import AuthApiClient from '@/server/auth';
 import CoursesApiClient from '@/server/courses';
 import { useLessonTasksStore } from '@/stores/tasks/tasks-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
@@ -40,7 +41,7 @@ hljs.registerLanguage('plaintext', plaintext);
 export default function LessonPage() {
     const { course, courseProgress, updateCourseProgress } = useCourseLearnContext();
 
-    const { user } = useUserStore((state) => state);
+    const { user, setUser } = useUserStore((state) => state);
     const [isLessonMarkedCompleted, setIsLessonMarkedCompleted] = useState(false);
     const [isCompletePending, startCompleteTransition] = useTransition();
     const router = useRouter();
@@ -130,6 +131,10 @@ export default function LessonPage() {
                 if (updatedProgressData) {
                     setIsLessonMarkedCompleted(true);
                     updateCourseProgress(updatedProgressData);
+                    const freshUserData = await new AuthApiClient().getMe();
+                    if (freshUserData) {
+                        setUser(freshUserData);
+                    }
                     toast.success(`Урок "${currentLesson.title}" отмечен как пройденный!`);
 
                     if (lessonKey) {

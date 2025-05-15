@@ -1,5 +1,5 @@
 import { createStore } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { User } from '@/models';
 import { achievementsApiClient } from '@/server/achievements';
@@ -10,7 +10,7 @@ import { UserState, UserStore } from './types';
 export const defaultInitState: UserState = {
     user: undefined,
     permissions: undefined,
-    achievements: undefined,
+    earnedAchievements: undefined,
 };
 
 export const createUserStore = (initState: UserState = defaultInitState) => {
@@ -21,49 +21,49 @@ export const createUserStore = (initState: UserState = defaultInitState) => {
                 setUser: (user: User) => {
                     set({ user, permissions: user.permissions ?? null });
                     if (user?.id) {
-                        (async () => {
-                            try {
-                                const myAchievements = await achievementsApiClient.getMyAchievements();
-                                if (myAchievements) {
-                                    set({ achievements: myAchievements });
-                                } else {
-                                    set({ achievements: [] });
-                                }
-                            } catch (error) {
-                                console.error('Failed to fetch user achievements on setUser', error);
-                                set({ achievements: [] });
-                            }
-                        })();
+                        get().fetchUserEarnedAchievements();
+                    } else {
+                        set({ earnedAchievements: null });
                     }
                 },
-                clearUser: () => set({ user: undefined, permissions: null, achievements: null }),
-                setAchievements: (achievements: Achievement[]) => set({ achievements }),
-                fetchUserAchievements: async () => {
-                    console.log('Fetching user achievements');
-                    if (!get().user?.id) {
-                        console.log('No user ID, clearing achievements');
-                        set({ achievements: [] });
+                clearUser: () => set({ user: undefined, permissions: null, earnedAchievements: null }),
+                setEarnedAchievements: (achievements: Achievement[]) => set({ earnedAchievements: achievements }),
+
+                fetchUserEarnedAchievements: async () => {
+                    const userId = get().user?.id;
+                    if (!userId) {
+                        set({ earnedAchievements: null });
                         return;
                     }
                     try {
                         const myAchievements = await achievementsApiClient.getMyAchievements();
-                        console.log('Fetched user achievements', myAchievements);
-                        if (myAchievements) {
-                            console.log('Setting achievements');
-                            set({ achievements: myAchievements });
-                        } else {
-                            console.log('No achievements found, clearing');
-                            set({ achievements: [] });
-                        }
+                        set({ earnedAchievements: myAchievements || [] });
                     } catch (error) {
-                        console.error('Failed to fetch user achievements', error);
-                        console.log('Clearing achievements');
-                        set({ achievements: [] });
+                        console.error('Failed to fetch user earned achievements', error);
+                        set({ earnedAchievements: [] });
                     }
+                },
+                updateUserXPLevel: (xp, level, xpForNextLevel, dailyLoginStreak, lessonCompletionStreakDaily) => {
+                    set((state) => {
+                        if (state.user) {
+                            return {
+                                user: {
+                                    ...state.user,
+                                    xp,
+                                    level,
+                                    xpForNextLevel,
+                                    dailyStreak: dailyLoginStreak,
+                                    lessonCompletionStreakDaily: lessonCompletionStreakDaily,
+                                },
+                            };
+                        }
+                        return state;
+                    });
                 },
             }),
             {
                 name: 'user-storage',
+                storage: createJSONStorage(() => localStorage),
                 partialize: (state) => ({
                     user: state.user,
                     permissions: state.permissions,

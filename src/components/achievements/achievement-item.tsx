@@ -1,167 +1,229 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo } from 'react';
 
-import { Sparkles } from 'lucide-react';
+import { CheckCircle, Lock, Star } from 'lucide-react';
 
 import AchievementIcon from '@/components/reusable/achievement-icon';
 import { cn } from '@/lib/utils';
-import { Achievement } from '@/types';
+import { AchievementRarity, GlobalAchievementDTO } from '@/types';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface AchievementItemProps {
-    achievement: Achievement;
+    achievement: GlobalAchievementDTO;
     compact?: boolean;
 }
 
-const AchievementItem: React.FC<AchievementItemProps> = ({ achievement, compact = false }) => {
-    const [isHovered, setIsHovered] = useState(false);
+const getRarityStyles = (rarity?: AchievementRarity | string, isEarned?: boolean, isLocked?: boolean) => {
+    const baseHover = 'hover:shadow-lg hover:scale-[1.02]';
+    const earnedOpacity = isEarned ? 'opacity-100' : 'opacity-70 group-hover:opacity-100';
+    const lockedStyles = isLocked ? 'opacity-50 grayscale cursor-not-allowed !shadow-none !scale-100' : baseHover;
 
-    const getGradient = () => {
-        const hash = achievement.name.split('').reduce((acc, char) => {
-            return char.charCodeAt(0) + ((acc << 5) - acc);
-        }, 0);
-
-        const hue1 = Math.abs(hash % 360);
-        const hue2 = (hue1 + 60) % 360;
-
-        return {
-            primary: `hsl(${hue1}, 90%, 55%)`,
-            secondary: `hsl(${hue2}, 90%, 45%)`,
-            text: `hsl(${hue1}, 90%, 35%)`,
-        };
+    let raritySpecificStyles = {
+        cardBg: 'bg-card hover:bg-muted/50',
+        border: 'border-border hover:border-foreground/30',
+        iconWrapperBg: 'bg-muted',
+        iconColor: 'text-muted-foreground',
+        titleColor: isEarned ? 'text-foreground' : 'text-muted-foreground',
+        xpBadgeBg: 'bg-muted text-muted-foreground',
+        categoryBadge: 'bg-secondary text-secondary-foreground',
     };
 
-    const { primary, secondary, text } = getGradient();
+    switch (rarity) {
+        case AchievementRarity.COMMON:
+            raritySpecificStyles = {
+                cardBg: 'bg-slate-500/5 dark:bg-slate-700/10',
+                border: 'border-slate-500/20 hover:border-slate-500/40',
+                iconWrapperBg: 'bg-slate-500/10 dark:bg-slate-700/20',
+                iconColor: 'text-slate-500 dark:text-slate-400',
+                titleColor: isEarned ? 'text-slate-700 dark:text-slate-200' : 'text-slate-500 dark:text-slate-400',
+                xpBadgeBg: 'bg-slate-500/80 text-white',
+                categoryBadge: 'border-slate-500/30 text-slate-600 dark:text-slate-300 bg-slate-500/10',
+            };
+            break;
+        case AchievementRarity.UNCOMMON:
+            raritySpecificStyles = {
+                cardBg: 'bg-green-500/5 dark:bg-green-600/10',
+                border: 'border-green-500/30 hover:border-green-500/50',
+                iconWrapperBg: 'bg-green-500/10 dark:bg-green-600/20',
+                iconColor: 'text-green-500 dark:text-green-400',
+                titleColor: isEarned ? 'text-green-700 dark:text-green-200' : 'text-green-500 dark:text-green-400',
+                xpBadgeBg: 'bg-green-500/90 text-white',
+                categoryBadge: 'border-green-500/30 text-green-600 dark:text-green-300 bg-green-500/10',
+            };
+            break;
+        case AchievementRarity.RARE:
+            raritySpecificStyles = {
+                cardBg: 'bg-blue-500/5 dark:bg-blue-600/10',
+                border: 'border-blue-500/30 hover:border-blue-500/50',
+                iconWrapperBg: 'bg-blue-500/10 dark:bg-blue-600/20',
+                iconColor: 'text-blue-500 dark:text-blue-400',
+                titleColor: isEarned ? 'text-blue-700 dark:text-blue-200' : 'text-blue-500 dark:text-blue-400',
+                xpBadgeBg: 'bg-blue-500/90 text-white',
+                categoryBadge: 'border-blue-500/30 text-blue-600 dark:text-blue-300 bg-blue-500/10',
+            };
+            break;
+        case AchievementRarity.EPIC:
+            raritySpecificStyles = {
+                cardBg: 'bg-purple-500/5 dark:bg-purple-600/10',
+                border: 'border-purple-500/30 hover:border-purple-500/50',
+                iconWrapperBg: 'bg-purple-500/10 dark:bg-purple-600/20',
+                iconColor: 'text-purple-500 dark:text-purple-400',
+                titleColor: isEarned ? 'text-purple-700 dark:text-purple-200' : 'text-purple-500 dark:text-purple-400',
+                xpBadgeBg: 'bg-purple-500/90 text-white',
+                categoryBadge: 'border-purple-500/30 text-purple-600 dark:text-purple-300 bg-purple-500/10',
+            };
+            break;
+        case AchievementRarity.LEGENDARY:
+            raritySpecificStyles = {
+                cardBg: 'bg-yellow-400/5 dark:bg-yellow-500/10 shadow-yellow-500/10 hover:shadow-yellow-500/20',
+                border: 'border-yellow-500/30 hover:border-yellow-500/50',
+                iconWrapperBg: 'bg-yellow-400/10 dark:bg-yellow-500/20',
+                iconColor: 'text-yellow-500 dark:text-yellow-400',
+                titleColor: isEarned ? 'text-yellow-600 dark:text-yellow-200' : 'text-yellow-500 dark:text-yellow-400',
+                xpBadgeBg: 'bg-gradient-to-r from-yellow-400 to-amber-500 text-black',
+                categoryBadge: 'border-yellow-500/30 text-yellow-600 dark:text-yellow-300 bg-yellow-400/10',
+            };
+            break;
+    }
+    return {
+        ...raritySpecificStyles,
+        cardDynamic: cn(raritySpecificStyles.cardBg, raritySpecificStyles.border, earnedOpacity, lockedStyles),
+    };
+};
+
+const AchievementItem: React.FC<AchievementItemProps> = ({ achievement, compact = false }) => {
+    const {
+        name,
+        description,
+        iconUrl,
+        xpBonus,
+        isEarnedByUser,
+        earnedAt,
+        category,
+        rarity,
+        prerequisites = [],
+    } = achievement;
+    const isLockedByPrerequisites = useMemo(() => {
+        if (isEarnedByUser || !prerequisites || prerequisites.length === 0) {
+            return false;
+        }
+        return true;
+    }, [isEarnedByUser, prerequisites]);
+
+    const styles = getRarityStyles(rarity, isEarnedByUser, isLockedByPrerequisites);
+
+    const earnedDateFormatted = earnedAt
+        ? new Date(earnedAt).toLocaleDateString('ru-RU', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+          })
+        : null;
 
     const cardContent = (
-        <Card
+        <div
             className={cn(
-                'flex flex-col h-full overflow-hidden transition-all duration-300 rounded-none',
-                'relative group',
-                compact ? 'py-2' : 'py-0',
-                isHovered && 'scale-[1.02]'
+                'flex flex-col h-full overflow-hidden transition-all duration-300 rounded-xl shadow-sm p-4 relative group',
+                styles.cardDynamic
             )}
-            style={{
-                background: `linear-gradient(135deg, ${primary}20, ${secondary}40)`,
-                borderImage: `linear-gradient(135deg, ${primary}, ${secondary}) 1`,
-                borderWidth: '2px',
-                borderStyle: 'solid',
-                boxShadow: isHovered ? `0 10px 25px -5px ${primary}40` : `0 5px 15px -5px ${primary}30`,
-            }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
         >
-            <div
-                className="absolute inset-0 opacity-20 z-0"
-                style={{
-                    background: `radial-gradient(circle at top right, ${primary}, transparent 70%)`,
-                }}
-            />
+            {rarity === AchievementRarity.LEGENDARY && (
+                <div className="absolute inset-0 opacity-20 pointer-events-none">
+                    <span className="absolute top-2 right-2 text-xs font-bold text-yellow-400/70 transform rotate-12">
+                        LEGENDARY
+                    </span>
+                </div>
+            )}
+            {rarity === AchievementRarity.EPIC && (
+                <div className="absolute top-1 right-1 h-3 w-3 rounded-full bg-purple-500/50 shadow-md"></div>
+            )}
 
-            <div
-                className={cn(
-                    'absolute top-1 right-1 opacity-70 transition-all duration-300',
-                    isHovered ? 'text-white scale-110' : `text-[${primary}]`
+            <div className="flex items-start gap-3 mb-2">
+                <div
+                    className={cn(
+                        'flex-shrink-0 p-2.5 rounded-lg border transition-all duration-300 group-hover:scale-105',
+                        styles.iconWrapperBg,
+                        isEarnedByUser ? 'border-current/30' : 'border-transparent opacity-80 group-hover:opacity-100'
+                    )}
+                >
+                    <AchievementIcon iconName={iconUrl} className={cn('size-6', styles.iconColor)} />
+                </div>
+                <div className="flex-1 min-w-0">
+                    <h3 className={cn('text-sm font-semibold line-clamp-2', styles.titleColor)}>{name}</h3>
+                    {category && (
+                        <Badge
+                            variant={'outline'}
+                            className={cn(
+                                'text-[10px] px-1.5 py-0 mt-1 font-normal leading-tight',
+                                styles.categoryBadge
+                            )}
+                        >
+                            {category}
+                        </Badge>
+                    )}
+                </div>
+                {isLockedByPrerequisites && (
+                    <TooltipProvider delayDuration={100}>
+                        <Tooltip>
+                            <TooltipTrigger className="absolute top-2 right-2 cursor-help">
+                                <Lock className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                                <p className="text-xs">Требуются другие достижения</p>
+                                {/* TODO: Отобразить список пререквизитов, если allAchievementsMap передан */}
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 )}
-            >
-                <Sparkles size={16} />
             </div>
 
-            <CardHeader
+            <p
                 className={cn(
-                    'flex space-y-0 pt-4 px-4 z-10',
-                    compact ? 'flex-col items-center' : 'flex-row items-center gap-x-4',
-                    !compact && 'pb-2'
+                    'text-xs text-muted-foreground line-clamp-3 min-h-[42px] flex-grow',
+                    isLockedByPrerequisites && 'blur-[1px]'
                 )}
             >
-                <div
-                    className={cn('relative p-3 rounded-full transition-all duration-300', isHovered && 'scale-110')}
-                    style={{
-                        background: `linear-gradient(135deg, ${primary}, ${secondary})`,
-                        boxShadow: isHovered
-                            ? `0 0 15px ${primary}70, 0 0 5px ${secondary}50 inset`
-                            : `0 0 10px ${primary}50`,
-                    }}
-                >
-                    <AchievementIcon
-                        iconName={achievement.iconUrl}
-                        className={cn('w-8 h-8 shrink-0 text-white', compact && 'w-7 h-7')}
-                    />
-                </div>
+                {description}
+            </p>
 
-                {!compact ? (
-                    <CardTitle className="text-md md:text-base font-bold leading-tight z-10" style={{ color: text }}>
-                        <h1>{achievement.name}</h1>
-                    </CardTitle>
-                ) : null}
-            </CardHeader>
-
-            <CardContent className={cn('flex-grow px-4 pt-0 z-10', !compact && 'pb-4', compact && 'text-center')}>
-                {!compact ? (
-                    <CardDescription className="text-xs md:text-sm text-muted-foreground line-clamp-3 mt-2">
-                        {achievement.description}
-                    </CardDescription>
-                ) : null}
-
-                {achievement.xpBonus > 0 && !compact && (
-                    <div
-                        className={cn(
-                            'text-xs font-bold mt-3 px-3 py-1 rounded-full w-fit transition-all duration-300',
-                            isHovered && 'scale-105'
-                        )}
-                        style={{
-                            background: `linear-gradient(135deg, ${primary}, ${secondary})`,
-                            color: 'white',
-                            boxShadow: isHovered ? `0 3px 10px ${primary}50` : `0 2px 5px ${primary}30`,
-                        }}
-                    >
-                        + {achievement.xpBonus} XP
-                    </div>
+            <div
+                className="mt-3 pt-3 border-t flex justify-between items-center border-dashed"
+                style={{ borderColor: styles.border.split(' ').pop()?.replace('hover:', '')?.replace('/30', '/15') }}
+            >
+                <Badge variant={'secondary'} className={cn('text-xs py-0.5 px-2', styles.xpBadgeBg)}>
+                    <Star className="mr-1 h-3 w-3" />
+                    {xpBonus} XP
+                </Badge>
+                {isEarnedByUser && earnedDateFormatted ? (
+                    <TooltipProvider delayDuration={100}>
+                        <Tooltip>
+                            <TooltipTrigger className="flex items-center text-[10px] text-green-600 dark:text-green-400 cursor-default">
+                                <CheckCircle className="mr-1 h-3 w-3" />
+                                {earnedDateFormatted}
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                                <p>
+                                    Достижение получено{' '}
+                                    {new Date(earnedAt!).toLocaleString('ru-RU', {
+                                        dateStyle: 'long',
+                                        timeStyle: 'short',
+                                    })}
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                ) : (
+                    !isEarnedByUser &&
+                    !isLockedByPrerequisites && (
+                        <span className="text-xs text-blue-500 dark:text-blue-400 italic">Еще не получено</span>
+                    )
                 )}
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
-
-    if (compact) {
-        return (
-            <TooltipProvider>
-                <Tooltip delayDuration={300}>
-                    <TooltipTrigger asChild>{cardContent}</TooltipTrigger>
-                    <TooltipContent
-                        arrowClassName="bg-transparent fill-none"
-                        className="p-0 overflow-hidden border-0 max-w-[250px] bg-background rounded-none"
-                        style={{
-                            background: `linear-gradient(135deg, ${primary}20, ${secondary}40)`,
-                            borderImage: `linear-gradient(135deg, ${primary}, ${secondary}) 1`,
-                            borderWidth: '2px',
-                            borderStyle: 'solid',
-                        }}
-                    >
-                        <div className="p-3">
-                            <h4 className="font-bold mb-1" style={{ color: text }}>
-                                {achievement.name}
-                            </h4>
-                            <p className="text-xs text-muted-foreground mb-2">{achievement.description}</p>
-                            {achievement.xpBonus > 0 && (
-                                <div
-                                    className="text-xs font-bold px-2 py-0.5 rounded-full w-fit"
-                                    style={{
-                                        background: `linear-gradient(135deg, ${primary}, ${secondary})`,
-                                        color: 'white',
-                                    }}
-                                >
-                                    + {achievement.xpBonus} XP
-                                </div>
-                            )}
-                        </div>
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
-        );
-    }
 
     return cardContent;
 };

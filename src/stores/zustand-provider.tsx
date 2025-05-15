@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 
+import { AllAchievementsStoreProvider } from './achievements/achievements-store-provider';
 import { CatalogFiltersStoreProvider } from './catalog-filters/catalog-filters-store-provider';
 import { NotificationsStoreProvider } from './notifications/notifications-store-provider';
 import { ProfileStoreProvider } from './profile/profile-store-provider';
@@ -18,7 +19,9 @@ const ZustandProvider = ({ children }: ZustandProviderProps) => {
             <UserStoreProvider>
                 <CatalogFiltersStoreProvider>
                     <LessonTasksStoreProvider>
-                        <NotificationsStoreProvider>{children}</NotificationsStoreProvider>
+                        <NotificationsStoreProvider>
+                            <AllAchievementsStoreProvider>{children}</AllAchievementsStoreProvider>
+                        </NotificationsStoreProvider>
                     </LessonTasksStoreProvider>
                 </CatalogFiltersStoreProvider>
             </UserStoreProvider>

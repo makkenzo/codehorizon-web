@@ -5,111 +5,66 @@ import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import debounce from 'lodash.debounce';
 import { Award, ListFilter, Loader2, SearchX, ShieldAlert, Trophy } from 'lucide-react';
-import { toast } from 'sonner';
 
 import AchievementCard from '@/components/achievements/achievement-card';
+import AchievementsFiltersMobile from '@/components/achievements/achievements-filters-mobile';
 import MyPagination from '@/components/reusable/my-pagination';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { achievementsApiClient } from '@/server/achievements';
-import { GlobalAchievementDTO, PagedResponse } from '@/types';
-
-import AchievementsFiltersMobile from '../achievements/achievements-filters-mobile';
+import { useAllAchievementsStore } from '@/stores/achievements/achievements-store-provider';
+import { AchievementsFilterStatus } from '@/stores/achievements/types';
 
 const AllAchievementsPageContent = () => {
-    const [achievementsData, setAchievementsData] = useState<PagedResponse<GlobalAchievementDTO> | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const {
+        achievementsData,
+        isLoading,
+        error,
+        currentPage,
+        sortBy,
+        filterStatus,
+        filterCategory,
+        searchQuery,
+        availableCategories,
+        fetchAchievements,
+        setCurrentPage,
+        setSortBy,
+        setFilterStatus,
+        setFilterCategory,
+        setSearchQuery: setStoreSearchQuery,
+        fetchAvailableCategories,
+        resetFilters,
+    } = useAllAchievementsStore((state) => state);
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(0);
-    const [sortBy, setSortBy] = useState('order_asc');
-
-    const [filterStatus, setFilterStatus] = useState<'all' | 'earned' | 'unearned'>('all');
-    const [filterCategory, setFilterCategory] = useState<string>('all');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-
+    const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
-    const apiClient = achievementsApiClient;
-
-    const debouncedSetQuery = useCallback(
+    const debouncedSetStoreSearchQuery = useCallback(
         debounce((value: string) => {
-            setDebouncedSearchQuery(value);
-            setCurrentPage(1);
+            setStoreSearchQuery(value);
         }, 500),
-        []
+        [setStoreSearchQuery]
     );
 
     useEffect(() => {
-        debouncedSetQuery(searchQuery);
-    }, [searchQuery, debouncedSetQuery]);
+        debouncedSetStoreSearchQuery(localSearchQuery);
+        return () => debouncedSetStoreSearchQuery.cancel();
+    }, [localSearchQuery, debouncedSetStoreSearchQuery]);
 
     useEffect(() => {
-        const fetchAchievements = async () => {
-            setIsLoading(true);
+        fetchAvailableCategories();
+    }, [fetchAvailableCategories]);
 
-            try {
-                const params: any = {
-                    page: currentPage,
-                    size: 12,
-                    sortBy,
-                };
-                if (filterStatus !== 'all') params.status = filterStatus;
-                if (filterCategory !== 'all') params.category = filterCategory;
-                if (debouncedSearchQuery.trim().length >= 2) params.q = debouncedSearchQuery.trim();
-
-                const response = await apiClient.getAllAchievementDefinitions(params);
-
-                if (response) {
-                    setAchievementsData(response);
-                    setTotalPages(response.totalPages);
-                } else {
-                    setAchievementsData({
-                        content: [],
-                        pageNumber: 0,
-                        pageSize: 12,
-                        totalElements: 0,
-                        totalPages: 0,
-                        isLast: true,
-                    });
-                    setTotalPages(0);
-                }
-            } catch (err: any) {
-                console.error('Failed to fetch achievements:', err);
-                toast.error(err.message || 'Не удалось загрузить достижения. Попробуйте обновить страницу.');
-                setAchievementsData(null);
-                setTotalPages(0);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchAchievements();
-    }, [currentPage, sortBy, filterStatus, filterCategory, debouncedSearchQuery, apiClient]);
+    useEffect(() => {
+        if (currentPage !== 1 && (filterStatus !== 'all' || filterCategory !== 'all' || searchQuery !== '')) {
+        } else {
+            fetchAchievements();
+        }
+    }, [currentPage, sortBy, filterStatus, filterCategory, searchQuery, fetchAchievements]);
 
     const handlePageChange = (newPage: number) => {
         setCurrentPage(newPage);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const handleSortChange = (value: string) => {
-        setSortBy(value);
-        setCurrentPage(1);
-    };
-    const handleStatusFilterChange = (value: 'all' | 'earned' | 'unearned') => {
-        setFilterStatus(value);
-        setCurrentPage(1);
-    };
-    const handleCategoryFilterChange = (value: string) => {
-        setFilterCategory(value);
-        setCurrentPage(1);
-    };
-    const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(event.target.value);
     };
 
     const renderSkeletons = (count = 12) => (
@@ -121,22 +76,21 @@ const AllAchievementsPageContent = () => {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5, delay: i * 0.05 }}
                 >
-                    <Card className="flex flex-col h-full bg-card/70 dark:bg-background/70 backdrop-blur-sm border border-border/20 shadow-sm">
-                        <CardHeader className="pb-3 pt-5 px-5">
-                            <div className="flex items-center gap-3">
-                                <Skeleton className="h-10 w-10 rounded-full bg-muted/70 dark:bg-muted/20" />
-                                <Skeleton className="h-6 w-3/4 rounded bg-muted/70 dark:bg-muted/20" />
+                    {/* Используем стилизованный Skeleton под AchievementCard */}
+                    <div className="flex flex-col h-full bg-card/70 dark:bg-background/70 backdrop-blur-sm border border-border/20 shadow-sm rounded-xl p-4 space-y-3">
+                        <div className="flex items-center gap-3">
+                            <Skeleton className="h-10 w-10 rounded-full bg-muted/70 dark:bg-muted/20" />
+                            <div className="flex-1 space-y-1.5">
+                                <Skeleton className="h-5 w-3/4 rounded bg-muted/70 dark:bg-muted/20" />
+                                <Skeleton className="h-3 w-1/2 rounded bg-muted/70 dark:bg-muted/20" />
                             </div>
-                        </CardHeader>
-                        <CardContent className="flex-grow px-5 pb-4 space-y-2">
-                            <Skeleton className="h-4 w-full rounded bg-muted/70 dark:bg-muted/20" />
-                            <Skeleton className="h-4 w-5/6 rounded bg-muted/70 dark:bg-muted/20" />
-                            <Skeleton className="h-3 w-1/2 rounded bg-muted/70 dark:bg-muted/20 mt-1" />
-                        </CardContent>
-                        <CardFooter className="px-5 py-3 border-t border-border/10 dark:border-border/20">
-                            <Skeleton className="h-5 w-1/3 rounded bg-muted/70 dark:bg-muted/20" />
-                        </CardFooter>
-                    </Card>
+                        </div>
+                        <Skeleton className="h-3 w-full rounded bg-muted/70 dark:bg-muted/20" />
+                        <Skeleton className="h-3 w-5/6 rounded bg-muted/70 dark:bg-muted/20" />
+                        <div className="pt-2 mt-auto border-t border-border/10 dark:border-border/20">
+                            <Skeleton className="h-5 w-1/3 rounded bg-muted/70 dark:bg-muted/20 mt-2" />
+                        </div>
+                    </div>
                 </motion.div>
             ))}
         </div>
@@ -149,6 +103,7 @@ const AllAchievementsPageContent = () => {
             transition={{ duration: 0.5 }}
             className="space-y-8"
         >
+            {/* ... (Заголовок страницы остается тем же) ... */}
             <div className="text-center">
                 <h1 className="text-3xl font-bold flex items-center justify-center gap-2.5">
                     <Trophy className="h-8 w-8 text-[#3eccb2]" />
@@ -162,20 +117,18 @@ const AllAchievementsPageContent = () => {
                 </p>
             </div>
 
-            {/* Панель фильтров и поиска */}
             <div className="sticky top-[var(--header-height,60px)] z-10 py-4 bg-background/80 dark:bg-background/80 backdrop-blur-md -mx-4 px-4 md:-mx-0 md:px-0 md:relative md:bg-transparent md:dark:bg-transparent md:backdrop-blur-none md:shadow-none md:border-none md:rounded-none shadow-sm border-b border-border/20 md:p-0">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 ">
                     <div className="w-full md:max-w-xs">
                         <Input
                             type="search"
                             placeholder="Поиск достижений..."
-                            value={searchQuery}
-                            onChange={handleSearchInputChange}
+                            value={localSearchQuery}
+                            onChange={(e) => setLocalSearchQuery(e.target.value)}
                             className="h-9 text-xs bg-background"
                         />
                     </div>
                     <div className="flex items-center gap-2 w-full md:w-auto">
-                        {/* Кнопка для мобильных фильтров */}
                         <Button
                             variant="outline"
                             size="icon"
@@ -186,9 +139,11 @@ const AllAchievementsPageContent = () => {
                             <span className="sr-only">Фильтры</span>
                         </Button>
 
-                        {/* Фильтры для десктопа */}
                         <div className="hidden md:flex items-center gap-2">
-                            <Select value={filterStatus} onValueChange={handleStatusFilterChange}>
+                            <Select
+                                value={filterStatus}
+                                onValueChange={(val) => setFilterStatus(val as AchievementsFilterStatus)}
+                            >
                                 <SelectTrigger className="w-auto min-w-[130px] h-9 text-xs bg-background">
                                     <SelectValue placeholder="Статус" />
                                 </SelectTrigger>
@@ -198,22 +153,21 @@ const AllAchievementsPageContent = () => {
                                     <SelectItem value="unearned">Неполученные</SelectItem>
                                 </SelectContent>
                             </Select>
-
-                            {/* TODO: Динамический список категорий
-                            <Select value={filterCategory} onValueChange={handleCategoryFilterChange}>
+                            <Select value={filterCategory} onValueChange={setFilterCategory}>
                                 <SelectTrigger className="w-auto min-w-[150px] h-9 text-xs bg-background">
                                     <SelectValue placeholder="Категория" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">Все категории</SelectItem>
-                                    {['Общие', 'Курсы', 'Сообщество'].map(cat => ( 
-                                        <SelectItem key={cat} value={cat.toLowerCase()}>{cat}</SelectItem>
+                                    {availableCategories.map((cat) => (
+                                        <SelectItem key={cat} value={cat.toLowerCase()}>
+                                            {cat}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-                             */}
                         </div>
-                        <Select value={sortBy} onValueChange={handleSortChange}>
+                        <Select value={sortBy} onValueChange={setSortBy}>
                             <SelectTrigger className="w-full md:w-auto md:min-w-[160px] h-9 text-xs bg-background">
                                 <SelectValue placeholder="Сортировка" />
                             </SelectTrigger>
@@ -233,23 +187,23 @@ const AllAchievementsPageContent = () => {
                 isOpen={isMobileFiltersOpen}
                 onOpenChange={setIsMobileFiltersOpen}
                 filterStatus={filterStatus}
-                setFilterStatus={handleStatusFilterChange}
+                setFilterStatus={setFilterStatus}
                 filterCategory={filterCategory}
-                setFilterCategory={handleCategoryFilterChange}
-                availableCategories={['Общие', 'Курсы', 'Сообщество']}
+                setFilterCategory={setFilterCategory}
+                availableCategories={availableCategories}
             />
 
             {isLoading && renderSkeletons()}
 
-            {!isLoading && !achievementsData && (
-                <div className="rounded-xl border border-border/20 bg-card/50 backdrop-blur-sm p-6 text-center">
-                    <ShieldAlert className="h-12 w-12 mx-auto text-muted-foreground/60 mb-3" />
-                    <h3 className="text-lg font-semibold text-muted-foreground mb-1">Не удалось загрузить данные</h3>
-                    <p className="text-sm text-muted-foreground/80">Попробуйте обновить страницу.</p>
+            {!isLoading && error && (
+                <div className="rounded-xl border border-destructive/30 bg-destructive/5 backdrop-blur-sm p-6 text-center">
+                    <ShieldAlert className="h-12 w-12 mx-auto text-destructive/60 mb-3" />
+                    <h3 className="text-lg font-semibold text-destructive mb-1">Не удалось загрузить достижения</h3>
+                    <p className="text-sm text-destructive/80">{error}</p>
                 </div>
             )}
 
-            {!isLoading && achievementsData && achievementsData.content.length === 0 && (
+            {!isLoading && !error && achievementsData && achievementsData.content.length === 0 && (
                 <div className="text-center py-16 px-4 rounded-xl bg-card/50 dark:bg-background/50 backdrop-blur-sm border border-border/20 shadow-sm">
                     <SearchX className="h-16 w-16 mx-auto text-[#3eccb2]/40 mb-4" />
                     <h3 className="text-xl font-semibold mb-1 text-foreground">Достижения не найдены</h3>
@@ -259,7 +213,7 @@ const AllAchievementsPageContent = () => {
                 </div>
             )}
 
-            {!isLoading && achievementsData && achievementsData.content.length > 0 && (
+            {!isLoading && !error && achievementsData && achievementsData.content.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {achievementsData.content.map((achievement, index) => (
                         <motion.div
@@ -274,11 +228,11 @@ const AllAchievementsPageContent = () => {
                 </div>
             )}
 
-            {!isLoading && totalPages > 1 && (
+            {!isLoading && achievementsData && achievementsData.totalPages > 1 && (
                 <MyPagination
                     className="mt-10"
-                    currentPage={currentPage}
-                    totalPages={totalPages}
+                    currentPage={achievementsData.pageNumber}
+                    totalPages={achievementsData.totalPages}
                     onPageChange={handlePageChange}
                 />
             )}

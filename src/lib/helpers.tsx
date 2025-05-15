@@ -1,4 +1,4 @@
-import { BellRing, CheckCircle, MessageSquare, Package, UserPlus, XCircle } from 'lucide-react';
+import { Award, BellRing, CheckCircle, MessageSquare, Package, UserPlus, XCircle } from 'lucide-react';
 
 import { NotificationType } from '@/types';
 
@@ -14,6 +14,8 @@ export const getNotificationIcon = (type: NotificationType) => {
             return <Package className="h-4 w-4 text-indigo-500" />;
         case NotificationType.NEW_REVIEW_ON_COURSE:
             return <MessageSquare className="h-4 w-4 text-purple-500" />;
+        case NotificationType.ACHIEVEMENT_UNLOCKED:
+            return <Award className="h-4 w-4 text-yellow-500" />;
 
         default:
             return <BellRing className="h-4 w-4 text-gray-500" />;

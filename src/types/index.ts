@@ -173,6 +173,7 @@ export enum NotificationType {
     COURSE_COMPLETED = 'COURSE_COMPLETED',
     NEW_REVIEW_ON_COURSE = 'NEW_REVIEW_ON_COURSE',
     LESSON_COMPLETED_BY_STUDENT = 'LESSON_COMPLETED_BY_STUDENT',
+    ACHIEVEMENT_UNLOCKED = 'ACHIEVEMENT_UNLOCKED',
 }
 
 export interface PublicCertificateInfoDTO {
@@ -193,6 +194,14 @@ export enum AchievementTriggerType {
     LEVEL_REACHED = 'LEVEL_REACHED',
 }
 
+export enum AchievementRarity {
+    COMMON = 'COMMON',
+    UNCOMMON = 'UNCOMMON',
+    RARE = 'RARE',
+    EPIC = 'EPIC',
+    LEGENDARY = 'LEGENDARY',
+}
+
 export interface Achievement {
     id: string;
     key: string;
@@ -205,6 +214,8 @@ export interface Achievement {
     isGlobal: boolean;
     order: number;
     earnedAt?: string;
+    category?: string;
+    rarity: AchievementRarity;
 }
 
 export interface UserAchievement {
@@ -229,4 +240,6 @@ export interface GlobalAchievementDTO {
     triggerType?: AchievementTriggerType;
     triggerThreshold?: number;
     isGlobal?: boolean;
+    rarity: AchievementRarity;
+    prerequisites?: string[];
 }
