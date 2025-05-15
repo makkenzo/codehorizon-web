@@ -95,8 +95,6 @@ const MyCertificatesPageContent = () => {
 
     return (
         <PageWrapper className="mb-12">
-            {' '}
-            {/* Возвращаем PageWrapper */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -110,7 +108,6 @@ const MyCertificatesPageContent = () => {
                             Мои Сертификаты
                         </span>
                     </h1>
-                    {/* Можно добавить кнопку фильтрации или сортировки если нужно */}
                 </div>
 
                 {isLoading && renderSkeletons()}
@@ -147,7 +144,7 @@ const MyCertificatesPageContent = () => {
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 transition={{ duration: 0.3, delay: index * 0.07 }}
                             >
-                                <Card className="flex flex-col h-full bg-card/70 dark:bg-background/70 backdrop-blur-sm border border-border/20 hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-xl">
+                                <Card className="flex flex-col h-full bg-card/70 dark:bg-background/70 backdrop-blur-sm border border-border/20 hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-xl py-0">
                                     <CardHeader className="pb-3 pt-5 px-5">
                                         <div className="flex justify-between items-start">
                                             <Badge
