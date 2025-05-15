@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
-import { Activity, BookOpen, CheckCircle, Eye, Loader2, Lock, Mail, MessageCircle } from 'lucide-react';
+import { Activity, BookOpen, CheckCircle, Eye, Loader2, Lock, Mail, MessageCircle, Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { settingsApiClient } from '@/server/settings';
 import { ProfileVisibility, UpdatePrivacySettingsRequest } from '@/types/settings';
 
+import { InteractiveHoverButton } from '../magicui/interactive-hover-button';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
@@ -318,14 +319,13 @@ const PrivacySettingsForm = () => {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3, delay: privacyFields.length * 0.1 }}
                                     >
-                                        <Button
+                                        <InteractiveHoverButton
                                             type="submit"
-                                            isLoading={isSubmitting}
                                             disabled={isSubmitting}
-                                            className="px-8 bg-gradient-to-r from-[#3eccb2] to-[hsl(173,58%,39%)] hover:from-[hsl(173,58%,39%)] hover:to-[#3eccb2] text-white shadow-md hover:shadow-[#3eccb2]/20 transition-all duration-300 ease-in-out font-semibold hover:text-white border-none"
+                                            icon={<Save className="h-4 w-4" />}
                                         >
                                             {isSubmitting ? 'Сохранение...' : 'Сохранить настройки'}
-                                        </Button>
+                                        </InteractiveHoverButton>
                                     </motion.div>
                                 </form>
                             </Form>

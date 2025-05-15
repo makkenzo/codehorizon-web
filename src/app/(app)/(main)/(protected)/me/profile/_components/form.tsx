@@ -13,6 +13,7 @@ import {
     Hourglass,
     Loader2,
     MapPin,
+    Save,
     Shield,
     ShieldAlert,
     ShieldCheck,
@@ -30,6 +31,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import HorizontalTabNav from '@/components/horizontal-tab-nav';
+import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
 import LevelProgress from '@/components/reusable/level-progress';
 import SignatureCanvas from '@/components/reusable/signature-canvas';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -682,13 +684,13 @@ const ProfileForm = ({}) => {
                                     </div>
 
                                     <div className="flex justify-end pt-4">
-                                        <Button
+                                        <InteractiveHoverButton
                                             type="submit"
-                                            className="px-8 bg-gradient-to-r from-[#3eccb2] to-[hsl(173,58%,39%)] hover:from-[hsl(173,58%,39%)] hover:to-[#3eccb2] text-white shadow-md hover:shadow-[#3eccb2]/20 transition-all duration-300 ease-in-out font-semibold hover:text-white"
-                                            isLoading={pending}
+                                            disabled={pending}
+                                            icon={<Save className="h-4 w-4" />}
                                         >
                                             {pending ? 'Сохранение...' : 'Сохранить изменения'}
-                                        </Button>
+                                        </InteractiveHoverButton>
                                     </div>
                                 </form>
                             </Form>

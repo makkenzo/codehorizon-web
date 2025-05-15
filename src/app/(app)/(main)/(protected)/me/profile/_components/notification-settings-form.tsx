@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
-import { AlertTriangle, Bell, CheckCircle, Info, Loader2, Lock, Megaphone, Shield } from 'lucide-react';
+import { AlertTriangle, Bell, CheckCircle, Info, Loader2, Lock, Megaphone, Save, Shield } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
@@ -386,14 +387,13 @@ const NotificationSettingsForm = () => {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3, delay: 0.5 }}
                                     >
-                                        <Button
+                                        <InteractiveHoverButton
                                             type="submit"
-                                            isLoading={isSubmitting}
                                             disabled={isSubmitting}
-                                            className="bg-gradient-to-r from-[#3eccb2] to-[hsl(173,58%,39%)] hover:from-[hsl(173,58%,39%)] hover:to-[#3eccb2] text-white shadow-md hover:shadow-[#3eccb2]/20 transition-all duration-300"
+                                            icon={<Save className="h-4 w-4" />}
                                         >
                                             {isSubmitting ? 'Сохранение...' : 'Сохранить настройки уведомлений'}
-                                        </Button>
+                                        </InteractiveHoverButton>
                                     </motion.div>
                                 </form>
                             </Form>
