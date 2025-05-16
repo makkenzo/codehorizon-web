@@ -29,6 +29,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useHasHydrated } from '@/hooks/use-has-hydrated';
 import { usePermissions } from '@/hooks/use-permissions';
 import { cn } from '@/lib/utils';
@@ -37,6 +38,47 @@ import AuthApiClient from '@/server/auth';
 import { useProfileStore } from '@/stores/profile/profile-store-provider';
 import { useUserStore } from '@/stores/user/user-store-provider';
 import { NavItem } from '@/types';
+
+const SidebarNav = ({ links }: { links: NavItem[] }) => {
+    const pathname = usePathname();
+
+    return (
+        <nav className="grid items-start px-2 text-sm font-medium lg:px-4 gap-1">
+            {links.map((link) => {
+                if (!link) return null;
+
+                const isActive = pathname === link?.href;
+                const IconComponent = link.icon;
+
+                return (
+                    <Link
+                        key={link.href}
+                        href={link.href ?? '#'}
+                        className={cn(
+                            'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary relative group overflow-hidden',
+                            isActive
+                                ? 'bg-gradient-to-r from-primary/10 to-primary/5 text-primary font-medium'
+                                : 'hover:bg-background/60'
+                        )}
+                    >
+                        <span
+                            className={cn(
+                                'absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100',
+                                isActive && 'opacity-100'
+                            )}
+                        ></span>
+                        {IconComponent && typeof IconComponent !== 'string' && (
+                            <div className="relative z-10 flex items-center justify-center">
+                                <IconComponent className={cn('h-4 w-4', isActive && 'text-primary')} />
+                            </div>
+                        )}
+                        <span className="relative z-10">{link?.label}</span>
+                    </Link>
+                );
+            })}
+        </nav>
+    );
+};
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
     const { isAuthenticated, isPending: isAuthPending } = useAuth();
@@ -126,8 +168,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     if (isLoading) {
         return (
-            <div className="flex h-screen w-full items-center justify-center bg-background">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="flex h-screen w-full items-center justify-center bg-gradient-to-br from-background to-background/80">
+                <div className="relative">
+                    <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
+                    <Loader2 className="h-8 w-8 animate-spin text-primary relative z-10" />
+                </div>
             </div>
         );
     }
@@ -136,89 +181,72 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         return null;
     }
 
-    const SidebarNav = ({ links }: { links: typeof baseNavLinks }) => (
-        <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-            {links.map((link) => {
-                if (!link) return null;
-
-                const isActive = pathname === link?.href;
-                const IconComponent = link.icon;
-
-                return (
-                    <Link
-                        key={link.href}
-                        href={link.href ?? '#'}
-                        className={cn(
-                            'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                            isActive && 'bg-muted/20 text-primary'
-                        )}
-                    >
-                        {IconComponent && typeof IconComponent !== 'string' && <IconComponent className="h-4 w-4" />}
-                        {link?.label}
-                    </Link>
-                );
-            })}
-        </nav>
-    );
-
     return (
-        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-            <div className="hidden border-r border-border bg-background md:block">
-                <div className="flex h-full max-h-screen flex-col gap-2">
-                    <div className="flex h-14 items-center border-b border-border px-4 lg:h-[60px] lg:px-6">
+        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] bg-gradient-to-br from-background to-background/80">
+            <div className="hidden border-r border-border/40 backdrop-blur-sm bg-background/80 md:block relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-primary/10 pointer-events-none"></div>
+                <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+                <div className="absolute -top-32 -right-32 w-64 h-64 bg-secondary/10 rounded-full blur-3xl"></div>
+                <div className="flex h-full max-h-screen flex-col gap-2 relative z-10">
+                    <div className="flex h-14 items-center border-b border-border/40 px-4 lg:h-[60px] lg:px-6 backdrop-blur-sm bg-background/60">
                         <Link href="/admin" className="flex items-center gap-2 font-semibold">
-                            <Package2 className="h-6 w-6 text-primary" />
-                            <span className="">CodeHorizon Admin</span>
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-primary/20 blur-sm rounded-full"></div>
+                                <Package2 className="h-6 w-6 text-primary relative z-10" />
+                            </div>
+                            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                CodeHorizon Admin
+                            </span>
                         </Link>
                     </div>
-                    <div className="flex-1 overflow-auto py-2">
-                        <SidebarNav links={filteredNavLinks} />
-                    </div>
-                    <div className="mt-auto p-4 border-t">
-                        <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
-                            <LogOut className="mr-2 h-4 w-4" />
-                            Выйти
-                        </Button>
-                    </div>
+                    <SidebarNav links={baseNavLinks} />
                 </div>
             </div>
 
             <div className="flex flex-col">
-                <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
+                <header className="flex h-14 items-center gap-4 border-b border-border/40 backdrop-blur-sm bg-background/60 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
                     <AdminMobileMenu navLinks={filteredMobileNavLinks} />
 
                     <div className="w-full flex-1"></div>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Avatar className="hover:cursor-pointer h-8 w-8 hover:outline-4 outline-primary outline-0 ease-in-out transition-all duration-100">
+                            <Avatar className="hover:cursor-pointer h-8 w-8 ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-200 ease-in-out">
                                 {profile?.avatarUrl ? (
-                                    <AvatarImage src={profile.avatarUrl} alt={user?.username || 'User'} />
+                                    <AvatarImage
+                                        src={profile.avatarUrl || '/placeholder.svg'}
+                                        alt={user?.username || 'User'}
+                                    />
                                 ) : null}
-                                <AvatarFallback>{user?.username?.substring(0, 1).toUpperCase() ?? 'A'}</AvatarFallback>
+                                <AvatarFallback className="bg-gradient-to-br from-primary/80 to-secondary/80 text-white">
+                                    {user?.username?.substring(0, 1).toUpperCase() ?? 'A'}
+                                </AvatarFallback>
                             </Avatar>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56 px-4 py-2" align="end">
-                            <DropdownMenuLabel className="pl-0">
+                        <DropdownMenuContent
+                            className="w-56 px-4 py-2 backdrop-blur-sm bg-background/90 border-border/40"
+                            align="end"
+                        >
+                            <DropdownMenuLabel className="pl-0 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                                 {profile?.firstName || user?.username || 'Мой аккаунт'}
                             </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
+                            <DropdownMenuSeparator className="bg-border/40" />
                             <Link href="/me/profile">
-                                <DropdownMenuItem>
+                                <DropdownMenuItem className="hover:bg-primary/5 focus:bg-primary/5">
                                     <Settings className="mr-2 size-4" />
                                     Настройки профиля
                                 </DropdownMenuItem>
                             </Link>
                             <Link href="/">
-                                <DropdownMenuItem>
+                                <DropdownMenuItem className="hover:bg-primary/5 focus:bg-primary/5">
                                     <Home className="mr-2 size-4" />
                                     Вернуться на сайт
                                 </DropdownMenuItem>
                             </Link>
-                            <DropdownMenuSeparator />
+                            <DropdownMenuSeparator className="bg-border/40" />
                             <DropdownMenuItem
                                 onClick={handleLogout}
-                                className="text-destructive focus:text-destructive cursor-pointer"
+                                className="text-destructive focus:text-destructive cursor-pointer hover:bg-destructive/5 focus:bg-destructive/5"
                             >
                                 <LogOut className="mr-2 size-4" />
                                 Выйти
@@ -227,8 +255,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                     </DropdownMenu>
                 </header>
 
-                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 admin-gradient-bg overflow-y-auto">
-                    {children}
+                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-y-auto relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5 pointer-events-none"></div>
+                    <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+                    <div className="absolute -top-32 -left-32 w-96 h-96 bg-secondary/5 rounded-full blur-3xl"></div>
+                    <div className="relative z-10">{children}</div>
                 </main>
             </div>
         </div>
