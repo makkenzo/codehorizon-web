@@ -270,4 +270,8 @@
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
         background: hsl(var(--primary));
     }
+
+    .tiptap {
+        @apply !w-full;
+    }
 }

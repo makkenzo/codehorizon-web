@@ -267,7 +267,7 @@ export default function LessonPage() {
                         return (
                             <pre
                                 key={`code-${index}`}
-                                className="not-prose bg-[#282c34] rounded-md p-4 overflow-x-auto mb-4"
+                                className="not-prose bg-[#282c34] text-white rounded-md p-4 overflow-x-auto mb-4"
                             >
                                 <code className={cn(langClass, 'text-sm')}>{code}</code>
                             </pre>

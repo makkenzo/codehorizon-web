@@ -3,7 +3,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { isAxiosError } from 'axios';
-import { Loader2, PlusCircle, Users } from 'lucide-react';
+import { BookAIcon, BookDashed, Loader2, LucideSunSnow, PlusCircle, Users } from 'lucide-react';
+import { IoDocument } from 'react-icons/io5';
 import { toast } from 'sonner';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -177,23 +178,30 @@ export default function EditCoursePage() {
                 </TabsContent>
 
                 <TabsContent value="lessons">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <div>
-                                <CardTitle>Уроки</CardTitle>
-                                <CardDescription>Управляйте уроками для этого курса.</CardDescription>
+                    <Card className="border-border/40 backdrop-blur-sm bg-background/60 overflow-hidden relative group hover:shadow-lg transition-all duration-300">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-primary/5 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute -top-32 -left-32 w-64 h-64 bg-secondary/5 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <CardHeader className="relative z-10">
+                            <div className="flex items-center gap-2">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-primary/10 blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <BookAIcon className="h-5 w-5 text-primary relative z-10" />
+                                </div>
+                                <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                    Уроки
+                                </CardTitle>
                             </div>
-                            <Button size="sm" onClick={() => handleOpenLessonDialog()}>
-                                <PlusCircle className="h-4 w-4 mr-2" />
-                                Add Lesson
-                            </Button>
+                            <CardDescription>Управляйте уроками для этого курса.</CardDescription>
                         </CardHeader>
-                        <CardContent>
-                            <LessonList
-                                lessons={courseData.lessons}
-                                onEditLesson={handleOpenLessonDialog}
-                                onDeleteLesson={handleDeleteLesson}
-                            />
+                        <CardContent className="relative z-10">
+                            <div className="rounded-md backdrop-blur-sm bg-background/40 overflow-hidden">
+                                <LessonList
+                                    lessons={courseData.lessons}
+                                    onEditLesson={handleOpenLessonDialog}
+                                    onDeleteLesson={handleDeleteLesson}
+                                />
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>

@@ -15,7 +15,7 @@ export const InteractiveHoverButton = React.forwardRef<HTMLButtonElement, Intera
             <button
                 ref={ref}
                 className={cn(
-                    'group relative w-auto cursor-pointer overflow-hidden rounded-full border bg-background p-2 px-6 text-center font-semibold',
+                    'group relative w-auto cursor-pointer overflow-hidden rounded-md border bg-background p-2 px-6 text-center font-semibold h-[41px]',
                     className
                 )}
                 {...props}
