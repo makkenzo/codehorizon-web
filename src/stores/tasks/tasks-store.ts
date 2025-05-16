@@ -1,10 +1,13 @@
 import { createStore } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { LessonTasksState, LessonTasksStore, TaskState } from './types';
+import { SubmissionStatus } from '@/types/task';
+
+import { LessonTasksState, LessonTasksStore } from './types';
 
 export const defaultTasksState: LessonTasksState = {
     lessons: {},
+    submissions: {},
     congratsShownForCourses: [],
 };
 
@@ -13,96 +16,70 @@ export const createLessonTasksStore = (initState: LessonTasksState = defaultTask
         persist(
             (set, get) => ({
                 ...initState,
-
+                submissions: initState.submissions || {},
                 initializeLesson: (lessonKey, tasks) =>
                     set((state) => {
-                        if (!state.lessons[lessonKey]) {
-                            const initialTasksState: { [taskId: string]: TaskState } = {};
+                        const taskSpecificKeyPrefix = `${lessonKey}_task_`;
+                        let needsUpdate = false;
+                        const newSubmissions = { ...state.submissions };
 
-                            const persistedLessonData = (get() as LessonTasksStore).lessons[lessonKey];
-
-                            tasks.forEach((task) => {
-                                const savedTaskAnswer = persistedLessonData?.tasks[task.id]?.userAnswer;
-                                initialTasksState[task.id] = {
+                        tasks.forEach((task) => {
+                            const currentTaskKey = `${taskSpecificKeyPrefix}${task.id}`;
+                            if (!newSubmissions[currentTaskKey]) {
+                                newSubmissions[currentTaskKey] = {
+                                    id: '',
                                     taskId: task.id,
-                                    userAnswer: savedTaskAnswer ?? '',
-                                    checkStatus: null,
+                                    userId: '',
+                                    courseId: '',
+                                    lessonId: '',
+                                    submittedAt: new Date().toISOString(),
+                                    status: SubmissionStatus.PENDING,
+                                    answerCode: task.boilerplateCode || '',
+                                    answerText: '',
+                                    language: task.language,
+                                    testRunResults: [],
                                 };
-                            });
+                                needsUpdate = true;
+                            }
+                        });
 
-                            return {
-                                lessons: {
-                                    ...state.lessons,
-                                    [lessonKey]: { tasks: initialTasksState },
-                                },
-                            };
-                        }
-                        return state;
+                        return needsUpdate ? { submissions: newSubmissions } : state;
                     }),
-                updateUserAnswer: (lessonKey, taskId, answer) =>
+                initializeOrUpdateSubmission: (lessonKey, taskId, submissionData) =>
                     set((state) => {
-                        const lessonData = state.lessons[lessonKey];
-                        if (!lessonData || !lessonData.tasks[taskId]) return state;
-
-                        const updatedTask: TaskState = {
-                            ...lessonData.tasks[taskId],
-                            userAnswer: answer,
-                            checkStatus: null,
-                        };
-
+                        const taskSpecificKey = `${lessonKey}_task_${taskId}`;
                         return {
-                            lessons: {
-                                ...state.lessons,
-                                [lessonKey]: {
-                                    ...lessonData,
-                                    tasks: {
-                                        ...lessonData.tasks,
-                                        [taskId]: updatedTask,
-                                    },
-                                },
+                            submissions: {
+                                ...state.submissions,
+                                [taskSpecificKey]: submissionData,
                             },
                         };
                     }),
-                updateCheckStatus: (lessonKey, taskId, status) =>
-                    set((state) => {
-                        const lessonData = state.lessons[lessonKey];
-                        if (!lessonData || !lessonData.tasks[taskId]) return state;
-
-                        const updatedTask: TaskState = {
-                            ...lessonData.tasks[taskId],
-                            checkStatus: status,
-                        };
-
-                        return {
-                            lessons: {
-                                ...state.lessons,
-                                [lessonKey]: {
-                                    ...lessonData,
-                                    tasks: {
-                                        ...lessonData.tasks,
-                                        [taskId]: updatedTask,
-                                    },
-                                },
-                            },
-                        };
-                    }),
-                getTaskState: (lessonKey, taskId) => {
-                    return get().lessons[lessonKey]?.tasks[taskId];
+                getSubmissionState: (lessonKey, taskId) => {
+                    const taskSpecificKey = `${lessonKey}_task_${taskId}`;
+                    return get().submissions[taskSpecificKey];
                 },
                 getAllTasksCompleted: (lessonKey) => {
-                    const lessonData = get().lessons[lessonKey];
-                    if (!lessonData || Object.keys(lessonData.tasks).length === 0) {
-                        return true;
+                    const lessonSubmissions = Object.keys(get().submissions)
+                        .filter((key) => key.startsWith(lessonKey + '_task_'))
+                        .map((key) => get().submissions[key]);
+
+                    if (!lessonSubmissions || lessonSubmissions.length === 0) {
+                        const course = get().lessons[lessonKey.split('_task_')[0]];
+                        return !course || Object.keys(course.tasks).length === 0;
                     }
-                    return Object.values(lessonData.tasks).every((task) => task.checkStatus === true);
+                    return lessonSubmissions.every((sub) => sub?.status === SubmissionStatus.CORRECT);
                 },
-                clearLessonState: (lessonKey) =>
+                clearLessonSubmissions: (lessonKey) =>
                     set((state) => {
-                        const newLessons = { ...state.lessons };
-                        delete newLessons[lessonKey];
-                        return { lessons: newLessons };
+                        const newSubmissions = { ...state.submissions };
+                        Object.keys(newSubmissions).forEach((key) => {
+                            if (key.startsWith(lessonKey + '_task_')) {
+                                delete newSubmissions[key];
+                            }
+                        });
+                        return { submissions: newSubmissions };
                     }),
-                congratsShownForCourses: initState.congratsShownForCourses ?? [],
                 markCongratsAsShown: (courseId) =>
                     set((state) => {
                         if (!state.congratsShownForCourses.includes(courseId)) {
@@ -110,13 +87,14 @@ export const createLessonTasksStore = (initState: LessonTasksState = defaultTask
                         }
                         return state;
                     }),
-                clearAllTasksState: () => set({ lessons: {} }),
+
+                clearAllTasksState: () => set({ submissions: {}, congratsShownForCourses: [] }),
             }),
             {
-                name: 'lesson-tasks-progress',
+                name: 'lesson-tasks-submissions',
                 storage: createJSONStorage(() => localStorage),
                 partialize: (state) => ({
-                    lessons: state.lessons,
+                    submissions: state.submissions,
                     congratsShownForCourses: state.congratsShownForCourses,
                 }),
             }

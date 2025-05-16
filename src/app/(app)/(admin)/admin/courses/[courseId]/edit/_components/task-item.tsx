@@ -1,15 +1,19 @@
+import { python } from '@codemirror/lang-python';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { Control, FieldErrors, UseFieldArrayRemove, useFieldArray, useWatch } from 'react-hook-form';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Button } from '@/components/ui/button';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { TaskType } from '@/types';
+import { AdminTestCaseDTO, ProgrammingLanguage } from '@/types/admin';
+import { TaskType } from '@/types/task';
 
 import { LessonFormData } from './lesson-edit-dialog';
 
@@ -21,11 +25,138 @@ interface TaskItemProps {
     errors: FieldErrors<LessonFormData>;
 }
 
+const TestCaseEditor: React.FC<{
+    control: Control<LessonFormData>;
+    taskIndex: number;
+    testCaseIndex: number;
+    removeTestCase: (index: number) => void;
+    isSubmitting: boolean;
+    testCaseErrors?: FieldErrors<AdminTestCaseDTO>;
+}> = ({ control, taskIndex, testCaseIndex, removeTestCase, isSubmitting, testCaseErrors }) => {
+    return (
+        <div className="p-3 border rounded-md space-y-3 bg-muted/20 relative group">
+            <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="absolute top-1 right-1 text-destructive hover:bg-destructive/10 opacity-50 group-hover:opacity-100"
+                onClick={() => removeTestCase(testCaseIndex)}
+                disabled={isSubmitting}
+            >
+                <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+            <p className="text-xs font-medium text-muted-foreground">Тест-кейс {testCaseIndex + 1}</p>
+            <FormField
+                control={control}
+                name={`tasks.${taskIndex}.testCases.${testCaseIndex}.name`}
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel className="text-xs">Название тест-кейса *</FormLabel>
+                        <FormControl>
+                            <Input
+                                placeholder="Например, Базовый тест"
+                                {...field}
+                                disabled={isSubmitting}
+                                className="h-8 text-xs"
+                            />
+                        </FormControl>
+                        <FormMessage className="text-xs">{testCaseErrors?.name?.message}</FormMessage>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={control}
+                name={`tasks.${taskIndex}.testCases.${testCaseIndex}.input`}
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel className="text-xs">Входные данные (каждый параметр с новой строки)</FormLabel>
+                        <FormControl>
+                            <Textarea
+                                placeholder={'2\n3'}
+                                {...field}
+                                value={Array.isArray(field.value) ? field.value.join('\n') : ''}
+                                onChange={(e) => {
+                                    const lines = e.target.value.split(/\r?\n/);
+                                    field.onChange(lines);
+                                }}
+                                disabled={isSubmitting}
+                                rows={Math.max(2, field.value?.length || 2)}
+                                className="text-xs font-mono"
+                            />
+                        </FormControl>
+                        <FormMessage className="text-xs">{testCaseErrors?.input?.message}</FormMessage>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={control}
+                name={`tasks.${taskIndex}.testCases.${testCaseIndex}.expectedOutput`}
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel className="text-xs">Ожидаемый вывод (каждая строка с новой строки)</FormLabel>
+                        <FormControl>
+                            <Textarea
+                                placeholder={'5'}
+                                {...field}
+                                value={Array.isArray(field.value) ? field.value.join('\n') : ''}
+                                onChange={(e) => {
+                                    const lines = e.target.value.split(/\r?\n/);
+                                    field.onChange(lines);
+                                }}
+                                disabled={isSubmitting}
+                                rows={Math.max(2, field.value?.length || 2)}
+                                className="text-xs font-mono"
+                            />
+                        </FormControl>
+                        <FormMessage className="text-xs">{testCaseErrors?.expectedOutput?.message}</FormMessage>
+                    </FormItem>
+                )}
+            />
+            <div className="grid grid-cols-2 gap-3">
+                <FormField
+                    control={control}
+                    name={`tasks.${taskIndex}.testCases.${testCaseIndex}.points`}
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="text-xs">Баллы *</FormLabel>
+                            <FormControl>
+                                <Input
+                                    type="number"
+                                    placeholder="1"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+                                    disabled={isSubmitting}
+                                    className="h-8 text-xs"
+                                />
+                            </FormControl>
+                            <FormMessage className="text-xs">{testCaseErrors?.points?.message}</FormMessage>
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={control}
+                    name={`tasks.${taskIndex}.testCases.${testCaseIndex}.isHidden`}
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0 pt-5">
+                            <FormControl>
+                                <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    disabled={isSubmitting}
+                                />
+                            </FormControl>
+                            <FormLabel className="text-xs font-normal">Скрытый тест</FormLabel>
+                        </FormItem>
+                    )}
+                />
+            </div>
+        </div>
+    );
+};
+
 const TaskItem: React.FC<TaskItemProps> = ({ control, index, removeTask, isSubmitting, errors }) => {
-    const taskType = useWatch({
-        control,
-        name: `tasks.${index}.taskType`,
-    });
+    const taskType = useWatch({ control, name: `tasks.${index}.taskType` });
+    const taskLanguage = useWatch({ control, name: `tasks.${index}.language` });
 
     const {
         fields: optionFields,
@@ -36,7 +167,21 @@ const TaskItem: React.FC<TaskItemProps> = ({ control, index, removeTask, isSubmi
         name: `tasks.${index}.options` as any,
     });
 
+    const {
+        fields: testCaseFields,
+        append: appendTestCase,
+        remove: removeTestCase,
+    } = useFieldArray({
+        control,
+        name: `tasks.${index}.testCases` as any,
+    });
+
     const taskErrors = errors.tasks?.[index];
+
+    const getLanguageExtension = () => {
+        if (taskLanguage === ProgrammingLanguage.PYTHON) return python();
+        return [];
+    };
 
     return (
         <div className="border relative group border-border/50 p-4 rounded-lg space-y-4 bg-card shadow-inner">
@@ -72,11 +217,11 @@ const TaskItem: React.FC<TaskItemProps> = ({ control, index, removeTask, isSubmi
                 name={`tasks.${index}.taskType`}
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel className="text-xs">Тип задачи</FormLabel>
+                        <FormLabel className="text-xs">Тип задачи *</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value} disabled={isSubmitting}>
                             <FormControl>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Выберите тип задачи" />
+                                    <SelectValue placeholder="Выберите тип" />
                                 </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -91,6 +236,158 @@ const TaskItem: React.FC<TaskItemProps> = ({ control, index, removeTask, isSubmi
                     </FormItem>
                 )}
             />
+            {taskType === TaskType.CODE_INPUT && (
+                <div className="space-y-3 border-l-2 border-blue-500/30 pl-3 ml-1 pt-2">
+                    <FormField
+                        control={control}
+                        name={`tasks.${index}.language`}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-xs">Язык программирования *</FormLabel>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value ?? undefined}
+                                    disabled={isSubmitting}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger className="h-9">
+                                            <SelectValue placeholder="Выберите язык" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {Object.values(ProgrammingLanguage).map((lang) => (
+                                            <SelectItem key={lang} value={lang}>
+                                                {lang}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage>{taskErrors?.language?.message}</FormMessage>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={control}
+                        name={`tasks.${index}.boilerplateCode`}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-xs">Шаблон кода (Boilerplate)</FormLabel>
+                                <FormControl>
+                                    <ReactCodeMirror
+                                        value={field.value ?? ''}
+                                        height="150px"
+                                        extensions={[getLanguageExtension()]}
+                                        onChange={field.onChange}
+                                        className="text-sm border rounded-md overflow-hidden"
+                                        readOnly={isSubmitting}
+                                        basicSetup={{
+                                            foldGutter: false,
+                                            dropCursor: false,
+                                            allowMultipleSelections: false,
+                                            indentOnInput: false,
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormMessage>{taskErrors?.boilerplateCode?.message}</FormMessage>
+                            </FormItem>
+                        )}
+                    />
+                    <div className="space-y-2">
+                        <FormLabel className="text-xs flex items-center gap-1">
+                            Тест-кейсы
+                            <FormDescription className="text-xs">(Обязательны для проверки)</FormDescription>
+                        </FormLabel>
+                        {testCaseFields.map((tcField, tcIndex) => (
+                            <TestCaseEditor
+                                key={tcField.id}
+                                control={control}
+                                taskIndex={index}
+                                testCaseIndex={tcIndex}
+                                removeTestCase={removeTestCase}
+                                isSubmitting={isSubmitting}
+                                testCaseErrors={
+                                    taskErrors?.testCases?.[tcIndex] as FieldErrors<AdminTestCaseDTO> | undefined
+                                }
+                            />
+                        ))}
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="text-xs"
+                            onClick={() =>
+                                appendTestCase({
+                                    id: uuidv4(),
+                                    name: '',
+                                    input: [],
+                                    expectedOutput: [],
+                                    isHidden: false,
+                                    points: 1,
+                                })
+                            }
+                            disabled={isSubmitting}
+                        >
+                            <PlusCircle className="mr-1 h-3.5 w-3.5" /> Добавить тест-кейс
+                        </Button>
+                        <FormMessage>
+                            {(taskErrors?.testCases as any)?.message || (taskErrors?.testCases as any)?.root?.message}
+                        </FormMessage>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <FormField
+                            control={control}
+                            name={`tasks.${index}.timeoutSeconds`}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-xs">Таймаут (сек)</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            placeholder="10"
+                                            {...field}
+                                            value={field.value ?? ''}
+                                            onChange={(e) =>
+                                                field.onChange(
+                                                    e.target.value === '' ? null : parseInt(e.target.value, 10)
+                                                )
+                                            }
+                                            disabled={isSubmitting}
+                                            className="h-9"
+                                        />
+                                    </FormControl>
+                                    <FormMessage>{taskErrors?.timeoutSeconds?.message}</FormMessage>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={control}
+                            name={`tasks.${index}.memoryLimitMb`}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-xs">Лимит памяти (МБ)</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            placeholder="128"
+                                            {...field}
+                                            value={field.value ?? ''}
+                                            onChange={(e) =>
+                                                field.onChange(
+                                                    e.target.value === '' ? null : parseInt(e.target.value, 10)
+                                                )
+                                            }
+                                            disabled={isSubmitting}
+                                            className="h-9"
+                                        />
+                                    </FormControl>
+                                    <FormMessage>{taskErrors?.memoryLimitMb?.message}</FormMessage>
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
+            )}
             {taskType === TaskType.MULTIPLE_CHOICE && (
                 <div className="space-y-2 border-l-2 border-dashed pl-3 ml-1 border-blue-500/30">
                     <FormLabel className="text-xs text-blue-600 dark:text-blue-400">
@@ -169,29 +466,6 @@ const TaskItem: React.FC<TaskItemProps> = ({ control, index, removeTask, isSubmi
                                 />
                             </FormControl>
                             <FormMessage>{taskErrors?.solution?.message}</FormMessage>
-                        </FormItem>
-                    )}
-                />
-            )}
-            {taskType === TaskType.CODE_INPUT && (
-                <FormField
-                    control={control}
-                    name={`tasks.${index}.tests`}
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-xs">Tests (optional, one per line)</FormLabel>
-                            <FormControl>
-                                <Textarea
-                                    placeholder="assert(sum(1, 2) === 3);\nassert(sum(-1, 1) === 0);"
-                                    rows={4}
-                                    className="font-mono text-sm"
-                                    {...field}
-                                    value={field.value?.join('\\n') ?? ''}
-                                    onChange={(e) => field.onChange(e.target.value.split('\\n'))}
-                                    disabled={isSubmitting}
-                                />
-                            </FormControl>
-                            <FormMessage>{taskErrors?.tests?.message}</FormMessage>
                         </FormItem>
                     )}
                 />

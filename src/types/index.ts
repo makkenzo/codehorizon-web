@@ -1,5 +1,7 @@
 import { ElementType } from 'react';
 
+import { Task } from './task';
+
 export type BaseMetadata = {
     title: string;
     description: string;
@@ -90,21 +92,6 @@ export interface Lesson {
 export interface Attachment {
     name: string;
     url: string;
-}
-
-export enum TaskType {
-    TEXT_INPUT = 'TEXT_INPUT',
-    CODE_INPUT = 'CODE_INPUT',
-    MULTIPLE_CHOICE = 'MULTIPLE_CHOICE',
-}
-
-export interface Task {
-    id: string;
-    description: string;
-    solution?: string | null;
-    tests?: string[] | null;
-    taskType: TaskType;
-    options?: string[] | null;
 }
 
 export interface Review {

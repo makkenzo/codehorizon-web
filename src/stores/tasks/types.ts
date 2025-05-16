@@ -1,34 +1,26 @@
 import { AdminTaskDTO } from '@/types/admin';
-
-export type TaskCheckStatus = boolean | null;
-
-export interface TaskState {
-    taskId: string;
-    userAnswer: string;
-    checkStatus: TaskCheckStatus;
-}
+import { Submission } from '@/types/task';
 
 export interface LessonTasksState {
     lessons: {
         [lessonKey: string]:
             | {
-                  tasks: {
-                      [taskId: string]: TaskState;
-                  };
+                  tasks: { [taskId: string]: AdminTaskDTO };
               }
             | undefined;
+    };
+    submissions: {
+        [taskSpecificKey: string]: Submission | undefined;
     };
     congratsShownForCourses: string[];
 }
 
 export interface LessonTasksActions {
     initializeLesson: (lessonKey: string, tasks: AdminTaskDTO[]) => void;
-    updateUserAnswer: (lessonKey: string, taskId: string, answer: string) => void;
-    updateCheckStatus: (lessonKey: string, taskId: string, status: TaskCheckStatus) => void;
-    getTaskState: (lessonKey: string, taskId: string) => TaskState | undefined;
+    initializeOrUpdateSubmission: (lessonKey: string, taskId: string, submissionData: Submission) => void;
+    getSubmissionState: (lessonKey: string, taskId: string) => Submission | undefined;
     getAllTasksCompleted: (lessonKey: string) => boolean;
-    clearLessonState: (lessonKey: string) => void;
-    congratsShownForCourses: string[];
+    clearLessonSubmissions: (lessonKey: string) => void;
     markCongratsAsShown: (courseId: string) => void;
     clearAllTasksState: () => void;
 }

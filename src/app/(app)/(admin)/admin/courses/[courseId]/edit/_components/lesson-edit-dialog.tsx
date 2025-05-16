@@ -29,10 +29,24 @@ import { Input } from '@/components/ui/input';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { adminApiClient } from '@/server/admin-api-client';
 import S3ApiClient from '@/server/s3';
-import { TaskType } from '@/types';
-import { AdminCourseDetailDTO, AdminCreateUpdateLessonRequestDTO, AdminLessonDTO } from '@/types/admin';
+import {
+    AdminCourseDetailDTO,
+    AdminCreateUpdateLessonRequestDTO,
+    AdminLessonDTO,
+    ProgrammingLanguage,
+} from '@/types/admin';
+import { TaskType } from '@/types/task';
 
 import TaskItem from './task-item';
+
+const testCaseSchema = z.object({
+    id: z.string().optional(),
+    name: z.string().min(1, 'Название тест-кейса обязательно'),
+    input: z.array(z.string()).min(0, 'Хотя бы один входной параметр (можно пустой массив, если нет входа)'),
+    expectedOutput: z.array(z.string()).min(0, 'Хотя бы один ожидаемый вывод (можно пустой массив)'),
+    isHidden: z.boolean().default(false),
+    points: z.coerce.number().min(0, 'Баллы не могут быть отрицательными').default(1),
+});
 
 const attachmentSchema = z.object({
     name: z.string(),
@@ -45,13 +59,43 @@ const codeExampleSchema = z.object({
 
 const taskSchema = z
     .object({
-        id: z.string(),
+        id: z.string().optional(),
         description: z.string().min(1, 'Описание задачи обязательно для заполнения'),
         solution: z.string().nullable().optional(),
-        tests: z.array(z.string()).nullable().optional(),
         taskType: z.nativeEnum(TaskType),
         options: z.array(z.string()).nullable().optional(),
+
+        language: z.nativeEnum(ProgrammingLanguage).nullable().optional(),
+        boilerplateCode: z.string().nullable().optional(),
+        testCases: z.array(testCaseSchema).optional().default([]),
+
+        timeoutSeconds: z.coerce.number().min(1).max(60).nullable().optional(),
+        memoryLimitMb: z.coerce.number().min(32).max(512).nullable().optional(),
     })
+    .refine(
+        (data) => {
+            if (data.taskType === TaskType.CODE_INPUT && !data.language) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message: 'Необходимо выбрать язык программирования для кодовой задачи',
+            path: ['language'],
+        }
+    )
+    .refine(
+        (data) => {
+            if (data.taskType === TaskType.CODE_INPUT && (!data.testCases || data.testCases.length === 0)) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message: 'Для кодовой задачи рекомендуется добавить хотя бы один тест-кейс',
+            path: ['testCases'],
+        }
+    )
     .refine(
         (data) => {
             if (data.taskType === TaskType.MULTIPLE_CHOICE) {
@@ -112,7 +156,21 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
             title: lesson?.title ?? '',
             content: lesson?.content ?? '',
             codeExamples: mapCodeExamplesToFormData(lesson?.codeExamples),
-            tasks: lesson?.tasks?.map((t) => ({ ...t, id: t.id || `temp-${Date.now()}-${Math.random()}` })) ?? [],
+            tasks:
+                lesson?.tasks?.map((t) => ({
+                    id: t.id || `temp-${Date.now()}-${Math.random()}`,
+                    description: t.description,
+                    solution: t.solution,
+                    taskType: t.taskType,
+                    options: t.options || [],
+                    language: t.language || null,
+                    boilerplateCode: t.boilerplateCode,
+                    testCases:
+                        t.testCases?.map((tc) => ({ ...tc, id: tc.id || `tc-temp-${Date.now()}-${Math.random()}` })) ||
+                        [],
+                    timeoutSeconds: t.timeoutSeconds || null,
+                    memoryLimitMb: t.memoryLimitMb || null,
+                })) ?? [],
             attachments: lesson?.attachments ?? [],
             mainAttachment: lesson?.mainAttachment ?? null,
         },
@@ -229,7 +287,16 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                 title: values.title,
                 content: values.content || null,
                 codeExamples: values.codeExamples?.map((ex) => ex.value),
-                tasks: tasksWithId,
+                tasks: values.tasks?.map((taskValue) => ({
+                    ...taskValue,
+                    id: taskValue.id?.startsWith('temp-') ? undefined : taskValue.id,
+                    language: taskValue.language,
+                    testCases:
+                        taskValue.testCases?.map((tc) => ({
+                            ...tc,
+                            id: tc.id?.startsWith('tc-temp-') ? undefined : tc.id,
+                        })) || [],
+                })),
                 attachments: values.attachments,
                 mainAttachment: values.mainAttachment,
             };
@@ -398,8 +465,12 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
                                             description: '',
                                             taskType: TaskType.TEXT_INPUT,
                                             solution: null,
-                                            tests: [],
                                             options: [],
+                                            language: null,
+                                            boilerplateCode: null,
+                                            testCases: [],
+                                            timeoutSeconds: 10,
+                                            memoryLimitMb: 128,
                                         })
                                     }
                                     disabled={isSubmitting}

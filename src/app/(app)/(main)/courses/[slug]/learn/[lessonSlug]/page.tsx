@@ -40,76 +40,120 @@ hljs.registerLanguage('plaintext', plaintext);
 
 export default function LessonPage() {
     const { course, courseProgress, updateCourseProgress } = useCourseLearnContext();
-
     const { user, setUser } = useUserStore((state) => state);
-    const [isLessonMarkedCompleted, setIsLessonMarkedCompleted] = useState(false);
+
+    const [isLessonMarkedCompletedByStudent, setIsLessonMarkedCompletedByStudent] = useState(false);
     const [isCompletePending, startCompleteTransition] = useTransition();
     const router = useRouter();
     const params = useParams();
     const courseSlug = params.slug as string;
-    const lessonSlug = params.lessonSlug as string;
+    const lessonSlugFromParams = params.lessonSlug as string;
 
     const currentLesson = useMemo(() => {
         return (
             course?.lessons.find(
-                (lesson) => decodeURIComponent(lesson.slug.trim()) === decodeURIComponent(lessonSlug.trim())
+                (lesson) => decodeURIComponent(lesson.slug.trim()) === decodeURIComponent(lessonSlugFromParams.trim())
             ) ?? null
         );
-    }, [course, lessonSlug]);
+    }, [course, lessonSlugFromParams]);
 
     const apiClient = new CoursesApiClient();
 
-    const lessonKey = useMemo(() => {
+    const lessonKeyForStore = useMemo(() => {
         if (!user?.id || !course?.id || !currentLesson?.id) return null;
         return `lesson_${user.id}_${course.id}_${currentLesson.id}`;
     }, [user?.id, course?.id, currentLesson?.id]);
 
-    const { currentLessonTasks, initializeLesson, clearLessonState } = useLessonTasksStore((state) => {
-        const tasks = lessonKey ? state.lessons[lessonKey]?.tasks : undefined;
-        return {
-            currentLessonTasks: tasks,
+    const { initializeLesson, getAllTasksCompleted, clearLessonSubmissions, submissions } = useLessonTasksStore(
+        (state) => ({
             initializeLesson: state.initializeLesson,
-            clearLessonState: state.clearLessonState,
-        };
-    }, shallow);
+            getAllTasksCompleted: state.getAllTasksCompleted,
+            clearLessonSubmissions: state.clearLessonSubmissions,
+            submissions: state.submissions,
+        })
+    );
 
     useEffect(() => {
-        const tasksExist = currentLessonTasks && Object.keys(currentLessonTasks).length > 0;
-
-        if (lessonKey && currentLesson?.tasks && !tasksExist) {
-            initializeLesson(lessonKey, currentLesson.tasks);
+        if (lessonKeyForStore && currentLesson?.tasks && currentLesson.tasks.length > 0) {
+            const existingSubmissions = Object.keys(submissions).some((key) =>
+                key.startsWith(lessonKeyForStore + '_task_')
+            );
+            if (!existingSubmissions) {
+                initializeLesson(lessonKeyForStore, currentLesson.tasks);
+            }
         }
-
-        if (currentLesson && courseProgress) {
-            setIsLessonMarkedCompleted(courseProgress.completedLessons?.includes(currentLesson.id) ?? false);
-        } else {
-            setIsLessonMarkedCompleted(false);
-        }
-    }, [lessonKey, currentLesson, initializeLesson]);
+    }, [lessonKeyForStore, currentLesson, initializeLesson]);
 
     useEffect(() => {
         if (currentLesson && courseProgress) {
-            setIsLessonMarkedCompleted(courseProgress.completedLessons?.includes(currentLesson.id) ?? false);
+            setIsLessonMarkedCompletedByStudent(courseProgress.completedLessons?.includes(currentLesson.id) ?? false);
         } else {
-            setIsLessonMarkedCompleted(false);
+            setIsLessonMarkedCompletedByStudent(false);
         }
     }, [currentLesson, courseProgress]);
 
     useEffect(() => {
-        if (currentLesson) {
+        if (currentLesson?.content) {
             document.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightElement(block as HTMLElement);
             });
         }
-    }, [currentLesson]);
+    }, [currentLesson?.content]);
 
-    const allTasksCompleted = useMemo(() => {
-        if (!currentLessonTasks || Object.keys(currentLessonTasks).length === 0) {
-            return !currentLesson?.tasks || currentLesson.tasks.length === 0;
+    const allTasksMarkedAsCorrectInStore = useMemo(() => {
+        if (!lessonKeyForStore || !currentLesson?.tasks || currentLesson.tasks.length === 0) {
+            return true;
         }
+        return getAllTasksCompleted(lessonKeyForStore);
+    }, [lessonKeyForStore, currentLesson?.tasks, getAllTasksCompleted]);
 
-        return Object.values(currentLessonTasks).every((task) => task.checkStatus === true);
-    }, [currentLessonTasks, currentLesson?.tasks]);
+    const handleCompleteLesson = () => {
+        if (!course || !currentLesson || isLessonMarkedCompletedByStudent || !allTasksMarkedAsCorrectInStore) return;
+
+        startCompleteTransition(async () => {
+            try {
+                const updatedProgressData = await apiClient.markLessonAsComplete(course.id, currentLesson.id);
+                if (updatedProgressData) {
+                    setIsLessonMarkedCompletedByStudent(true);
+                    updateCourseProgress(updatedProgressData);
+
+                    const freshUserData = await new AuthApiClient().getMe();
+                    if (freshUserData) {
+                        setUser(freshUserData);
+                    }
+
+                    toast.success(`Урок "${currentLesson.title}" отмечен как пройденный!`);
+
+                    if (lessonKeyForStore) {
+                        clearLessonSubmissions(lessonKeyForStore);
+                    }
+
+                    const currentIndex = course.lessons.findIndex((lesson) => lesson.id === currentLesson.id);
+                    const nextLesson = course.lessons[currentIndex + 1];
+
+                    if (nextLesson?.slug) {
+                        const nextLessonUrl = `/courses/${courseSlug}/learn/${nextLesson.slug}`;
+                        setTimeout(() => {
+                            router.push(nextLessonUrl);
+                        }, 800);
+                    } else {
+                        toast.info('Это был последний урок в курсе!');
+                    }
+                } else {
+                    toast.error('Не удалось обновить прогресс.');
+                }
+            } catch (error: unknown) {
+                console.error('Ошибка при отметке урока:', error);
+                let errorMsg = 'Не удалось отметить урок как пройденный.';
+                if (isAxiosError(error)) {
+                    errorMsg = error?.response?.data?.message || error.message || errorMsg;
+                } else if (error instanceof Error) {
+                    errorMsg = error.message;
+                }
+                toast.error(errorMsg);
+            }
+        });
+    };
 
     const parseCodeBlock = (codeBlock: string): { language: string | null; code: string } => {
         const match = codeBlock.match(/^```(\w*)\n([\s\S]*?)\n```$/);
@@ -118,59 +162,7 @@ export default function LessonPage() {
             const code = match[2];
             return { language: language ? language.toLowerCase() : null, code };
         }
-
         return { language: null, code: codeBlock };
-    };
-
-    const handleCompleteLesson = () => {
-        if (!course || !currentLesson || isLessonMarkedCompleted || !allTasksCompleted) return;
-
-        startCompleteTransition(async () => {
-            try {
-                const updatedProgressData = await apiClient.markLessonAsComplete(course.id, currentLesson.id);
-                if (updatedProgressData) {
-                    setIsLessonMarkedCompleted(true);
-                    updateCourseProgress(updatedProgressData);
-                    const freshUserData = await new AuthApiClient().getMe();
-                    if (freshUserData) {
-                        setUser(freshUserData);
-                    }
-                    toast.success(`Урок "${currentLesson.title}" отмечен как пройденный!`);
-
-                    if (lessonKey) {
-                        clearLessonState(lessonKey);
-                    } else {
-                        console.warn('Could not clear lesson state: lessonKey is null');
-                    }
-
-                    const currentIndex = course.lessons.findIndex((lesson) => lesson.id === currentLesson.id);
-                    const nextLesson = course.lessons[currentIndex + 1];
-
-                    if (nextLesson) {
-                        const nextLessonUrl = `/courses/${courseSlug}/learn/${nextLesson.slug}`;
-
-                        setTimeout(() => {
-                            router.push(nextLessonUrl);
-                        }, 800);
-                    }
-                } else {
-                    toast.error('Не удалось обновить прогресс.');
-                }
-            } catch (error: unknown) {
-                console.error('Ошибка при отметке урока:', error);
-
-                let errorMsg = 'Не удалось отметить урок как пройденный.';
-
-                if (isAxiosError(error)) {
-                    errorMsg =
-                        error?.response?.data?.message || error.message || 'Не удалось отметить урок как пройденный.';
-                } else if (error instanceof Error) {
-                    errorMsg = error.message;
-                }
-
-                toast.error(errorMsg);
-            }
-        });
     };
 
     if (!currentLesson) {
@@ -189,11 +181,11 @@ export default function LessonPage() {
             <div className="absolute top-0 right-0 not-prose">
                 <Button
                     onClick={handleCompleteLesson}
-                    disabled={isLessonMarkedCompleted || isCompletePending || !allTasksCompleted}
+                    disabled={isLessonMarkedCompletedByStudent || isCompletePending || !allTasksMarkedAsCorrectInStore}
                     size="sm"
-                    variant={isLessonMarkedCompleted ? 'secondary' : 'default'}
+                    variant={isLessonMarkedCompletedByStudent ? 'secondary' : 'default'}
                 >
-                    {isLessonMarkedCompleted ? 'Урок пройден' : 'Отметить и продолжить'}
+                    {isLessonMarkedCompletedByStudent ? 'Урок пройден' : 'Отметить и продолжить'}
                 </Button>
             </div>
 
@@ -284,11 +276,18 @@ export default function LessonPage() {
                 </>
             )}
 
-            {currentLesson.tasks && currentLesson.tasks.length > 0 && (
+            {currentLesson.tasks && course?.id && currentLesson.tasks.length > 0 && (
                 <>
                     <h2 className="not-prose text-xl font-semibold mt-6 mb-3">Задачи</h2>
                     {currentLesson.tasks.map((task, index) => (
-                        <TaskDisplay key={`${task.id}-${index}`} task={task} index={index} lessonKey={lessonKey} />
+                        <TaskDisplay
+                            key={`${task.id}-${index}`}
+                            task={task}
+                            index={index}
+                            lessonKey={lessonKeyForStore}
+                            courseId={course?.id}
+                            lessonId={currentLesson.id}
+                        />
                     ))}
                 </>
             )}

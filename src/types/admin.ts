@@ -1,4 +1,5 @@
 import { CourseDifficultyLevels } from '.';
+import { TaskType } from './task';
 
 export interface AdminUser {
     id: string;
@@ -13,28 +14,9 @@ export interface AdminUpdateUserRequest {
     isVerified?: boolean;
 }
 
-export interface AdminTaskDTO {
-    // Пример типа для Task
-    id: string;
-    description: string;
-    // ... другие поля Task
-}
-
 export interface AdminAttachmentDTO {
-    // Пример типа для Attachment
     name: string;
     url: string;
-}
-
-export interface AdminLessonDTO {
-    id: string;
-    title: string;
-    slug?: string | null;
-    content?: string | null;
-    codeExamples?: string[];
-    tasks?: AdminTaskDTO[];
-    attachments?: AdminAttachmentDTO[];
-    mainAttachment?: string | null;
 }
 
 export interface AdminCourseListItemDTO {
@@ -111,15 +93,6 @@ export interface AdminTestimonialDTO {
     avatarSrc?: string | null;
 }
 
-export interface AdminCreateUpdateLessonRequestDTO {
-    title: string;
-    content?: string | null;
-    codeExamples?: string[];
-    tasks?: AdminTaskDTO[];
-    attachments?: AdminAttachmentDTO[];
-    mainAttachment?: string | null;
-}
-
 export interface AdminDashboardStatsDTO {
     totalUsers: number;
     newUsersToday: number;
@@ -179,4 +152,54 @@ export interface AuthorCourseListItemAnalytics {
     averageCompletionRate: number;
     averageRating: number;
     imagePreview?: string | null;
+}
+
+export enum ProgrammingLanguage {
+    PYTHON = 'PYTHON',
+}
+
+export interface AdminTestCaseDTO {
+    id?: string;
+    name: string;
+    input: string[];
+    expectedOutput: string[];
+    isHidden: boolean;
+    points: number;
+}
+
+export interface AdminTaskDTO {
+    id?: string;
+    description: string;
+    solution?: string | null;
+    taskType: TaskType;
+    options?: string[] | null;
+
+    language?: ProgrammingLanguage | null;
+    boilerplateCode?: string | null;
+    testCases: AdminTestCaseDTO[];
+
+    timeoutSeconds?: number | null;
+    memoryLimitMb?: number | null;
+}
+
+export interface AdminCreateUpdateLessonRequestDTO {
+    title: string;
+    content?: string | null;
+    codeExamples?: string[];
+    tasks?: AdminTaskDTO[];
+    attachments?: AdminAttachmentDTO[];
+    mainAttachment?: string | null;
+    videoLength?: number | null;
+}
+
+export interface AdminLessonDTO {
+    id: string;
+    title: string;
+    slug?: string | null;
+    content?: string | null;
+    codeExamples?: string[];
+    tasks?: AdminTaskDTO[];
+    attachments?: AdminAttachmentDTO[];
+    mainAttachment?: string | null;
+    videoLength?: number | null;
 }
