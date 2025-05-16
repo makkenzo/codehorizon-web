@@ -149,6 +149,7 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
     const [pagedData, setPagedData] = useState<PagedResponse<StudentProgressDTO> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
     const currentPage = parseInt(searchParams.get('spage') || '1', 10);
     const pageSize = 10;
@@ -167,7 +168,11 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
                         <span className="text-xs text-muted-foreground w-8">
                             {row.original.progressPercent.toFixed(0)}%
                         </span>
-                        <Progress value={row.original.progressPercent} className="h-1.5 w-20" />
+                        <Progress
+                            value={row.original.progressPercent}
+                            className="h-1.5 w-20 bg-muted/30 overflow-hidden"
+                            indicatorClassName="bg-gradient-to-r from-red-500 to-secondary"
+                        />
                     </div>
                 ),
             },
@@ -263,12 +268,20 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
         if (columnBackendName !== currentColumn) {
             return <ArrowUpDown className="ml-2 h-3 w-3 text-muted-foreground/50" />;
         }
-        return currentDirection === 'asc' ? '▲' : '▼';
+        return (
+            <span
+                className={`ml-2 text-xs ${
+                    currentDirection === 'asc' ? 'text-primary' : 'text-secondary'
+                } font-bold transition-colors duration-200`}
+            >
+                {currentDirection === 'asc' ? '▲' : '▼'}
+            </span>
+        );
     };
 
     const renderSkeletons = (count: number) =>
         Array.from({ length: count }).map((_, index) => (
-            <TableRow key={`skel-stud-${index}`}>
+            <TableRow key={`skel-stud-${index}`} className="backdrop-blur-sm bg-background/40">
                 <TableCell>
                     <Skeleton className="h-5 w-24" />
                 </TableCell>
@@ -288,8 +301,14 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
         ));
 
     return (
-        <div className="space-y-4">
-            {error && <p className="text-destructive text-center">{error}</p>}
+        <div className="space-y-6">
+            {error && (
+                <Card className="border-destructive/40 bg-destructive/5 backdrop-blur-sm">
+                    <CardContent className="p-4 text-center text-destructive">
+                        <p>{error}</p>
+                    </CardContent>
+                </Card>
+            )}
 
             {!isLoading && rawData.length > 0 && (
                 <LinkedChart
@@ -370,7 +389,9 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
                 </Table>
             </div>
             {!isLoading && pagedData && pagedData.totalPages > 1 && (
-                <MyPagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+                <div className="p-4 border-t border-border/40 backdrop-blur-sm bg-background/40 relative z-10">
+                    <MyPagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+                </div>
             )}
         </div>
     );
