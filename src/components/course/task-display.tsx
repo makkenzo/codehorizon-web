@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
 import ReactCodeMirror from '@uiw/react-codemirror';
+import { motion } from 'framer-motion';
 import { AlertTriangle, Check, CheckCircle, HelpCircle, Loader2, Send, TerminalSquare, X, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { shallow } from 'zustand/shallow';
@@ -212,7 +213,7 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index, lessonKey, cours
         return [];
     };
 
-    const renderInput = () => {
+    const renderTaskInput = () => {
         switch (task.taskType) {
             case TaskType.CODE_INPUT:
                 return (
@@ -222,11 +223,7 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index, lessonKey, cours
                         extensions={[getLanguageExtension()]}
                         onChange={(value) => setCurrentCode(value)}
                         className="text-sm border border-input rounded-md overflow-hidden focus-within:ring-1 focus-within:ring-ring"
-                        readOnly={
-                            isSubmitting ||
-                            submissionDetails?.status === SubmissionStatus.CORRECT ||
-                            submissionDetails?.status === SubmissionStatus.CHECKING
-                        }
+                        readOnly={!canSubmit || isSubmitting}
                         basicSetup={{
                             foldGutter: false,
                             dropCursor: false,
@@ -243,11 +240,7 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index, lessonKey, cours
                         onChange={(e) => setTextAnswer(e.target.value)}
                         className="min-h-[100px]"
                         rows={4}
-                        disabled={
-                            isSubmitting ||
-                            submissionDetails?.status === SubmissionStatus.CORRECT ||
-                            submissionDetails?.status === SubmissionStatus.CHECKING
-                        }
+                        disabled={!canSubmit || isSubmitting}
                     />
                 );
             case TaskType.MULTIPLE_CHOICE:
@@ -255,17 +248,13 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index, lessonKey, cours
                     <RadioGroup
                         value={selectedOption}
                         onValueChange={setSelectedOption}
-                        disabled={
-                            isSubmitting ||
-                            submissionDetails?.status === SubmissionStatus.CORRECT ||
-                            submissionDetails?.status === SubmissionStatus.CHECKING
-                        }
+                        disabled={!canSubmit || isSubmitting}
                         className="space-y-2"
                     >
                         {task.options?.map((option, i) => (
                             <div
                                 key={i}
-                                className="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/50 transition-colors"
+                                className="flex items-center space-x-2 p-3 border rounded-md hover:bg-muted/50 transition-colors"
                             >
                                 <RadioGroupItem value={option} id={`task-${task.id}-option-${i}`} />
                                 <Label htmlFor={`task-${task.id}-option-${i}`} className="cursor-pointer flex-grow">
@@ -280,24 +269,61 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index, lessonKey, cours
         }
     };
 
-    const renderStatusIconAndText = () => {
-        if (!submissionDetails || isLoadingInitialSubmission)
-            return <HelpCircle className="h-5 w-5 text-muted-foreground" />;
+    const renderStatusBadge = () => {
+        if (!submissionDetails || (submissionDetails.status === SubmissionStatus.PENDING && !isSubmitting)) return null;
+
+        let badgeVariant: 'default' | 'destructive' | 'outline' | 'secondary' = 'outline';
+        let icon = <HelpCircle className="h-4 w-4" />;
+        let text = submissionDetails.status.replace('_', ' ');
+
         switch (submissionDetails.status) {
             case SubmissionStatus.CORRECT:
-                return <CheckCircle className="h-5 w-5 text-green-500" />;
+                badgeVariant = 'default'; // Успешный зеленый
+                icon = <CheckCircle className="h-4 w-4" />;
+                text = 'Решено';
+                break;
             case SubmissionStatus.INCORRECT:
             case SubmissionStatus.ERROR:
             case SubmissionStatus.TIMEOUT:
-                return <XCircle className="h-5 w-5 text-red-500" />;
+                badgeVariant = 'destructive';
+                icon = <XCircle className="h-4 w-4" />;
+                break;
             case SubmissionStatus.CHECKING:
-            case SubmissionStatus.PENDING:
-                return <Loader2 className="h-5 w-5 text-yellow-500 animate-spin" />;
+                badgeVariant = 'default'; // Желтый
+                icon = <Loader2 className="h-4 w-4 animate-spin" />;
+                text = 'Проверка...';
+                break;
             case SubmissionStatus.PARTIALLY_CORRECT:
-                return <AlertTriangle className="h-5 w-5 text-orange-500" />;
-            default:
-                return <HelpCircle className="h-5 w-5 text-muted-foreground" />;
+                badgeVariant = 'default';
+                icon = <AlertTriangle className="h-4 w-4" />;
+                break;
         }
+        if (isSubmitting && submissionDetails.status === SubmissionStatus.PENDING) {
+            icon = <Loader2 className="h-4 w-4 animate-spin" />;
+            text = 'Отправка...';
+        }
+
+        return (
+            <Badge
+                variant={badgeVariant}
+                className={cn(
+                    'text-xs',
+                    submissionDetails.status === SubmissionStatus.CORRECT &&
+                        'bg-green-500/15 text-green-700 border-green-500/30 dark:text-green-300 dark:border-green-500/50 dark:bg-green-500/20',
+                    (submissionDetails.status === SubmissionStatus.INCORRECT ||
+                        submissionDetails.status === SubmissionStatus.ERROR ||
+                        submissionDetails.status === SubmissionStatus.TIMEOUT) &&
+                        'bg-red-500/15 text-red-700 border-red-500/30 dark:text-red-300 dark:border-red-500/50 dark:bg-red-500/20',
+                    submissionDetails.status === SubmissionStatus.CHECKING &&
+                        'bg-yellow-500/15 text-yellow-700 border-yellow-500/30 dark:text-yellow-300 dark:border-yellow-500/50 dark:bg-yellow-500/20',
+                    submissionDetails.status === SubmissionStatus.PARTIALLY_CORRECT &&
+                        'bg-orange-500/15 text-orange-700 border-orange-500/30 dark:text-orange-300 dark:border-orange-500/50 dark:bg-orange-500/20'
+                )}
+            >
+                {icon}
+                <span className="ml-1.5">{text}</span>
+            </Badge>
+        );
     };
 
     const renderOutputDetails = (label: string, content: string | null | undefined, isError = false) => {
@@ -329,6 +355,57 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index, lessonKey, cours
             </pre>
         );
     };
+
+    const renderTestResultItem = (result: TestRunResult, idx: number) => (
+        <motion.li
+            key={result.testCaseId || `test-${idx}`}
+            className={cn(
+                'text-xs p-3 rounded-md border',
+                result.passed
+                    ? 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700 text-green-700 dark:text-green-300'
+                    : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 text-red-700 dark:text-red-400'
+            )}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05 }}
+        >
+            <div className="flex items-center font-medium">
+                {result.passed ? (
+                    <Check className="h-4 w-4 mr-1.5 shrink-0" />
+                ) : (
+                    <X className="h-4 w-4 mr-1.5 shrink-0" />
+                )}
+                {result.testCaseName || `Тест #${result.testCaseId.slice(-4)}`}:{' '}
+                {result.passed ? 'Пройден' : 'Не пройден'}
+                {result.executionTimeMs != null && (
+                    <span className="ml-auto text-xs opacity-70">{result.executionTimeMs}ms</span>
+                )}
+            </div>
+            {(!result.passed || result.actualOutput || result.expectedOutput) && (
+                <div className="mt-1.5 pl-5 text-xs opacity-90 space-y-1 font-mono">
+                    {result.expectedOutput && result.expectedOutput.length > 0 && (
+                        <div>
+                            Ожидалось:{' '}
+                            <code className="bg-black/5 dark:bg-white/5 px-1 py-0.5 rounded">
+                                {result.expectedOutput.join('\\n')}
+                            </code>
+                        </div>
+                    )}
+                    {result.actualOutput && result.actualOutput.length > 0 && (
+                        <div>
+                            Получено:{' '}
+                            <code className="bg-black/5 dark:bg-white/5 px-1 py-0.5 rounded">
+                                {result.actualOutput.join('\\n')}
+                            </code>
+                        </div>
+                    )}
+                    {result.errorMessage && (
+                        <div className="text-red-600 dark:text-red-400">Ошибка: {result.errorMessage}</div>
+                    )}
+                </div>
+            )}
+        </motion.li>
+    );
 
     const renderTestResults = (results: TestRunResult[]) => {
         if (!results || results.length === 0) return null;
@@ -415,10 +492,12 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index, lessonKey, cours
         );
     }
 
-    const canSubmit =
-        !isSubmitting &&
-        submissionDetails?.status !== SubmissionStatus.CORRECT &&
-        submissionDetails?.status !== SubmissionStatus.CHECKING;
+    const isTaskCorrect = submissionDetails?.status === SubmissionStatus.CORRECT;
+    const isTaskChecking =
+        submissionDetails?.status === SubmissionStatus.CHECKING ||
+        submissionDetails?.status === SubmissionStatus.PENDING ||
+        isSubmitting;
+    const canSubmit = !isTaskCorrect && !isTaskChecking;
 
     return (
         <Card
@@ -435,28 +514,8 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index, lessonKey, cours
         >
             <CardHeader>
                 <div className="flex justify-between items-start">
-                    <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                        {renderStatusIconAndText()}
-                        Задание {index + 1}
-                    </CardTitle>
-                    {submissionDetails?.status && submissionDetails.status !== SubmissionStatus.PENDING && (
-                        <Badge
-                            variant="outline"
-                            className={cn(
-                                'text-xs',
-                                submissionDetails.status === SubmissionStatus.CORRECT &&
-                                    'border-green-500 text-green-600 bg-green-500/10',
-                                submissionDetails.status === SubmissionStatus.INCORRECT &&
-                                    'border-red-500 text-red-600 bg-red-500/10',
-                                submissionDetails.status === SubmissionStatus.CHECKING &&
-                                    'border-yellow-500 text-yellow-600 bg-yellow-500/10 animate-pulse',
-                                submissionDetails.status === SubmissionStatus.ERROR &&
-                                    'border-destructive text-destructive-foreground bg-destructive/10'
-                            )}
-                        >
-                            {submissionDetails.status.replace('_', ' ')}
-                        </Badge>
-                    )}
+                    <CardTitle className="flex items-center gap-2 text-base md:text-lg">Задание {index + 1}</CardTitle>
+                    {renderStatusBadge()}
                 </div>
                 <CardDescription
                     dangerouslySetInnerHTML={{ __html: task.description }}
@@ -464,7 +523,7 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index, lessonKey, cours
                 />
             </CardHeader>
             <CardContent>
-                {renderInput()}
+                {renderTaskInput()}
                 {submissionDetails?.compileErrorMessage && (
                     <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-md">
                         <p className="text-xs font-semibold text-red-600 dark:text-red-300 flex items-center">

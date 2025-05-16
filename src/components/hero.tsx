@@ -9,8 +9,6 @@ import Link from 'next/link';
 import { fadeInVariants } from '@/lib/constants';
 
 import PageWrapper from './reusable/page-wrapper';
-import { Button } from './ui/button';
-import Threads from './ui/threads';
 import WrapButton from './ui/wrap-button';
 
 const Hero = () => {
@@ -34,37 +32,87 @@ const Hero = () => {
 
     return (
         <>
-            <motion.div
-                initial={{
-                    opacity: 0,
-                }}
-                animate={{
-                    opacity: 1,
-                }}
-                transition={{
-                    duration: 0.3,
-                    delay: 0.6,
-                }}
-                className="w-full h-[1000px] absolute -z-[50]"
-            >
-                <Threads
-                    amplitude={1}
-                    distance={0}
-                    enableMouseInteraction={true}
-                    color={[0.24313725490196078, 0.8, 0.6980392156862745]}
-                />
-            </motion.div>
+            <div className="absolute inset-0 -z-10 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-background/50"></div>
 
+                <motion.div
+                    className="absolute -top-[30%] -left-[10%] w-[70%] h-[70%] rounded-full bg-gradient-to-r from-primary/10 to-primary/5 blur-3xl"
+                    animate={{
+                        scale: [1, 1.1, 1],
+                        opacity: [0.3, 0.5, 0.3],
+                    }}
+                    transition={{
+                        duration: 8,
+                        repeat: Number.POSITIVE_INFINITY,
+                        repeatType: 'reverse',
+                    }}
+                />
+                <motion.div
+                    className="absolute top-[20%] -right-[10%] w-[60%] h-[60%] rounded-full bg-gradient-to-l from-secondary/10 to-primary/10 blur-3xl"
+                    animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.2, 0.4, 0.2],
+                    }}
+                    transition={{
+                        duration: 10,
+                        repeat: Number.POSITIVE_INFINITY,
+                        repeatType: 'reverse',
+                        delay: 1,
+                    }}
+                />
+                <div className="absolute inset-0 opacity-30">
+                    <motion.div
+                        className="absolute top-[15%] left-[20%] w-16 h-16 rounded-full border border-primary/20"
+                        animate={{
+                            y: [0, -20, 0],
+                            opacity: [0.5, 1, 0.5],
+                        }}
+                        transition={{
+                            duration: 5,
+                            repeat: Number.POSITIVE_INFINITY,
+                            ease: 'easeInOut',
+                        }}
+                    />
+
+                    <motion.div
+                        className="absolute top-[40%] right-[25%] w-24 h-24 rounded-lg border border-secondary/20 rotate-45"
+                        animate={{
+                            rotate: [45, 90, 45],
+                            opacity: [0.3, 0.7, 0.3],
+                        }}
+                        transition={{
+                            duration: 7,
+                            repeat: Number.POSITIVE_INFINITY,
+                            ease: 'easeInOut',
+                            delay: 2,
+                        }}
+                    />
+
+                    <motion.div
+                        className="absolute bottom-[20%] left-[30%] w-20 h-20 rounded-md border border-primary/20 rotate-12"
+                        animate={{
+                            rotate: [12, -12, 12],
+                            opacity: [0.4, 0.8, 0.4],
+                        }}
+                        transition={{
+                            duration: 6,
+                            repeat: Number.POSITIVE_INFINITY,
+                            ease: 'easeInOut',
+                            delay: 1,
+                        }}
+                    />
+                </div>
+                <div className="absolute inset-0 bg-[radial-gradient(hsl(var(--muted-foreground)/10)_1px,transparent_1px)] [background-size:20px_20px] opacity-30"></div>
+            </div>
             <motion.section
                 variants={fadeInVariants}
                 animate="visible"
                 initial="hidden"
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="overflow-hidden py-8 md:py-16 lg:py-24 bg-background-contrast dark:bg-background"
+                className="overflow-hidden py-8 md:py-16 lg:py-24 bg-transparent"
             >
                 <PageWrapper className="relative mt-0">
-                    <div className="pointer-events-none absolute inset-0 -top-20 -z-10 mx-auto hidden size-[500px] bg-[radial-gradient(hsl(var(--muted-foreground))_1px,transparent_1px)] opacity-100 [background-size:6px_6px] [mask-image:radial-gradient(circle_at_center,white_250px,transparent_250px)] lg:block"></div>
                     <div className="relative flex flex-col lg:flex-row justify-between gap-10 lg:gap-16">
                         <motion.div
                             className="w-full lg:max-w-lg xl:max-w-xl shrink-0"
@@ -130,7 +178,7 @@ const Hero = () => {
                                 className="w-fit"
                             >
                                 <Link href="/courses">
-                                    <WrapButton className="bg-primary">
+                                    <WrapButton className="bg-primary hover:bg-primary/90 transition-all duration-300">
                                         <span className="font-bold">Выбрать курс</span>
                                     </WrapButton>
                                 </Link>
@@ -141,14 +189,62 @@ const Hero = () => {
                             variants={fadeInVariants}
                             transition={{ delay: 1 }}
                         >
-                            <Image
-                                src={'/hero/bg.png'}
-                                alt="CodeHorizon platform preview"
-                                width={900}
-                                height={600}
-                                className="max-h-[450px] w-full min-w-[450px] rounded-lg object-contain"
-                                priority
-                            />
+                            <div className="relative">
+                                <motion.div
+                                    className="absolute -z-10 inset-0 bg-gradient-to-tr from-primary/10 to-secondary/10 rounded-lg blur-xl"
+                                    animate={{
+                                        opacity: [0.5, 0.7, 0.5],
+                                    }}
+                                    transition={{
+                                        duration: 3,
+                                        repeat: Number.POSITIVE_INFINITY,
+                                        repeatType: 'reverse',
+                                    }}
+                                />
+
+                                <motion.div
+                                    className="absolute -z-10 -inset-1 bg-gradient-to-br from-primary/20 to-transparent rounded-lg opacity-70"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 0.7 }}
+                                    transition={{ delay: 1.5, duration: 0.8 }}
+                                />
+
+                                <Image
+                                    src={'/hero/bg.png'}
+                                    alt="CodeHorizon platform preview"
+                                    width={900}
+                                    height={600}
+                                    className="max-h-[450px] w-full min-w-[450px] rounded-lg object-contain relative z-10"
+                                    priority
+                                />
+
+                                <motion.div
+                                    className="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-primary/10 backdrop-blur-sm border border-primary/20 z-20"
+                                    animate={{
+                                        y: [0, -10, 0],
+                                        x: [0, 5, 0],
+                                    }}
+                                    transition={{
+                                        duration: 4,
+                                        repeat: Number.POSITIVE_INFINITY,
+                                        repeatType: 'reverse',
+                                    }}
+                                />
+
+                                <motion.div
+                                    className="absolute -bottom-6 right-12 w-16 h-16 rounded-lg bg-secondary/10 backdrop-blur-sm border border-secondary/20 z-20 rotate-12"
+                                    animate={{
+                                        y: [0, 10, 0],
+                                        rotate: [12, 0, 12],
+                                    }}
+                                    transition={{
+                                        duration: 5,
+                                        repeat: Number.POSITIVE_INFINITY,
+                                        repeatType: 'reverse',
+                                        delay: 0.5,
+                                    }}
+                                />
+                            </div>
                         </motion.div>
                     </div>
 
@@ -161,13 +257,24 @@ const Hero = () => {
                             {features.map((feature, index) => (
                                 <motion.div
                                     key={index}
-                                    className="flex flex-col gap-y-4 px-4 py-8 md:p-6 lg:p-8 border-b md:border-b-0 md:border-r border-input/50 last:border-b-0 last:md:border-r-0"
+                                    className="flex flex-col gap-y-4 px-4 py-8 md:p-6 lg:p-8 border-b md:border-b-0 md:border-r border-input/50 last:border-b-0 last:md:border-r-0 group"
                                     variants={fadeInVariants}
                                     transition={{ delay: 0.4 + (index + 24) * 0.1 }}
+                                    whileHover={{
+                                        backgroundColor: 'rgba(var(--primary-rgb), 0.05)',
+                                        transition: { duration: 0.2 },
+                                    }}
                                 >
-                                    <feature.icon className="size-8 text-primary" />
+                                    <motion.div
+                                        whileHover={{ scale: 1.1, rotate: 5 }}
+                                        transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                                    >
+                                        <feature.icon className="size-8 text-primary" />
+                                    </motion.div>
                                     <div>
-                                        <h3 className="text-lg font-semibold mb-1">{feature.title}</h3>
+                                        <h3 className="text-lg font-semibold mb-1 group-hover:text-primary transition-colors duration-200">
+                                            {feature.title}
+                                        </h3>
                                         <p className="text-muted-foreground text-sm">{feature.description}</p>
                                     </div>
                                 </motion.div>
