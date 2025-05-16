@@ -28,7 +28,7 @@ export const createLessonTasksStore = (initState: LessonTasksState = defaultTask
                             if (!newSubmissions[currentTaskKey]) {
                                 newSubmissions[currentTaskKey] = {
                                     id: '',
-                                    taskId: task.id,
+                                    taskId: task.id!,
                                     userId: '',
                                     courseId: '',
                                     lessonId: '',

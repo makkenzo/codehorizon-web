@@ -1,4 +1,5 @@
 import { Attachment } from '.';
+import { ProgrammingLanguage } from './admin';
 
 export enum TaskType {
     TEXT_INPUT = 'TEXT_INPUT',
@@ -22,7 +23,7 @@ export interface Task {
     taskType: TaskType;
     options?: string[] | null;
 
-    language?: string | null;
+    language?: ProgrammingLanguage | null;
     boilerplateCode?: string | null;
     testCases: TestCase[];
 }

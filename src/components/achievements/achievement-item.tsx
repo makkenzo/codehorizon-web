@@ -81,11 +81,9 @@ const getRarityStyles = (rarity?: AchievementRarity | string, isEarned?: boolean
                 border: 'border-primary/30 hover:border-primary/50 dark:border-primary/40 dark:hover:border-primary/60',
                 iconWrapperBg: 'bg-primary/10 dark:bg-primary/20',
                 iconColor: 'text-primary dark:text-primary/90',
-                titleColor: isEarned
-                    ? 'text-primary-focus dark:text-primary-content'
-                    : 'text-primary dark:text-primary/90',
+                titleColor: isEarned ? 'text-primary dark:text-primary-content' : 'text-primary dark:text-primary/90',
                 descriptionColor: isEarned
-                    ? 'text-primary/80 dark:text-primary/70'
+                    ? 'text-[#3ECCB2] dark:text-primary/70'
                     : 'text-primary/70 dark:text-primary/60',
                 xpBadgeBg: 'bg-primary text-primary-foreground dark:bg-primary/80',
                 categoryBadgeClasses:
