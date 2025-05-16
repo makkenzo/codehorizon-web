@@ -8,6 +8,7 @@ import Link from 'next/link';
 
 import { fadeInVariants } from '@/lib/constants';
 
+import { InteractiveHoverButton } from './magicui/interactive-hover-button';
 import PageWrapper from './reusable/page-wrapper';
 import WrapButton from './ui/wrap-button';
 
@@ -178,9 +179,9 @@ const Hero = () => {
                                 className="w-fit"
                             >
                                 <Link href="/courses">
-                                    <WrapButton className="bg-primary hover:bg-primary/90 transition-all duration-300">
+                                    <InteractiveHoverButton>
                                         <span className="font-bold">Выбрать курс</span>
-                                    </WrapButton>
+                                    </InteractiveHoverButton>
                                 </Link>
                             </motion.div>
                         </motion.div>
