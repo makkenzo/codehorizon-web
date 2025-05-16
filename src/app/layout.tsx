@@ -10,6 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
         path: '/',
         title: 'CodeHorizon',
         description: 'CodeHorizon - современная платформа для изучения программирования.',
+        imageUrl: 'opengraph-image.jpg',
     });
 
     return metadata;
