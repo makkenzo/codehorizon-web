@@ -559,7 +559,7 @@ const AdminAchievementsPageContent = () => {
                             Удалить достижение?
                         </DialogTitle>
                         <DialogDescription className="text-base mt-2">
-                            Вы уверены, что хотите удалить достижение "{achievementToDelete?.name}" (ключ:{' '}
+                            Вы уверены, что хотите удалить достижение &quot;{achievementToDelete?.name}&quot; (ключ:{' '}
                             {achievementToDelete?.key}
                             )? Это действие необратимо.
                         </DialogDescription>
