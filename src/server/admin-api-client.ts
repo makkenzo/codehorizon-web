@@ -1,4 +1,5 @@
 import { PagedResponse } from '@/types';
+import { AdminAchievementDTO, AdminCreateAchievementDTO, AdminUpdateAchievementDTO } from '@/types/achievementsAdmin';
 import {
     AdminChartDataDTO,
     AdminCourseDetailDTO,
@@ -253,6 +254,83 @@ class AdminApiClient {
             return response.data;
         } catch (error: unknown) {
             console.error('Error running retroactive achievement grant:', error);
+            throw error;
+        }
+    }
+
+    async getAllAchievementsDefinitions(
+        page: number = 1,
+        size: number = 10,
+        sort?: string
+    ): Promise<PagedResponse<AdminAchievementDTO>> {
+        const params = new URLSearchParams();
+
+        params.append('page', (page - 1).toString());
+        params.append('size', size.toString());
+        if (sort) params.append('sort', sort);
+        try {
+            const response = await apiClient.get<PagedResponse<AdminAchievementDTO>>(
+                `/admin/achievements?${params.toString()}`
+            );
+
+            return response.data;
+        } catch (error: unknown) {
+            console.error('Error fetching all achievement definitions:', error);
+            throw error;
+        }
+    }
+
+    async getAchievementDefinitionById(id: string): Promise<AdminAchievementDTO> {
+        try {
+            const response = await apiClient.get<AdminAchievementDTO>(`/admin/achievements/${id}`);
+            return response.data;
+        } catch (error: unknown) {
+            console.error(`Error fetching achievement definition by ID ${id}:`, error);
+            throw error;
+        }
+    }
+
+    async createAchievementDefinition(data: AdminCreateAchievementDTO): Promise<AdminAchievementDTO> {
+        try {
+            const response = await apiClient.post<AdminAchievementDTO, AdminCreateAchievementDTO>(
+                `/admin/achievements`,
+                data
+            );
+            return response.data;
+        } catch (error: unknown) {
+            console.error(`Error creating achievement definition:`, error);
+            throw error;
+        }
+    }
+
+    async updateAchievementDefinition(id: string, data: AdminUpdateAchievementDTO): Promise<AdminAchievementDTO> {
+        try {
+            const response = await apiClient.put<AdminAchievementDTO, AdminUpdateAchievementDTO>(
+                `/admin/achievements/${id}`,
+                data
+            );
+            return response.data;
+        } catch (error: unknown) {
+            console.error(`Error updating achievement definition ${id}:`, error);
+            throw error;
+        }
+    }
+
+    async deleteAchievementDefinition(id: string): Promise<void> {
+        try {
+            await apiClient.delete<void>(`/admin/achievements/${id}`);
+        } catch (error: unknown) {
+            console.error(`Error deleting achievement definition ${id}:`, error);
+            throw error;
+        }
+    }
+
+    async getAchievementCategories(): Promise<string[]> {
+        try {
+            const response = await apiClient.get<string[]>('/admin/achievements/categories');
+            return response.data ?? [];
+        } catch (error) {
+            console.error('Error fetching achievement categories:', error);
             throw error;
         }
     }

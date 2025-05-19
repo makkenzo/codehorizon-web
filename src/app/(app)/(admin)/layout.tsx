@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useMemo } from 'react';
 
 import {
+    Award,
     BarChart3,
     BookOpen,
     Home,
@@ -20,7 +21,6 @@ import { usePathname, useRouter } from 'next/navigation';
 
 import AdminMobileMenu from '@/components/navigation/admin-mobile-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -29,7 +29,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useHasHydrated } from '@/hooks/use-has-hydrated';
 import { usePermissions } from '@/hooks/use-permissions';
 import { cn } from '@/lib/utils';
@@ -138,6 +137,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                     : null,
                 hasPermission('course:read:list:all') || hasPermission('course:read:list:own_created')
                     ? { id: 'admin-courses', href: '/admin/courses', label: 'Курсы', icon: BookOpen }
+                    : null,
+                hasPermission('achievement:admin:manage')
+                    ? { id: 'admin-achievements', href: '/admin/achievements', label: 'Достижения', icon: Award }
                     : null,
                 hasPermission('mentorship_application:admin:read:any')
                     ? {
