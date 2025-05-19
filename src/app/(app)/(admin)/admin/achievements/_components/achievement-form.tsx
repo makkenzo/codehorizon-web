@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { cloneElement, useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { isAxiosError } from 'axios';
@@ -410,7 +410,7 @@ const AchievementForm: React.FC<AchievementFormProps> = ({ initialData, onFormSu
                                         >
                                             {section.icon}
                                         </div>
-                                        <span className="font-medium">{section.label}</span>
+                                        <span className="font-medium text-left">{section.label}</span>
                                     </button>
                                 ))}
                             </nav>
@@ -793,7 +793,10 @@ const AchievementForm: React.FC<AchievementFormProps> = ({ initialData, onFormSu
                                                                                     <div
                                                                                         className={`w-8 h-8 rounded-lg ${opt.bgColor} flex items-center justify-center text-white`}
                                                                                     >
-                                                                                        {opt.icon}
+                                                                                        {cloneElement(opt.icon, {
+                                                                                            key: opt.value,
+                                                                                            className: 'text-white',
+                                                                                        })}
                                                                                     </div>
                                                                                     <span
                                                                                         className={`font-medium ${opt.color}`}
