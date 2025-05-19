@@ -339,7 +339,7 @@ const AdminAchievementsPageContent = () => {
                 <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-gradient-to-br from-blue-600/30 to-cyan-500/30 rounded-full blur-3xl opacity-70 animate-pulse"></div>
                 <div className="relative backdrop-blur-sm">
                     <Card className="border-0 bg-white/70 backdrop-blur-md shadow-xl rounded-3xl overflow-hidden py-0">
-                        <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-500 p-8">
+                        <CardHeader className="bg-gradient-to-r from-primary to-secondary p-8">
                             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                                 <div>
                                     <CardTitle className="flex items-center gap-3 text-3xl text-white">
