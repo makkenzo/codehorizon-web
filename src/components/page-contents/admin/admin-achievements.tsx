@@ -240,7 +240,7 @@ const AdminAchievementsPageContent = () => {
             case AchievementRarity.RARE:
                 return 'from-blue-500 to-indigo-600';
             case AchievementRarity.EPIC:
-                return 'from-purple-500 to-pink-500';
+                return 'from-primary to-pink-500';
             case AchievementRarity.LEGENDARY:
                 return 'from-amber-400 to-orange-500';
             default:
@@ -257,7 +257,7 @@ const AdminAchievementsPageContent = () => {
             case AchievementRarity.RARE:
                 return 'text-blue-500';
             case AchievementRarity.EPIC:
-                return 'text-purple-500';
+                return 'text-primary';
             case AchievementRarity.LEGENDARY:
                 return 'text-amber-500';
             default:
@@ -274,7 +274,7 @@ const AdminAchievementsPageContent = () => {
             case AchievementRarity.RARE:
                 return 'bg-blue-500';
             case AchievementRarity.EPIC:
-                return 'bg-purple-500';
+                return 'bg-primary';
             case AchievementRarity.LEGENDARY:
                 return 'bg-amber-500';
             default:
@@ -370,13 +370,13 @@ const AdminAchievementsPageContent = () => {
                                         placeholder="Поиск по названию, ключу, категории..."
                                         value={searchTerm}
                                         onChange={handleSearchChange}
-                                        className="pl-12 w-full h-12 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300"
+                                        className="pl-12 w-full h-12 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-primary bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300"
                                     />
                                 </div>
 
                                 <div className="flex flex-wrap gap-3 w-full md:w-auto">
                                     <Select value={sortOption} onValueChange={handleSortChange}>
-                                        <SelectTrigger className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 w-full md:w-[200px]">
+                                        <SelectTrigger className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-primary bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 w-full md:w-[200px]">
                                             <SelectValue placeholder="Сортировка" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-white/90 backdrop-blur-md border-gray-200 rounded-xl shadow-xl">
@@ -392,7 +392,7 @@ const AdminAchievementsPageContent = () => {
                                     </Select>
                                     {categories.length > 0 && (
                                         <Select value={selectedCategory || 'all'} onValueChange={handleCategoryChange}>
-                                            <SelectTrigger className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 w-full md:w-[200px]">
+                                            <SelectTrigger className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-primary bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 w-full md:w-[200px]">
                                                 <SelectValue placeholder="Категория" />
                                             </SelectTrigger>
                                             <SelectContent className="bg-white/90 backdrop-blur-md border-gray-200 rounded-xl shadow-xl">
