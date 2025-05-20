@@ -425,7 +425,7 @@ const IconPicker = React.forwardRef<React.ComponentRef<typeof PopoverTrigger>, I
                             {currentKebabIcon && currentPascalIcon ? (
                                 <>
                                     {/* @ts-ignore */}
-                                    <Icon name={currentKebabIcon} className="mr-2 h-4 w-4" /> {currentPascalIcon}
+                                    <Icon name={currentKebabIcon} className="mr-2 size-6" /> {currentPascalIcon}
                                 </>
                             ) : (
                                 triggerPlaceholder
