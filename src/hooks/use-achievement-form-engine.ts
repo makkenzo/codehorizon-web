@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 import { ACHIEVEMENT_FORM_SCHEMA, AchievementFormData, INITIAL_ACHIEVEMENT_FORM_DATA } from '@/lib/constants';
 import { adminApiClient } from '@/server/admin-api-client';
-import { AchievementRarity, AchievementTriggerType } from '@/types/achievements';
+import { AchievementRarity } from '@/types/achievements';
 import { AdminAchievementDTO, AdminCreateAchievementDTO, AdminUpdateAchievementDTO } from '@/types/achievementsAdmin';
 
 import { usePermissions } from './use-permissions';
