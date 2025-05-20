@@ -2,6 +2,10 @@ import { User } from '@/models';
 
 import ApiClient from './api-client';
 
+interface ResendVerificationResponse {
+    message: string;
+}
+
 class AuthApiClient extends ApiClient {
     async login(login: string, password: string) {
         const response = await this.post<{ accessToken: string; refreshToken: string }>('/auth/login', {
@@ -94,6 +98,11 @@ class AuthApiClient extends ApiClient {
         }
 
         return false;
+    }
+
+    async resendVerificationEmail(): Promise<ResendVerificationResponse> {
+        const response = await this.post<ResendVerificationResponse>('/auth/resend-verification');
+        return response.data;
     }
 }
 

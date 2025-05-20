@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from 'react';
 
 import { loadStripe } from '@stripe/stripe-js';
 import { isAxiosError } from 'axios';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Lock } from 'lucide-react';
 import { FaRegHeart } from 'react-icons/fa6';
 import { toast } from 'sonner';
 
@@ -94,6 +94,11 @@ const CourseButtons = ({ course, currentCourseProgressDetails, className }: Cour
             return;
         }
 
+        if (!user.isVerified) {
+            toast.error('Пожалуйста, подтвердите ваш email, чтобы записаться на курс.');
+            return;
+        }
+
         setIsEnrolling(true);
         try {
             const result = await apiClient.enrollFreeCourse(course.id);
@@ -115,6 +120,11 @@ const CourseButtons = ({ course, currentCourseProgressDetails, className }: Cour
     const handleCheckout = async () => {
         if (!isAuthenticated || !user) {
             router.push(`/sign-in?from=/courses/${course.slug}`);
+            return;
+        }
+
+        if (!user.isVerified) {
+            toast.error('Пожалуйста, подтвердите ваш email перед совершением покупки.');
             return;
         }
 
@@ -219,6 +229,52 @@ const CourseButtons = ({ course, currentCourseProgressDetails, className }: Cour
                 <Button id="course-buttons-go-to-learning" size="lg" className="w-full" onClick={handleGoToLearning}>
                     <BookOpen className="mr-2 h-5 w-5" />
                     {buttonText}
+                </Button>
+            </div>
+        );
+    }
+
+    if (isAuthenticated && user && !user.isVerified && !course.isFree) {
+        return (
+            <div className={cn('space-y-4', className)}>
+                <div className="mb-4">
+                    <Price
+                        discount={course.discount ?? 0}
+                        price={course.price ?? 0}
+                        isFree={course.isFree}
+                        priceClassName="text-2xl"
+                        discountPriceClassName="text-xl ml-4"
+                    />
+                    {course.discount ? (
+                        <div className="bg-warning text-white font-bold w-fit p-1 rounded-[2px]">
+                            СКИДКА {getPercentDifference(course.price, course.price - course.discount)}
+                        </div>
+                    ) : null}
+                </div>
+                <Button size="lg" disabled className="w-full" variant="outline">
+                    <Lock className="mr-2 h-5 w-5" />
+                    Подтвердите email
+                </Button>
+                <Button
+                    variant={isInWishlist ? 'secondary' : 'outline'}
+                    size="lg"
+                    onClick={handleToggleWishlist}
+                    isLoading={isWishlistPending}
+                    aria-live="polite"
+                    disabled={isWishlistPending}
+                    className="w-full"
+                >
+                    {isWishlistPending ? (
+                        <span>Обновление...</span>
+                    ) : isInWishlist ? (
+                        <>
+                            <FaRegHeart className="size-5 mr-2" />В желаемом
+                        </>
+                    ) : (
+                        <>
+                            <FaRegHeart className="size-5 mr-2" />В желаемое
+                        </>
+                    )}
                 </Button>
             </div>
         );

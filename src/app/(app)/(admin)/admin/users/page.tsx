@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [filterRole, setFilterRole] = useState<string | null>(null);
     const [filterVerified, setFilterVerified] = useState<boolean | null>(null);
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
     const currentPage = parseInt(searchParams.get('page') || '1', 10);
     const pageSize = parseInt(searchParams.get('size') || '10', 10);

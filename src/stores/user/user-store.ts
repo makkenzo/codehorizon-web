@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { User } from '@/models';
 import { achievementsApiClient } from '@/server/achievements';
+import AuthApiClient from '@/server/auth';
 import { Achievement } from '@/types/achievements';
 
 import { UserState, UserStore } from './types';
@@ -59,6 +60,18 @@ export const createUserStore = (initState: UserState = defaultInitState) => {
                         }
                         return state;
                     });
+                },
+                resendVerificationEmail: async () => {
+                    try {
+                        const response = await new AuthApiClient().resendVerificationEmail();
+                        return { success: true, message: response.message };
+                    } catch (error: any) {
+                        console.error('Error resending verification email:', error);
+                        return {
+                            success: false,
+                            message: error.response?.data?.message || error.message || 'Не удалось отправить письмо.',
+                        };
+                    }
                 },
             }),
             {

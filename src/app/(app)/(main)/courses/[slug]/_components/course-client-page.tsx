@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { usePermissions } from '@/hooks/use-permissions';
 import { useAuth } from '@/providers/auth-provider';
 import ReviewsApiClient from '@/server/reviews';
+import { useUserStore } from '@/stores/user/user-store-provider';
 import { PagedResponse } from '@/types';
 import { RatingDistributionDTO, ReviewDTO } from '@/types/review';
 
@@ -37,6 +38,7 @@ export default function CourseClientPageReviews({
 }: CourseClientPageReviewsProps) {
     const { isAuthenticated, isPending: isAuthPending } = useAuth();
     const { hasPermission } = usePermissions();
+    const { user } = useUserStore((state) => state);
 
     const [reviewsData, setReviewsData] = useState(initialReviewsData);
     const [currentRatingDistribution, setCurrentRatingDistribution] = useState(initialRatingDistribution);
@@ -150,7 +152,8 @@ export default function CourseClientPageReviews({
         fetchReviewsAndDistribution(reviewsPage);
     };
 
-    const canWriteReview = isAuthenticated && hasCourseAccess && !isLoadingAccess && hasPermission('review:create');
+    const canWriteReview =
+        isAuthenticated && user?.isVerified && hasCourseAccess && !isLoadingAccess && hasPermission('review:create');
     const isLoadingPrerequisitesForButton = isLoadingAccess || isCheckingUserReview || isAuthPending;
 
     const ReviewSectionSkeleton = () => (

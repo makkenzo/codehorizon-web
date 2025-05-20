@@ -19,6 +19,7 @@ export type UserActions = {
         dailyStreak: number,
         lessonStreak: number
     ) => void;
+    resendVerificationEmail: () => Promise<{ success: boolean; message: string }>;
 };
 
 export type UserStore = UserState & UserActions;

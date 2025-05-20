@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { motion } from 'framer-motion';
-import { ShieldQuestion } from 'lucide-react';
+import { Lock, ShieldQuestion } from 'lucide-react';
 import { FaUserSecret } from 'react-icons/fa6';
 import { RiProgress5Line } from 'react-icons/ri';
 
@@ -40,6 +40,7 @@ import LevelProgress from '../reusable/level-progress';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Dialog, DialogTrigger } from '../ui/dialog';
 import { Skeleton } from '../ui/skeleton';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import MobileBurgerMenu from './mobile-burger-menu';
 
 const Header = () => {
@@ -146,27 +147,55 @@ const Header = () => {
 
                         <div className="flex items-center gap-4 w-full justify-end ml-auto">
                             {isAuthenticated &&
+                                user &&
                                 hasPermission('mentorship_application:apply') &&
-                                canApplyForMentorship &&
                                 !isCheckingMentorshipStatus && (
-                                    <Dialog open={isApplicationModalOpen} onOpenChange={setIsApplicationModalOpen}>
-                                        <DialogTrigger asChild>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-foreground lg:flex hidden items-center gap-1.5 hover:bg-primary/10 hover:text-primary"
+                                    <>
+                                        {!user.isVerified ? (
+                                            <TooltipProvider delayDuration={100}>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <div className="lg:flex hidden items-center">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="text-foreground items-center gap-1.5 hover:bg-primary/10 hover:text-primary"
+                                                                disabled
+                                                            >
+                                                                <Lock className="h-3 w-3 mr-1" />
+                                                                Стать ментором
+                                                            </Button>
+                                                        </div>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Подтвердите email, чтобы подать заявку.</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        ) : canApplyForMentorship ? (
+                                            <Dialog
+                                                open={isApplicationModalOpen}
+                                                onOpenChange={setIsApplicationModalOpen}
                                             >
-                                                <ShieldQuestion className="h-4 w-4" />
-                                                Стать ментором
-                                            </Button>
-                                        </DialogTrigger>
-                                        {isApplicationModalOpen && (
-                                            <MentorshipApplicationModal
-                                                onClose={() => setIsApplicationModalOpen(false)}
-                                                onSuccess={handleApplicationSuccess}
-                                            />
-                                        )}
-                                    </Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-foreground lg:flex hidden items-center gap-1.5 hover:bg-primary/10 hover:text-primary"
+                                                    >
+                                                        <ShieldQuestion className="h-4 w-4" />
+                                                        Стать ментором
+                                                    </Button>
+                                                </DialogTrigger>
+                                                {isApplicationModalOpen && (
+                                                    <MentorshipApplicationModal
+                                                        onClose={() => setIsApplicationModalOpen(false)}
+                                                        onSuccess={handleApplicationSuccess}
+                                                    />
+                                                )}
+                                            </Dialog>
+                                        ) : null}
+                                    </>
                                 )}
                             {pathname.includes('courses') ? <CatalogFiltersMobile /> : null}
                             {isAuthenticated && user ? (

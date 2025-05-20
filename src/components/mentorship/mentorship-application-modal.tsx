@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { mentorshipApiClient } from '@/server/mentorship';
+import { useUserStore } from '@/stores/user/user-store-provider';
 
 import { Button } from '../ui/button';
 import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
@@ -26,6 +27,7 @@ type ApplicationFormData = z.infer<typeof applicationSchema>;
 
 const MentorshipApplicationModal: React.FC<MentorshipApplicationModalProps> = ({ onClose, onSuccess }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { user } = useUserStore((state) => state);
 
     const form = useForm<ApplicationFormData>({
         resolver: zodResolver(applicationSchema),
@@ -35,6 +37,11 @@ const MentorshipApplicationModal: React.FC<MentorshipApplicationModalProps> = ({
     });
 
     const onSubmit = async (values: ApplicationFormData) => {
+        if (!user?.isVerified) {
+            toast.error('Пожалуйста, подтвердите ваш email, чтобы подать заявку на менторство.');
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const newApplication = await mentorshipApiClient.applyForMentorship({ reason: values.reason });
