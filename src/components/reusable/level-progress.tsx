@@ -12,6 +12,7 @@ interface LevelProgressProps {
     dailyStreak?: number;
     className?: string;
     showTooltip?: boolean;
+    showLevel?: boolean;
 }
 
 const LevelProgress: React.FC<LevelProgressProps> = ({
@@ -21,6 +22,7 @@ const LevelProgress: React.FC<LevelProgressProps> = ({
     dailyStreak,
     className,
     showTooltip = true,
+    showLevel = true,
 }) => {
     const safeXpForNextLevel = xpForNextLevel > 0 ? xpForNextLevel : 100;
     const safeCurrentXp = Math.min(currentXp, safeXpForNextLevel);
@@ -58,21 +60,23 @@ const LevelProgress: React.FC<LevelProgressProps> = ({
                     </Tooltip>
                 </TooltipProvider>
             )}
-            <TooltipProvider delayDuration={100}>
-                <Tooltip>
-                    <TooltipTrigger asChild>{content}</TooltipTrigger>
-                    <TooltipContent side="bottom">
-                        <p>
-                            Опыт: {currentXp} / {xpForNextLevel}
-                        </p>
-                        {xpToNext > 0 ? (
-                            <p>До след. уровня: {xpToNext} XP</p>
-                        ) : (
-                            <p>Максимальный уровень достигнут или данные обновляются!</p>
-                        )}
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
+            {showLevel && (
+                <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                        <TooltipTrigger asChild>{content}</TooltipTrigger>
+                        <TooltipContent side="bottom">
+                            <p>
+                                Опыт: {currentXp} / {xpForNextLevel}
+                            </p>
+                            {xpToNext > 0 ? (
+                                <p>До след. уровня: {xpToNext} XP</p>
+                            ) : (
+                                <p>Максимальный уровень достигнут или данные обновляются!</p>
+                            )}
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            )}
         </div>
     );
 };

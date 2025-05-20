@@ -208,6 +208,7 @@ const Header = () => {
                                             xpForNextLevel={user.xpForNextLevel}
                                             dailyStreak={user.dailyStreak}
                                             showTooltip={true}
+                                            showLevel={false}
                                         />
                                     </div>
                                 </>

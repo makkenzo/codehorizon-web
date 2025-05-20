@@ -149,7 +149,7 @@ const AdminDashboardPageContent = () => {
         })) ?? [];
 
     return (
-        <div className="flex flex-col gap-4 md:gap-6 lg:gap-8">
+        <div className="flex flex-col gap-4 md:gap-6 lg:gap-8 p-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="overflow-hidden border-border/40 backdrop-blur-sm bg-background/60 relative group hover:shadow-lg transition-all duration-300">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
