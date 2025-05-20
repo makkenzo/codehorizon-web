@@ -239,10 +239,10 @@ const AdminMentorshipApplicationsPageContent = () => {
                                             setCurrentPage(1);
                                         }}
                                     >
-                                        <SelectTrigger className="bg-white/20 hover:bg-white/30 text-white border-0 h-12 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 w-[200px]">
+                                        <SelectTrigger className="hover:bg-white/30 border-0 h-12 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 w-[200px] bg-white/90">
                                             <SelectValue placeholder="Фильтр по статусу" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-white/90 backdrop-blur-md border-gray-200 rounded-xl shadow-xl">
+                                        <SelectContent className="bg-white/90 backdrop-blur-md border-gray-200 rounded-lg shadow-xl">
                                             <SelectItem value="ALL" className="flex items-center gap-2 py-2">
                                                 <UserPlus className="h-4 w-4 text-blue-500" />
                                                 <span>Все статусы</span>
@@ -271,10 +271,10 @@ const AdminMentorshipApplicationsPageContent = () => {
                                         </SelectContent>
                                     </Select>
                                     <Select value={sortBy} onValueChange={setSortBy}>
-                                        <SelectTrigger className="bg-white/20 hover:bg-white/30 text-white border-0 h-12 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 w-[200px]">
+                                        <SelectTrigger className="hover:bg-white/30 border-0 h-12 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 w-[200px] bg-white/90">
                                             <SelectValue placeholder="Сортировка" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-white/90 backdrop-blur-md border-gray-200 rounded-xl shadow-xl">
+                                        <SelectContent className="bg-white/90 backdrop-blur-md border-gray-200 rounded-lg shadow-xl">
                                             <SelectItem value="appliedAt,desc" className="flex items-center gap-2 py-2">
                                                 <Calendar className="h-4 w-4 text-blue-500" />
                                                 <span>Сначала новые</span>

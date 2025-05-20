@@ -265,23 +265,6 @@ const AdminAchievementsPageContent = () => {
         }
     }
 
-    function getRarityBgColor(rarity: AchievementRarity): string {
-        switch (rarity) {
-            case AchievementRarity.COMMON:
-                return 'bg-cyan-500';
-            case AchievementRarity.UNCOMMON:
-                return 'bg-emerald-500';
-            case AchievementRarity.RARE:
-                return 'bg-blue-500';
-            case AchievementRarity.EPIC:
-                return 'bg-primary';
-            case AchievementRarity.LEGENDARY:
-                return 'bg-amber-500';
-            default:
-                return 'bg-cyan-500';
-        }
-    }
-
     function getRarityBgLight(rarity: AchievementRarity): string {
         switch (rarity) {
             case AchievementRarity.COMMON:
