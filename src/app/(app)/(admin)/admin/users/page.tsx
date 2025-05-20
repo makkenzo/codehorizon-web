@@ -16,8 +16,10 @@ import {
     X,
 } from 'lucide-react';
 
+import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -47,7 +49,7 @@ export default function AdminUsersPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [filterRole, setFilterRole] = useState<string | null>(null);
     const [filterVerified, setFilterVerified] = useState<boolean | null>(null);
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
 
     const currentPage = parseInt(searchParams.get('page') || '1', 10);
     const pageSize = parseInt(searchParams.get('size') || '10', 10);
@@ -268,7 +270,7 @@ export default function AdminUsersPage() {
                             <div className="relative w-full md:w-64 group">
                                 <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
                                 <div className="relative bg-white/80 backdrop-blur-sm rounded-xl flex items-center px-3 border border-white/50 shadow-sm">
-                                    <Search className="h-4 w-4 text-slate-400 mr-2" />
+                                    <Search className="size-4 text-slate-400 mr-2" />
                                     <input
                                         type="text"
                                         placeholder="Поиск пользователей..."
@@ -287,9 +289,9 @@ export default function AdminUsersPage() {
                                             size="sm"
                                             className="border-white/50 bg-white/80 backdrop-blur-sm"
                                         >
-                                            <Filter className="h-4 w-4 mr-2" />
+                                            <Filter className="size-4 mr-2" />
                                             Фильтры
-                                            <ChevronDown className="h-4 w-4 ml-2" />
+                                            <ChevronDown className="size-4 ml-2" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent className="w-56 p-2 bg-white/90 backdrop-blur-lg border border-white/50 shadow-xl rounded-xl">
@@ -348,7 +350,7 @@ export default function AdminUsersPage() {
                                         className={`rounded-none rounded-l-lg ${viewMode === 'grid' ? 'bg-violet-600 hover:bg-violet-700' : 'bg-white/80 backdrop-blur-sm'}`}
                                         onClick={() => setViewMode('grid')}
                                     >
-                                        <Users className="h-4 w-4" />
+                                        <Users className="size-4" />
                                     </Button>
                                     <Button
                                         variant={viewMode === 'list' ? 'default' : 'outline'}
@@ -451,9 +453,9 @@ export default function AdminUsersPage() {
                                                                 aria-haspopup="true"
                                                                 size="icon"
                                                                 variant="ghost"
-                                                                className="rounded-full h-8 w-8 bg-white/30 backdrop-blur-sm hover:bg-white/50"
+                                                                className="rounded-full h-8 w-8 bg-white/30 backdrop-blur-sm group"
                                                             >
-                                                                <MoreHorizontal className="h-4 w-4 text-white" />
+                                                                <MoreHorizontal className="size-4 text-white group-hover:text-foreground" />
                                                                 <span className="sr-only">Toggle menu</span>
                                                             </Button>
                                                         </DropdownMenuTrigger>
@@ -466,7 +468,7 @@ export default function AdminUsersPage() {
                                                                 onClick={() => setEditingUser(user)}
                                                                 className="cursor-pointer hover:bg-violet-50 rounded-lg transition-colors my-1 focus:bg-violet-50"
                                                             >
-                                                                <Pencil className="mr-2 h-4 w-4" /> Редактировать
+                                                                <Pencil className="mr-2 size-4" /> Редактировать
                                                             </DropdownMenuItem>
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>
@@ -476,7 +478,13 @@ export default function AdminUsersPage() {
                                                     <div
                                                         className={`w-20 h-20 rounded-full flex items-center justify-center text-white text-xl font-bold bg-gradient-to-br ${getRandomGradient(user.id)} shadow-lg border-4 border-white`}
                                                     >
-                                                        {getInitials(user.username)}
+                                                        {user.imageUrl ? (
+                                                            <Avatar className="w-full h-full">
+                                                                <AvatarImage src={user.imageUrl} alt={user.username} />
+                                                            </Avatar>
+                                                        ) : (
+                                                            getInitials(user.username)
+                                                        )}
                                                     </div>
                                                     <h3 className="mt-4 text-lg font-semibold">{user.username}</h3>
                                                     <p className="text-slate-500 text-sm">{user.email}</p>
@@ -532,26 +540,12 @@ export default function AdminUsersPage() {
                             ) : filteredUsers && filteredUsers.length > 0 ? (
                                 <div className="space-y-4">
                                     <div className="flex items-center px-4 py-2 text-sm font-medium text-slate-500 bg-slate-50/50 rounded-lg">
-                                        <div className="flex-1 flex gap-4">
-                                            <button
-                                                className="flex items-center gap-1 hover:text-violet-600 transition-colors"
-                                                onClick={() => handleSort('username')}
-                                            >
-                                                Имя пользователя
-                                                {sortField === 'username' &&
-                                                    (sortDirection === 'asc' ? (
-                                                        <ChevronUp className="h-3 w-3" />
-                                                    ) : (
-                                                        <ChevronDown className="h-3 w-3" />
-                                                    ))}
-                                            </button>
-                                        </div>
-                                        <div className="flex-1">
+                                        <div className="flex-1 pl-14">
                                             <button
                                                 className="flex items-center gap-1 hover:text-violet-600 transition-colors"
                                                 onClick={() => handleSort('email')}
                                             >
-                                                E-mail
+                                                Имя пользователя/E-mail
                                                 {sortField === 'email' &&
                                                     (sortDirection === 'asc' ? (
                                                         <ChevronUp className="h-3 w-3" />
@@ -560,7 +554,7 @@ export default function AdminUsersPage() {
                                                     ))}
                                             </button>
                                         </div>
-                                        <div className="w-24">
+                                        <div className="flex-1 w-24">
                                             <button
                                                 className="flex items-center gap-1 hover:text-violet-600 transition-colors"
                                                 onClick={() => handleSort('verified')}
@@ -574,7 +568,7 @@ export default function AdminUsersPage() {
                                                     ))}
                                             </button>
                                         </div>
-                                        <div className="w-40">
+                                        <div className="flex-1 w-40">
                                             <button
                                                 className="flex items-center gap-1 hover:text-violet-600 transition-colors"
                                                 onClick={() => handleSort('roles')}
@@ -608,13 +602,19 @@ export default function AdminUsersPage() {
                                                     <div
                                                         className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold bg-gradient-to-br ${getRandomGradient(user.id)} shadow border-2 border-white`}
                                                     >
-                                                        {getInitials(user.username)}
+                                                        {user.imageUrl ? (
+                                                            <Avatar className="w-full h-full">
+                                                                <AvatarImage src={user.imageUrl} alt={user.username} />
+                                                            </Avatar>
+                                                        ) : (
+                                                            getInitials(user.username)
+                                                        )}
                                                     </div>
                                                     <div className="flex-1">
                                                         <h3 className="font-medium">{user.username}</h3>
                                                         <p className="text-slate-500 text-sm">{user.email}</p>
                                                     </div>
-                                                    <div className="w-24">
+                                                    <div className="w-24 flex-1">
                                                         <Badge
                                                             variant={user.isVerified ? 'default' : 'destructive'}
                                                             className="px-2 py-0.5 text-xs"
@@ -622,7 +622,7 @@ export default function AdminUsersPage() {
                                                             {user.isVerified ? 'Верифицирован' : 'Не верифицирован'}
                                                         </Badge>
                                                     </div>
-                                                    <div className="w-40 flex flex-wrap gap-1">
+                                                    <div className="w-40 flex flex-wrap gap-1 flex-1">
                                                         {user.roles.map((role) => (
                                                             <Badge
                                                                 key={role}
@@ -641,9 +641,9 @@ export default function AdminUsersPage() {
                                                                 aria-haspopup="true"
                                                                 size="icon"
                                                                 variant="ghost"
-                                                                className="rounded-full h-8 w-8 hover:bg-slate-100"
+                                                                className="rounded-full h-8 w-8 hover:bg-slate-100 hover:text-red-500"
                                                             >
-                                                                <MoreHorizontal className="h-4 w-4 text-slate-600" />
+                                                                <MoreHorizontal className="size-4 text-slate-600" />
                                                                 <span className="sr-only">Toggle menu</span>
                                                             </Button>
                                                         </DropdownMenuTrigger>
@@ -654,9 +654,9 @@ export default function AdminUsersPage() {
                                                             <DropdownMenuLabel>Действия</DropdownMenuLabel>
                                                             <DropdownMenuItem
                                                                 onClick={() => setEditingUser(user)}
-                                                                className="cursor-pointer hover:bg-violet-50 rounded-lg transition-colors my-1 focus:bg-violet-50"
+                                                                className="cursor-pointer hover:bg-violet-50 rounded-lg transition-colors my-1 focus:bg-violet-50 pl-2"
                                                             >
-                                                                <Pencil className="mr-2 h-4 w-4" /> Редактировать
+                                                                <Pencil className="size-4" /> Редактировать
                                                             </DropdownMenuItem>
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>

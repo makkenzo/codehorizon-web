@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -113,7 +114,13 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
                         <div
                             className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-lg font-bold bg-gradient-to-br ${getRandomGradient(user.id)} shadow-lg border-4 border-white`}
                         >
-                            {getInitials(user.username)}
+                            {user.imageUrl ? (
+                                <Avatar className="w-full h-full">
+                                    <AvatarImage src={user.imageUrl} alt={user.username} />
+                                </Avatar>
+                            ) : (
+                                getInitials(user.username)
+                            )}
                         </div>
                     </div>
                     <DialogTitle className="text-center text-xl">Редактировать пользователя</DialogTitle>

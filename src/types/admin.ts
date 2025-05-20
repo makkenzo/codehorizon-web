@@ -7,6 +7,9 @@ export interface AdminUser {
     email: string;
     isVerified: boolean;
     roles: string[];
+    imageUrl: string | null;
+    createdAt: string;
+    lastLoginDate: string | null;
 }
 
 export interface AdminUpdateUserRequest {
