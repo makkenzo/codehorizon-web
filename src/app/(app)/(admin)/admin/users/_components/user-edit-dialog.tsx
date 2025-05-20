@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { adminApiClient } from '@/server/admin-api-client';
-import { AdminUpdateUserRequest, AdminUser } from '@/types/admin';
+import type { AdminUpdateUserRequest, AdminUser } from '@/types/admin';
 
 const formSchema = z.object({
     isVerified: z.boolean(),
@@ -44,7 +44,6 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
         resolver: zodResolver(formSchema),
         defaultValues: {
             isVerified: user.isVerified,
-
             isAdmin: user.roles.includes('ADMIN') || user.roles.includes('ROLE_ADMIN'),
             isUser: user.roles.includes('USER') || user.roles.includes('ROLE_USER'),
             isMentor: user.roles.includes('MENTOR') || user.roles.includes('ROLE_MENTOR'),
@@ -80,13 +79,46 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
         }
     };
 
+    const getInitials = (username: string) => {
+        return username.substring(0, 2).toUpperCase();
+    };
+
+    const getRandomGradient = (userId: string) => {
+        // Generate a deterministic gradient based on user ID
+        const hash = userId.split('').reduce((acc, char) => {
+            return char.charCodeAt(0) + ((acc << 5) - acc);
+        }, 0);
+
+        const gradients = [
+            'from-violet-500 to-fuchsia-500',
+            'from-cyan-500 to-blue-500',
+            'from-emerald-500 to-teal-500',
+            'from-amber-500 to-orange-500',
+            'from-rose-500 to-pink-500',
+            'from-indigo-500 to-purple-500',
+            'from-blue-500 to-indigo-500',
+            'from-green-500 to-emerald-500',
+            'from-orange-500 to-red-500',
+            'from-pink-500 to-rose-500',
+        ];
+
+        return gradients[Math.abs(hash) % gradients.length];
+    };
+
     return (
         <Dialog open={true} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Редактировать пользователя: {user.username}</DialogTitle>
-                    <DialogDescription>
-                        Измените данные пользователя и роли. Нажмите «Сохранить», когда закончите.
+            <DialogContent className="sm:max-w-[425px] bg-white/90 backdrop-blur-lg border border-white/50 shadow-xl rounded-xl">
+                <DialogHeader className="space-y-3">
+                    <div className="mx-auto">
+                        <div
+                            className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-lg font-bold bg-gradient-to-br ${getRandomGradient(user.id)} shadow-lg border-4 border-white`}
+                        >
+                            {getInitials(user.username)}
+                        </div>
+                    </div>
+                    <DialogTitle className="text-center text-xl">Редактировать пользователя</DialogTitle>
+                    <DialogDescription className="text-center">
+                        {user.username} • {user.email}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -95,7 +127,7 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
                             control={form.control}
                             name="isVerified"
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/50 bg-white/50 p-4">
                                     <div className="space-y-0.5">
                                         <FormLabel className="text-base">Верификация</FormLabel>
                                         <FormDescription>Пользователь подтвержден эл. почтой?</FormDescription>
@@ -105,80 +137,97 @@ export default function AdminUserEditDialog({ user, onOpenChange, onUserUpdate }
                                             checked={field.value}
                                             onCheckedChange={field.onChange}
                                             disabled={isSubmitting}
+                                            className="data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
                                         />
                                     </FormControl>
                                 </FormItem>
                             )}
                         />
 
-                        <div className="space-y-2 rounded-lg border p-4">
+                        <div className="space-y-4 rounded-lg border border-white/50 bg-white/50 p-4">
                             <FormLabel className="text-base">Роли</FormLabel>
                             <FormDescription>Назначьте роли пользователю.</FormDescription>
-                            <FormField
-                                control={form.control}
-                                name="isUser"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                        <FormControl>
-                                            <Checkbox
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                                disabled={isSubmitting}
-                                            />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">Пользователь</FormLabel>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="isAdmin"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                        <FormControl>
-                                            <Checkbox
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                                disabled={isSubmitting}
-                                            />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">Администратор</FormLabel>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="isMentor"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                        <FormControl>
-                                            <Checkbox
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                                disabled={isSubmitting}
-                                                id={`mentor-role-${user.id}`}
-                                            />
-                                        </FormControl>
-                                        <FormLabel htmlFor={`mentor-role-${user.id}`} className="font-normal">
-                                            Ментор
-                                        </FormLabel>
-                                    </FormItem>
-                                )}
-                            />
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="isUser"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col items-center space-y-2 rounded-lg border border-white/50 bg-white/70 p-3 transition-colors hover:bg-white/90">
+                                            <FormControl>
+                                                <Checkbox
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                    disabled={isSubmitting}
+                                                    className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                                                />
+                                            </FormControl>
+                                            <FormLabel className="font-medium text-emerald-700">Пользователь</FormLabel>
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="isAdmin"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col items-center space-y-2 rounded-lg border border-white/50 bg-white/70 p-3 transition-colors hover:bg-white/90">
+                                            <FormControl>
+                                                <Checkbox
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                    disabled={isSubmitting}
+                                                    className="data-[state=checked]:bg-rose-600 data-[state=checked]:border-rose-600"
+                                                />
+                                            </FormControl>
+                                            <FormLabel className="font-medium text-rose-700">Администратор</FormLabel>
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="isMentor"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col items-center space-y-2 rounded-lg border border-white/50 bg-white/70 p-3 transition-colors hover:bg-white/90">
+                                            <FormControl>
+                                                <Checkbox
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                    disabled={isSubmitting}
+                                                    id={`mentor-role-${user.id}`}
+                                                    className="data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
+                                                />
+                                            </FormControl>
+                                            <FormLabel
+                                                htmlFor={`mentor-role-${user.id}`}
+                                                className="font-medium text-amber-700"
+                                            >
+                                                Ментор
+                                            </FormLabel>
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                         </div>
 
-                        <DialogFooter>
+                        <DialogFooter className="gap-2">
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() => onOpenChange(false)}
                                 disabled={isSubmitting}
+                                className="border-white/50 bg-white/80"
                             >
-                                Cancel
+                                Отмена
                             </Button>
-                            <Button type="submit" disabled={isSubmitting}>
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+                            >
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Save changes
+                                Сохранить
                             </Button>
                         </DialogFooter>
                     </form>
