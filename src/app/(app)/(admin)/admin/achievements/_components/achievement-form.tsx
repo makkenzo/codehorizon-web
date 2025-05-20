@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ArrowLeft, Loader2, Settings, Trophy } from 'lucide-react';
 

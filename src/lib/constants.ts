@@ -157,12 +157,15 @@ export const ACHIEVEMENT_FORM_SCHEMA = z.object({
         .string()
         .min(3, 'Ключ должен содержать минимум 3 символа')
         .max(100, 'Ключ не должен превышать 100 символов')
-        .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Ключ может содержать только строчные латинские буквы, цифры и дефисы'),
+        .regex(
+            /^[a-zA-Z0-9]+(?:_[a-zA-Z0-9]+)*$/,
+            'Ключ может содержать только латинские буквы, цифры и нижние подчеркивания'
+        ),
     name: z.string().min(1, 'Название обязательно').max(255),
     description: z.string().min(1, 'Описание обязательно').max(1000),
-    iconUrl: z.string().url('Некорректный URL иконки').min(1, 'URL иконки обязателен'),
+    iconName: z.string().min(1, 'Выберите иконку'),
     triggerType: z.nativeEnum(AchievementTriggerType, { errorMap: () => ({ message: 'Выберите тип триггера' }) }),
-    triggerThreshold: z.coerce.number().min(0, 'Порог не может быть отрицательным'),
+    triggerThreshold: z.coerce.number().min(0, 'Порог не может быть отрицательным').default(0),
     triggerThresholdValue: z.string().max(255).nullable().optional(),
     xpBonus: z.coerce.number().min(0, 'XP бонус не может быть отрицательным').default(0),
     rarity: z.nativeEnum(AchievementRarity).default(AchievementRarity.COMMON),
@@ -170,7 +173,7 @@ export const ACHIEVEMENT_FORM_SCHEMA = z.object({
     order: z.coerce.number().min(0, 'Порядок не может быть отрицательным').default(0),
     category: z.string().max(100).nullable().optional(),
     isHidden: z.boolean().default(false),
-    prerequisites: z.array(z.string().min(1, 'Ключ предусловия не может быть пустым')).optional().default([]),
+    prerequisites: z.array(z.string()).optional().default([]),
 });
 
 export type AchievementFormData = z.infer<typeof ACHIEVEMENT_FORM_SCHEMA>;
@@ -179,7 +182,7 @@ export const INITIAL_ACHIEVEMENT_FORM_DATA: AchievementFormData = {
     key: '',
     name: '',
     description: '',
-    iconUrl: '',
+    iconName: '',
     triggerType: AchievementTriggerType.COURSE_COMPLETION_COUNT,
     triggerThreshold: 0,
     triggerThresholdValue: undefined,

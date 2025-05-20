@@ -5,7 +5,6 @@ import {
     Eye,
     EyeOff,
     Globe,
-    ImageIcon,
     Key,
     Layers,
     MessageSquareText,
@@ -17,9 +16,11 @@ import {
     Type,
 } from 'lucide-react';
 
+import AchievementIcon from '@/components/reusable/achievement-icon';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { IconPicker } from '@/components/ui/icon-picker';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -75,6 +76,7 @@ const FormSectionRenderer: React.FC<FormSectionRendererProps> = ({
     );
 
     const { gradient } = currentRarityConfig;
+    const watchedIconName = form.watch('iconName');
 
     const renderSectionContent = () => {
         switch (id) {
@@ -103,9 +105,6 @@ const FormSectionRenderer: React.FC<FormSectionRendererProps> = ({
                                                 className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500 bg-white/80 backdrop-blur-sm shadow-sm group-hover:shadow-md transition-all duration-300"
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-gray-500 text-sm mt-2">
-                                            Латиница, цифры, дефисы. Не меняется после создания.
-                                        </FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -164,23 +163,28 @@ const FormSectionRenderer: React.FC<FormSectionRendererProps> = ({
                         />
                         <FormField
                             control={form.control}
-                            name="iconUrl"
+                            name="iconName"
                             render={({ field }) => (
                                 <FormItem className="group">
-                                    <FormLabel className="flex items-center gap-2 text-lg font-medium text-gray-700 mb-2">
+                                    <FormLabel className="flex w-fit items-center gap-2 text-lg font-medium text-gray-700 mb-2">
                                         <div
                                             className={`w-8 h-8 rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white transition-colors duration-500`}
                                         >
-                                            <ImageIcon className="h-4 w-4" />
+                                            <AchievementIcon
+                                                iconName={watchedIconName || 'ImageIcon'}
+                                                className="h-4 w-4"
+                                            />
                                         </div>
-                                        URL иконки *
+                                        Иконка *
                                     </FormLabel>
                                     <FormControl>
-                                        <Input
-                                            placeholder="https://example.com/icon.png"
-                                            {...field}
+                                        <IconPicker
+                                            value={field.value}
+                                            onValueChange={field.onChange}
                                             disabled={isSubmitting}
-                                            className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500 bg-white/80 backdrop-blur-sm shadow-sm group-hover:shadow-md transition-all duration-300"
+                                            triggerPlaceholder="Выберите иконку"
+                                            searchPlaceholder="Поиск иконки"
+                                            className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500 bg-white/80 backdrop-blur-sm shadow-sm group-hover:shadow-md transition-all duration-300 hover:bg-transparent"
                                         />
                                     </FormControl>
                                     <FormMessage />

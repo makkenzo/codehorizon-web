@@ -27,7 +27,7 @@ export const useAchievementFormEngine = (
                 key: initialData.key,
                 name: initialData.name,
                 description: initialData.description,
-                iconUrl: initialData.iconUrl,
+                iconName: initialData.iconUrl,
                 triggerType: initialData.triggerType,
                 triggerThreshold: initialData.triggerThreshold,
                 triggerThresholdValue: initialData.triggerThresholdValue || undefined,
@@ -62,11 +62,15 @@ export const useAchievementFormEngine = (
             }
             setIsSubmitting(true);
             try {
+                const filteredPrerequisites = data.prerequisites?.filter((p) => p.trim() !== '') || [];
+
                 const payload = {
                     ...data,
+                    iconUrl: data.iconName,
                     triggerThresholdValue:
                         data.triggerThresholdValue?.trim() === '' ? null : data.triggerThresholdValue,
                     category: data.category?.trim() === '' ? null : data.category,
+                    prerequisites: filteredPrerequisites,
                 };
 
                 let result: AdminAchievementDTO;

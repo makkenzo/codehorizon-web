@@ -83,3 +83,19 @@ export const getInitials = (author: PopularAuthorDTO) => {
         return author.username[0].toUpperCase();
     }
 };
+
+export function pascalToKebabCase(str: string): string {
+    if (!str) return '';
+    return str
+        .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+        .replace(/([A-Z])([A-Z][a-z])/g, '$1-$2')
+        .toLowerCase();
+}
+
+export function kebabToPascalCase(str: string): string {
+    if (!str) return '';
+    return str
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('');
+}
