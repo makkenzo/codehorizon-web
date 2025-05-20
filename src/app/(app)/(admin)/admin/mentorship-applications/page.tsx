@@ -1,4 +1,4 @@
-import AdminMentorshipApplicationsPageContent from '@/components/page-contents/admin/admin-mentorship-applications';
+import AdminMentorshipApplicationsPageContent from '@/components/page-contents/admin/mentorship-applications';
 
 export default function Page() {
     return (

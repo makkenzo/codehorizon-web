@@ -1,4 +1,4 @@
-import AdminAchievementsPageContent from '@/components/page-contents/admin/admin-achievements';
+import AdminAchievementsPageContent from '@/components/page-contents/admin/achievements';
 
 export default function Page() {
     return (
