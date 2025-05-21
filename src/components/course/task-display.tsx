@@ -493,10 +493,13 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index, lessonKey, cours
     }
 
     const isTaskCorrect = submissionDetails?.status === SubmissionStatus.CORRECT;
-    const isTaskChecking =
-        submissionDetails?.status === SubmissionStatus.CHECKING ||
-        submissionDetails?.status === SubmissionStatus.PENDING ||
-        isSubmitting;
+    const isEffectivelyPendingOrCheckingOnServer =
+        submissionDetails &&
+        (submissionDetails.status === SubmissionStatus.CHECKING ||
+            (submissionDetails.status === SubmissionStatus.PENDING &&
+                submissionDetails.id &&
+                !submissionDetails.id.startsWith('local-')));
+    const isTaskChecking = isSubmitting || isEffectivelyPendingOrCheckingOnServer;
     const canSubmit = !isTaskCorrect && !isTaskChecking;
 
     return (
