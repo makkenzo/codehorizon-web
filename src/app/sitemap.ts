@@ -7,13 +7,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
         {
             url: BASE_URL,
             lastModified: new Date(),
-            changeFrequency: 'weekly',
+            changeFrequency: 'daily',
             priority: 1,
         },
         {
             url: `${BASE_URL}/courses`,
             lastModified: new Date(),
-            changeFrequency: 'weekly',
+            changeFrequency: 'daily',
             priority: 0.9,
         },
         {
