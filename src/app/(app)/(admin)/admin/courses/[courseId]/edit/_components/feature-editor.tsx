@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle, GripVertical, Lightbulb, PlusCircle, Sparkles, Target, Trash2 } from 'lucide-react';
+import { CheckCircle, Lightbulb, PlusCircle, Sparkles, Target, Trash2 } from 'lucide-react';
 import { Control, FieldErrors, useFieldArray } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
@@ -93,12 +93,13 @@ const FeatureEditor: React.FC<FeatureEditorProps> = ({ control, disabled, errors
                     </motion.div>
                 ) : (
                     <motion.div className="space-y-6" variants={container} initial="hidden" animate="show">
-                        <AnimatePresence>
+                        <AnimatePresence mode="wait" initial={false}>
                             {fields.map((field, index) => {
                                 const featureErrors = errors.features?.[index];
 
                                 return (
                                     <motion.div
+                                        layout
                                         key={field.id}
                                         className="relative group/card"
                                         variants={item}

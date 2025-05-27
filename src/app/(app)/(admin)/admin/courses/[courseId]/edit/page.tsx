@@ -343,7 +343,12 @@ export default function EditCoursePage() {
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
-                                    <p className="text-slate-600 mt-2">{courseData.description}</p>
+                                    {courseData.description && (
+                                        <div
+                                            className="text-slate-600 mt-2 prose max-w-none"
+                                            dangerouslySetInnerHTML={{ __html: courseData.description }}
+                                        ></div>
+                                    )}
                                     <div className="flex items-center gap-4 mt-4">
                                         <div className="flex items-center gap-2 text-sm text-slate-500">
                                             <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>

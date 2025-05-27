@@ -51,7 +51,7 @@ export function RichTextEditor({ value, onChange, disabled = false, className, e
         editorProps: {
             attributes: {
                 class: cn(
-                    'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-xl w-full',
+                    'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-xl w-full max-w-none',
                     'min-h-[200px] w-full rounded-b-xl border-0 bg-transparent px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
                     'prose-headings:text-slate-800 prose-p:text-slate-700 prose-strong:text-slate-800 prose-code:text-violet-600 prose-code:bg-violet-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded',
                     editorClassName
