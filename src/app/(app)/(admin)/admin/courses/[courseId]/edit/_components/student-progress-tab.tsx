@@ -5,12 +5,25 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ColumnDef, FilterFn, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { ArrowUpDown } from 'lucide-react';
+import { motion } from 'framer-motion';
+import {
+    AlertCircle,
+    ArrowUpDown,
+    Award,
+    BarChart3,
+    Calendar,
+    CheckCircle,
+    Clock,
+    Target,
+    TrendingUp,
+    Users,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import MyPagination from '@/components/reusable/my-pagination';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LinkedChart } from '@/components/ui/linked-chart';
 import { Progress } from '@/components/ui/progress';
@@ -164,14 +177,20 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
                 accessorKey: 'progressPercent',
                 header: 'Прогресс',
                 cell: ({ row }) => (
-                    <div className="flex items-center justify-end gap-2">
-                        <span className="text-xs text-muted-foreground w-8">
+                    <div className="flex items-center justify-end gap-3">
+                        <span className="text-sm font-medium text-slate-600 w-10 text-right">
                             {row.original.progressPercent.toFixed(0)}%
                         </span>
                         <Progress
                             value={row.original.progressPercent}
-                            className="h-1.5 w-20 bg-muted/30 overflow-hidden"
-                            indicatorClassName="bg-gradient-to-r from-red-500 to-secondary"
+                            className="h-2 w-24 bg-slate-200/50 overflow-hidden"
+                            indicatorClassName={`transition-all duration-500 ${
+                                row.original.progressPercent >= 80
+                                    ? 'bg-gradient-to-r from-emerald-500 to-green-500'
+                                    : row.original.progressPercent >= 50
+                                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500'
+                                      : 'bg-gradient-to-r from-rose-500 to-red-500'
+                            }`}
                         />
                     </div>
                 ),
@@ -179,22 +198,62 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
             {
                 accessorKey: 'completedLessonsCount',
                 header: 'Уроков пройдено',
-                cell: ({ row }) => `${row.original.completedLessonsCount} из ${row.original.totalLessonsCount}`,
+                cell: ({ row }) => (
+                    <div className="text-center">
+                        <span className="font-medium">{row.original.completedLessonsCount}</span>
+                        <span className="text-slate-400 mx-1">/</span>
+                        <span className="text-slate-600">{row.original.totalLessonsCount}</span>
+                    </div>
+                ),
             },
             {
                 accessorKey: 'lastAccessedLessonAt',
                 header: 'Последняя активность',
                 cell: ({ row }) => {
                     const dateString = row.getValue<string>('lastAccessedLessonAt');
-                    if (!dateString) return 'N/A';
+                    if (!dateString) {
+                        return (
+                            <Badge variant="outline" className="text-slate-400 border-slate-300">
+                                Нет данных
+                            </Badge>
+                        );
+                    }
                     try {
-                        return new Date(dateString).toLocaleDateString('ru-RU', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                        });
+                        const date = new Date(dateString);
+                        const now = new Date();
+                        const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+                        let badgeVariant: 'default' | 'secondary' | 'destructive' | 'outline' = 'default';
+                        let badgeText = '';
+
+                        if (diffDays === 0) {
+                            badgeVariant = 'default';
+                            badgeText = 'Сегодня';
+                        } else if (diffDays === 1) {
+                            badgeVariant = 'secondary';
+                            badgeText = 'Вчера';
+                        } else if (diffDays <= 7) {
+                            badgeVariant = 'secondary';
+                            badgeText = `${diffDays} дн. назад`;
+                        } else {
+                            badgeVariant = 'outline';
+                            badgeText = date.toLocaleDateString('ru-RU', {
+                                day: 'numeric',
+                                month: 'short',
+                            });
+                        }
+
+                        return (
+                            <Badge variant={badgeVariant} className="font-medium">
+                                {badgeText}
+                            </Badge>
+                        );
                     } catch {
-                        return 'Invalid Date';
+                        return (
+                            <Badge variant="destructive" className="text-xs">
+                                Ошибка даты
+                            </Badge>
+                        );
                     }
                 },
                 filterFn: dateRangeFilterFn,
@@ -266,12 +325,12 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
     const renderSortIcon = (columnBackendName: string) => {
         const [currentColumn, currentDirection] = currentSort.split(',');
         if (columnBackendName !== currentColumn) {
-            return <ArrowUpDown className="ml-2 h-3 w-3 text-muted-foreground/50" />;
+            return <ArrowUpDown className="ml-2 h-3 w-3 text-slate-400" />;
         }
         return (
             <span
                 className={`ml-2 text-xs ${
-                    currentDirection === 'asc' ? 'text-primary' : 'text-secondary'
+                    currentDirection === 'asc' ? 'text-violet-600' : 'text-fuchsia-600'
                 } font-bold transition-colors duration-200`}
             >
                 {currentDirection === 'asc' ? '▲' : '▼'}
@@ -281,118 +340,377 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
 
     const renderSkeletons = (count: number) =>
         Array.from({ length: count }).map((_, index) => (
-            <TableRow key={`skel-stud-${index}`} className="backdrop-blur-sm bg-background/40">
+            <TableRow key={`skel-stud-${index}`} className="bg-white/40 backdrop-blur-sm">
                 <TableCell>
-                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-5 w-24 rounded-md" />
                 </TableCell>
                 <TableCell>
-                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-5 w-40 rounded-md" />
                 </TableCell>
                 <TableCell>
-                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-5 w-16 rounded-md" />
                 </TableCell>
                 <TableCell>
-                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-5 w-24 rounded-md" />
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                    <Skeleton className="h-5 w-28" />
+                    <Skeleton className="h-5 w-28 rounded-md" />
                 </TableCell>
             </TableRow>
         ));
 
+    const stats = useMemo(() => {
+        if (!rawData.length) return null;
+
+        const totalStudents = rawData.length;
+        const activeStudents = rawData.filter((s) => s.lastAccessedLessonAt).length;
+        const completedStudents = rawData.filter((s) => s.progressPercent >= 100).length;
+        const avgProgress = rawData.reduce((sum, s) => sum + s.progressPercent, 0) / totalStudents;
+
+        return {
+            totalStudents,
+            activeStudents,
+            completedStudents,
+            avgProgress,
+        };
+    }, [rawData]);
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {error && (
-                <Card className="border-destructive/40 bg-destructive/5 backdrop-blur-sm">
-                    <CardContent className="p-4 text-center text-destructive">
-                        <p>{error}</p>
-                    </CardContent>
-                </Card>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-6 rounded-2xl bg-gradient-to-br from-red-50/80 to-rose-50/80 backdrop-blur-sm border border-red-200/50 shadow-lg"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-red-100 rounded-lg">
+                            <AlertCircle className="h-5 w-5 text-red-600" />
+                        </div>
+                        <div>
+                            <h3 className="font-medium text-red-800">Ошибка загрузки</h3>
+                            <p className="text-red-600 text-sm">{error}</p>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
+
+            {!isLoading && stats && (
+                <motion.div
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <Card className="bg-gradient-to-br from-blue-50/80 to-cyan-50/80 backdrop-blur-sm border border-blue-200/50 shadow-lg">
+                        <CardContent className="p-6">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-blue-100 rounded-xl">
+                                    <Users className="h-6 w-6 text-blue-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-blue-600 font-medium">Всего студентов</p>
+                                    <p className="text-2xl font-bold text-blue-800">{stats.totalStudents}</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-gradient-to-br from-emerald-50/80 to-green-50/80 backdrop-blur-sm border border-emerald-200/50 shadow-lg">
+                        <CardContent className="p-6">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-emerald-100 rounded-xl">
+                                    <TrendingUp className="h-6 w-6 text-emerald-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-emerald-600 font-medium">Активные</p>
+                                    <p className="text-2xl font-bold text-emerald-800">{stats.activeStudents}</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-gradient-to-br from-amber-50/80 to-orange-50/80 backdrop-blur-sm border border-amber-200/50 shadow-lg">
+                        <CardContent className="p-6">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-amber-100 rounded-xl">
+                                    <Target className="h-6 w-6 text-amber-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-amber-600 font-medium">Средний прогресс</p>
+                                    <p className="text-2xl font-bold text-amber-800">{stats.avgProgress.toFixed(1)}%</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-gradient-to-br from-violet-50/80 to-purple-50/80 backdrop-blur-sm border border-violet-200/50 shadow-lg">
+                        <CardContent className="p-6">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-violet-100 rounded-xl">
+                                    <Award className="h-6 w-6 text-violet-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-violet-600 font-medium">Завершили</p>
+                                    <p className="text-2xl font-bold text-violet-800">{stats.completedStudents}</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
             )}
 
             {!isLoading && rawData.length > 0 && (
-                <LinkedChart
-                    data={rawData}
-                    // @ts-ignore
-                    columns={columns.filter(
-                        // @ts-ignore
-                        (col) => col.accessorKey !== 'email' && col.accessorKey !== 'username'
-                    )}
-                    dateFormat="dd/MM/yyyy"
-                    setColumnFilters={table.setColumnFilters}
-                    dateField="lastAccessedLessonAt"
-                    aggregatorConfig={studentChartAggregatorConfig}
-                    chartType="area"
-                    title="Активность студентов по дате"
-                />
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                    <Card className="bg-white/70 backdrop-blur-lg shadow-xl border border-white/50 overflow-hidden py-0">
+                        <CardHeader className="bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 py-4">
+                            <div className="flex items-center gap-3">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 rounded-lg blur opacity-75"></div>
+                                    <div className="relative bg-white/80 backdrop-blur-sm rounded-lg p-2">
+                                        <BarChart3 className="h-5 w-5 text-violet-600" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <CardTitle className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
+                                        Аналитика активности
+                                    </CardTitle>
+                                    <CardDescription>Активность студентов по времени</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            <LinkedChart
+                                data={rawData}
+                                // @ts-ignore
+                                columns={columns.filter(
+                                    // @ts-ignore
+                                    (col) => col.accessorKey !== 'email' && col.accessorKey !== 'username'
+                                )}
+                                dateFormat="dd/MM/yyyy"
+                                setColumnFilters={table.setColumnFilters}
+                                dateField="lastAccessedLessonAt"
+                                aggregatorConfig={studentChartAggregatorConfig}
+                                chartType="area"
+                                title="Активность студентов по дате"
+                            />
+                        </CardContent>
+                    </Card>
+                </motion.div>
             )}
 
-            <div className="overflow-x-auto border rounded-md">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="cursor-pointer hover:bg-muted/50 flex items-center justify-between">
-                                Имя пользователя
-                            </TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead
-                                className="text-right cursor-pointer hover:bg-muted/50 flex items-center justify-between"
-                                onClick={() => handleSort('progress')}
-                            >
-                                Прогресс <p>{renderSortIcon('progress')}</p>
-                            </TableHead>
-                            <TableHead className="text-right">Уроков пройдено</TableHead>
-                            <TableHead
-                                className="hidden md:flex text-right cursor-pointer hover:bg-muted/50  items-center justify-between"
-                                onClick={() => handleSort('lastUpdated')}
-                            >
-                                Последняя активность <p>{renderSortIcon('lastUpdated')}</p>
-                            </TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            renderSkeletons(pageSize)
-                        ) : pagedData && pagedData.content.length > 0 ? (
-                            pagedData.content.map((student) => (
-                                <TableRow key={student.userId}>
-                                    <TableCell className="font-medium">{student.username}</TableCell>
-                                    <TableCell>{student.email}</TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <span className="text-xs text-muted-foreground w-8">
-                                                {student.progressPercent.toFixed(0)}%
-                                            </span>
-                                            <Progress value={student.progressPercent} className="h-1.5 w-20" />
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {student.completedLessonsCount} из {student.totalLessonsCount}
-                                    </TableCell>
-                                    <TableCell className="hidden md:table-cell text-right">
-                                        {student.lastAccessedLessonAt
-                                            ? format(new Date(student.lastAccessedLessonAt), 'dd MMM yyyy, HH:mm', {
-                                                  locale: ru,
-                                              })
-                                            : 'Нет данных'}
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center">
-                                    Студентов нет или прогресс отсутствует.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-            {!isLoading && pagedData && pagedData.totalPages > 1 && (
-                <div className="p-4 border-t border-border/40 backdrop-blur-sm bg-background/40 relative z-10">
-                    <MyPagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-                </div>
-            )}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+            >
+                <Card className="bg-white/70 backdrop-blur-lg shadow-xl border border-white/50 overflow-hidden py-0">
+                    <CardHeader className="bg-gradient-to-r from-slate-50/50 to-slate-100/50 py-4">
+                        <div className="flex items-center gap-3">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-gradient-to-r from-slate-500/20 to-gray-500/20 rounded-lg blur opacity-75"></div>
+                                <div className="relative bg-white/80 backdrop-blur-sm rounded-lg p-2">
+                                    <Users className="h-5 w-5 text-slate-600" />
+                                </div>
+                            </div>
+                            <div>
+                                <CardTitle className="text-slate-800">Список студентов</CardTitle>
+                                <CardDescription>Детальная информация о прогрессе каждого студента</CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="bg-gradient-to-r from-slate-50/30 to-slate-100/30 hover:from-slate-50/50 hover:to-slate-100/50 border-b border-slate-200/50">
+                                        <TableHead className="font-semibold text-slate-700 py-4">
+                                            <div className="flex items-center gap-2">
+                                                <Users className="h-4 w-4" />
+                                                Имя пользователя
+                                            </div>
+                                        </TableHead>
+                                        <TableHead className="font-semibold text-slate-700">
+                                            <div className="flex items-center gap-2">
+                                                <Calendar className="h-4 w-4" />
+                                                Email
+                                            </div>
+                                        </TableHead>
+                                        <TableHead
+                                            className="text-right cursor-pointer hover:bg-slate-100/50 font-semibold text-slate-700 transition-colors"
+                                            onClick={() => handleSort('progress')}
+                                        >
+                                            <div className="flex items-center justify-end gap-2">
+                                                <TrendingUp className="h-4 w-4" />
+                                                Прогресс
+                                                {renderSortIcon('progress')}
+                                            </div>
+                                        </TableHead>
+                                        <TableHead className="text-center font-semibold text-slate-700">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <CheckCircle className="h-4 w-4" />
+                                                Уроков пройдено
+                                            </div>
+                                        </TableHead>
+                                        <TableHead
+                                            className="hidden md:table-cell text-center cursor-pointer hover:bg-slate-100/50 font-semibold text-slate-700 transition-colors"
+                                            onClick={() => handleSort('lastUpdated')}
+                                        >
+                                            <div className="flex items-center justify-center gap-2">
+                                                <Clock className="h-4 w-4" />
+                                                Последняя активность
+                                                {renderSortIcon('lastUpdated')}
+                                            </div>
+                                        </TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {isLoading ? (
+                                        renderSkeletons(pageSize)
+                                    ) : pagedData && pagedData.content.length > 0 ? (
+                                        pagedData.content.map((student, index) => (
+                                            <motion.tr
+                                                key={student.userId}
+                                                className={`group transition-all duration-300 border-b border-slate-100/50 ${
+                                                    hoveredRow === student.userId
+                                                        ? 'bg-gradient-to-r from-violet-50/30 to-fuchsia-50/30 shadow-sm'
+                                                        : 'bg-white/40 hover:bg-white/60'
+                                                }`}
+                                                onMouseEnter={() => setHoveredRow(student.userId)}
+                                                onMouseLeave={() => setHoveredRow(null)}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ duration: 0.3, delay: index * 0.05 }}
+                                            >
+                                                <TableCell className="py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div
+                                                            className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold transition-all duration-300 ${
+                                                                hoveredRow === student.userId
+                                                                    ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 shadow-lg'
+                                                                    : 'bg-gradient-to-r from-slate-400 to-slate-500'
+                                                            }`}
+                                                        >
+                                                            {student.username.substring(0, 2).toUpperCase()}
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-medium text-slate-800">
+                                                                {student.username}
+                                                            </p>
+                                                            <p className="text-xs text-slate-500">
+                                                                ID: {student.userId}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <p className="text-slate-600">{student.email}</p>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="flex items-center justify-end gap-3">
+                                                        <span className="text-sm font-medium text-slate-600 w-10 text-right">
+                                                            {student.progressPercent.toFixed(0)}%
+                                                        </span>
+                                                        <Progress
+                                                            value={student.progressPercent}
+                                                            className="h-2 w-24 bg-slate-200/50 overflow-hidden"
+                                                            indicatorClassName={`transition-all duration-500 ${
+                                                                student.progressPercent >= 80
+                                                                    ? 'bg-gradient-to-r from-emerald-500 to-green-500'
+                                                                    : student.progressPercent >= 50
+                                                                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500'
+                                                                      : 'bg-gradient-to-r from-rose-500 to-red-500'
+                                                            }`}
+                                                        />
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 text-slate-700">
+                                                        <span className="font-medium">
+                                                            {student.completedLessonsCount}
+                                                        </span>
+                                                        <span className="text-slate-400">/</span>
+                                                        <span>{student.totalLessonsCount}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="hidden md:table-cell text-center">
+                                                    {student.lastAccessedLessonAt ? (
+                                                        (() => {
+                                                            const date = new Date(student.lastAccessedLessonAt);
+                                                            const now = new Date();
+                                                            const diffDays = Math.floor(
+                                                                (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+                                                            );
+
+                                                            let badgeVariant:
+                                                                | 'default'
+                                                                | 'secondary'
+                                                                | 'destructive'
+                                                                | 'outline' = 'default';
+                                                            let badgeText = '';
+
+                                                            if (diffDays === 0) {
+                                                                badgeVariant = 'default';
+                                                                badgeText = 'Сегодня';
+                                                            } else if (diffDays === 1) {
+                                                                badgeVariant = 'secondary';
+                                                                badgeText = 'Вчера';
+                                                            } else if (diffDays <= 7) {
+                                                                badgeVariant = 'secondary';
+                                                                badgeText = `${diffDays} дн. назад`;
+                                                            } else {
+                                                                badgeVariant = 'outline';
+                                                                badgeText = format(date, 'dd MMM yyyy', { locale: ru });
+                                                            }
+
+                                                            return (
+                                                                <Badge variant={badgeVariant} className="font-medium">
+                                                                    {badgeText}
+                                                                </Badge>
+                                                            );
+                                                        })()
+                                                    ) : (
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="text-slate-400 border-slate-300"
+                                                        >
+                                                            Нет данных
+                                                        </Badge>
+                                                    )}
+                                                </TableCell>
+                                            </motion.tr>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="h-32 text-center">
+                                                <div className="flex flex-col items-center justify-center text-slate-500">
+                                                    <div className="rounded-full bg-slate-100 p-4 mb-4">
+                                                        <Users className="h-8 w-8 text-slate-400" />
+                                                    </div>
+                                                    <p className="text-lg font-medium">Студентов пока нет</p>
+                                                    <p className="text-sm text-slate-400 mt-1">
+                                                        Когда студенты запишутся на курс, их прогресс появится здесь
+                                                    </p>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </CardContent>
+                    {!isLoading && pagedData && pagedData.totalPages > 1 && (
+                        <div className="p-6 bg-gradient-to-t from-slate-50/50 to-transparent border-t border-slate-100">
+                            <MyPagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={handlePageChange}
+                            />
+                        </div>
+                    )}
+                </Card>
+            </motion.div>
         </div>
     );
 };
