@@ -398,7 +398,7 @@ export default function EditCoursePage() {
                         </div>
 
                         <AnimatePresence mode="wait">
-                            <TabsContent value="details" className="mt-0">
+                            <TabsContent key="details-content" value="details" className="mt-0">
                                 <motion.div
                                     key="details"
                                     initial={{ opacity: 0, x: -20 }}
@@ -435,7 +435,7 @@ export default function EditCoursePage() {
                                     </Card>
                                 </motion.div>
                             </TabsContent>
-                            <TabsContent value="lessons" className="mt-0">
+                            <TabsContent key="lessons-content" value="lessons" className="mt-0">
                                 <motion.div
                                     key="lessons"
                                     initial={{ opacity: 0, x: -20 }}
@@ -477,7 +477,7 @@ export default function EditCoursePage() {
                                     </Card>
                                 </motion.div>
                             </TabsContent>
-                            <TabsContent value="students" className="mt-0">
+                            <TabsContent key="students-content" value="students" className="mt-0">
                                 <motion.div
                                     key="students"
                                     initial={{ opacity: 0, x: -20 }}
