@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { isAxiosError } from 'axios';
-import { AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowUpDown, BarChart3, Percent, Star, Users } from 'lucide-react';
 import { toast } from 'sonner';
 

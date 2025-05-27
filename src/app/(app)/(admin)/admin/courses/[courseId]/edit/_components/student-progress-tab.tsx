@@ -463,40 +463,20 @@ const StudentProgressTab = ({ courseId }: StudentProgressTabProps) => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                 >
-                    <Card className="bg-white/70 backdrop-blur-lg shadow-xl border border-white/50 overflow-hidden py-0">
-                        <CardHeader className="bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 py-4">
-                            <div className="flex items-center gap-3">
-                                <div className="relative">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 rounded-lg blur opacity-75"></div>
-                                    <div className="relative bg-white/80 backdrop-blur-sm rounded-lg p-2">
-                                        <BarChart3 className="h-5 w-5 text-violet-600" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <CardTitle className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
-                                        Аналитика активности
-                                    </CardTitle>
-                                    <CardDescription>Активность студентов по времени</CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            <LinkedChart
-                                data={rawData}
-                                // @ts-ignore
-                                columns={columns.filter(
-                                    // @ts-ignore
-                                    (col) => col.accessorKey !== 'email' && col.accessorKey !== 'username'
-                                )}
-                                dateFormat="dd/MM/yyyy"
-                                setColumnFilters={table.setColumnFilters}
-                                dateField="lastAccessedLessonAt"
-                                aggregatorConfig={studentChartAggregatorConfig}
-                                chartType="area"
-                                title="Активность студентов по дате"
-                            />
-                        </CardContent>
-                    </Card>
+                    <LinkedChart
+                        data={rawData}
+                        // @ts-ignore
+                        columns={columns.filter(
+                            // @ts-ignore
+                            (col) => col.accessorKey !== 'email' && col.accessorKey !== 'username'
+                        )}
+                        dateFormat="dd/MM/yyyy"
+                        setColumnFilters={table.setColumnFilters}
+                        dateField="lastAccessedLessonAt"
+                        aggregatorConfig={studentChartAggregatorConfig}
+                        chartType="area"
+                        title="Активность студентов по дате"
+                    />
                 </motion.div>
             )}
 
