@@ -3,13 +3,31 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { isAxiosError } from 'axios';
-import { Activity, ArrowLeft, BookOpen, MessageSquare, Percent, Star, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
+import {
+    Activity,
+    ArrowLeft,
+    Award,
+    BarChart3,
+    BookOpen,
+    Calendar,
+    Eye,
+    Heart,
+    MessageSquare,
+    Percent,
+    Sparkles,
+    Star,
+    TrendingUp,
+    Users,
+    Zap,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 
 import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -55,266 +73,197 @@ export default function CourseDetailedAnalyticsPage() {
         fetchAnalytics();
     }, [fetchAnalytics]);
 
-    const StatCard = ({
-        title,
-        value,
-        icon: Icon,
-        description,
-        isLoadingCard,
-        color = 'primary',
-        id,
-    }: {
-        title: string;
-        value: string | number;
-        icon: React.ElementType;
-        description?: string;
-        isLoadingCard?: boolean;
-        color?: 'primary' | 'secondary' | 'green' | 'purple' | 'yellow';
-        id: string;
-    }) => {
-        const colorMap = {
-            primary: {
-                bg: 'from-primary/5 to-transparent',
-                text: 'from-primary to-primary/70',
-                icon: 'text-primary',
-                glow: 'bg-primary/10',
-            },
-            secondary: {
-                bg: 'from-secondary/5 to-transparent',
-                text: 'from-secondary to-secondary/70',
-                icon: 'text-secondary',
-                glow: 'bg-secondary/10',
-            },
-            green: {
-                bg: 'from-green-500/5 to-transparent',
-                text: 'from-green-500 to-green-500/70',
-                icon: 'text-green-500',
-                glow: 'bg-green-500/10',
-            },
-            purple: {
-                bg: 'from-purple-500/5 to-transparent',
-                text: 'from-purple-500 to-purple-500/70',
-                icon: 'text-purple-500',
-                glow: 'bg-purple-500/10',
-            },
-            yellow: {
-                bg: 'from-yellow-500/5 to-transparent',
-                text: 'from-yellow-500 to-yellow-500/70',
-                icon: 'text-yellow-500',
-                glow: 'bg-yellow-500/10',
-            },
-        };
-
-        const isHovered = hoveredCard === id;
-
-        return (
-            <Card
-                className="overflow-hidden border-border/40 backdrop-blur-sm bg-background/60 relative group hover:shadow-lg transition-all duration-300"
-                onMouseEnter={() => setHoveredCard(id)}
-                onMouseLeave={() => setHoveredCard(null)}
-            >
-                <div
-                    className={`absolute inset-0 bg-gradient-to-br ${colorMap[color].bg} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
-                ></div>
-                <div className="absolute -bottom-16 -right-16 w-32 h-32 bg-primary/5 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                    <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                    <div className="relative">
-                        <div
-                            className={`absolute inset-0 ${
-                                colorMap[color].glow
-                            } blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
-                        ></div>
-                        <Icon
-                            className={`h-4 w-4 ${
-                                isHovered ? colorMap[color].icon : 'text-muted-foreground'
-                            } relative z-10 transition-colors duration-300`}
-                        />
-                    </div>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                    {isLoadingCard ? (
-                        <Skeleton className="h-8 w-24" />
-                    ) : (
-                        <div
-                            className={`text-2xl font-bold bg-gradient-to-r ${
-                                colorMap[color].text
-                            } bg-clip-text text-transparent transition-all duration-300`}
-                        >
-                            {value}
-                        </div>
-                    )}
-                    {description && !isLoadingCard && (
-                        <p
-                            className={`text-xs ${
-                                isHovered ? colorMap[color].icon : 'text-muted-foreground'
-                            } transition-colors duration-300`}
-                        >
-                            {description}
-                        </p>
-                    )}
-                    {description && isLoadingCard && <Skeleton className="h-4 w-3/4 mt-1" />}
-                </CardContent>
-            </Card>
-        );
-    };
-
     if (isLoading && !analytics) {
         return (
-            <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <Skeleton className="h-8 w-1/2 mb-4" />
-                    <Skeleton className="h-10 w-40" />
+            <div className="relative min-h-screen py-8">
+                <div className="absolute inset-0 overflow-hidden -z-10">
+                    <div className="absolute -top-40 -left-40 w-96 h-96 bg-gradient-to-br from-violet-500/15 to-fuchsia-500/15 rounded-full blur-3xl opacity-60 animate-pulse"></div>
+                    <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-gradient-to-bl from-blue-500/15 to-cyan-500/15 rounded-full blur-3xl opacity-60 animate-pulse delay-700"></div>
                 </div>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-                    {[...Array(5)].map((_, i) => (
-                        <StatCard
-                            key={`skel-stat-${i}`}
-                            id={`skel-${i}`}
-                            title="Загрузка..."
-                            value=""
-                            icon={Activity}
-                            isLoadingCard={true}
-                            color={
-                                i === 0
-                                    ? 'primary'
-                                    : i === 1
-                                      ? 'secondary'
-                                      : i === 2
-                                        ? 'green'
-                                        : i === 3
-                                          ? 'yellow'
-                                          : 'purple'
-                            }
-                        />
-                    ))}
+
+                <div className="container mx-auto px-4 relative z-10 space-y-8">
+                    <div className="flex justify-between items-center">
+                        <Skeleton className="h-10 w-1/2 rounded-lg" />
+                        <div className="flex gap-3">
+                            <Skeleton className="h-10 w-24 rounded-lg" />
+                            <Skeleton className="h-10 w-40 rounded-lg" />
+                        </div>
+                    </div>
+                    <Card className="bg-white/70 backdrop-blur-lg shadow-xl border border-white/50">
+                        <CardHeader>
+                            <Skeleton className="h-6 w-1/4 rounded-md" />
+                            <Skeleton className="h-4 w-1/2 rounded-md" />
+                        </CardHeader>
+                        <CardContent>
+                            <Skeleton className="h-64 w-full rounded-lg" />
+                        </CardContent>
+                    </Card>
                 </div>
-                <Card className="border-border/40 backdrop-blur-sm bg-background/60 overflow-hidden relative">
-                    <CardHeader>
-                        <Skeleton className="h-6 w-1/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                    </CardHeader>
-                    <CardContent>
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
             </div>
         );
     }
 
     if (!analytics) {
         return (
-            <Card className="border-border/40 backdrop-blur-sm bg-background/60 overflow-hidden relative group hover:shadow-lg transition-all duration-300">
-                <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-destructive/5 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="relative z-10">
-                    <CardTitle className="bg-gradient-to-r from-destructive to-destructive/70 bg-clip-text text-transparent">
-                        Ошибка
-                    </CardTitle>
-                    <CardDescription>Не удалось загрузить аналитику для этого курса.</CardDescription>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                    <Button
-                        onClick={() => router.push('/admin/my-analytics')}
-                        className="relative overflow-hidden group/btn"
+            <div className="relative min-h-screen py-8">
+                <div className="fixed inset-0 bg-gradient-to-br from-slate-50 to-slate-100 -z-20"></div>
+                <div className="container mx-auto px-4 relative z-10">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5 }}
                     >
-                        <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-destructive/10 to-destructive/5 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></span>
-                        <ArrowLeft className="mr-2 h-4 w-4 relative z-10" />
-                        <span className="relative z-10">Назад к списку</span>
-                    </Button>
-                </CardContent>
-            </Card>
+                        <Card className="bg-gradient-to-br from-red-50/80 to-rose-50/80 backdrop-blur-lg shadow-xl border border-red-200/50 overflow-hidden relative group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-transparent to-rose-500/5"></div>
+                            <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-red-500/10 rounded-full blur-xl opacity-60"></div>
+
+                            <CardHeader className="relative z-10">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-3 bg-red-100 rounded-xl">
+                                        <BarChart3 className="h-6 w-6 text-red-600" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
+                                            Ошибка загрузки
+                                        </CardTitle>
+                                        <CardDescription>
+                                            Не удалось загрузить аналитику для этого курса
+                                        </CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="relative z-10">
+                                <Button
+                                    onClick={() => router.push('/admin/my-analytics')}
+                                    className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
+                                    <ArrowLeft className="mr-2 h-4 w-4" />
+                                    Назад к списку
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                </div>
+            </div>
         );
     }
 
+    const container = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+            },
+        },
+    };
+
+    const item = {
+        hidden: { y: 20, opacity: 0 },
+        show: { y: 0, opacity: 1 },
+    };
+
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold">
-                    Аналитика курса:{' '}
-                    <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                        {analytics.courseTitle}
-                    </span>
-                </h1>
-                <div className="flex gap-2">
-                    <Link href="/admin/my-analytics">
-                        <InteractiveHoverButton
-                            icon={<ArrowLeft className="-4 w-4 relative z-10" />}
-                            className="relative overflow-hidden group/btn border-border/40 bg-background/60 backdrop-blur-sm"
-                        >
-                            <span className="relative z-10">Назад</span>
-                        </InteractiveHoverButton>
-                    </Link>
-                    <Link href={`/admin/courses/${analytics.courseId}/edit`}>
-                        <InteractiveHoverButton
-                            icon={<BookOpen className="h-4 w-4 relative z-10" />}
-                            className="relative overflow-hidden group/btn border-border/40 bg-background/60 backdrop-blur-sm"
-                        >
-                            <span className="relative z-10">Редактировать курс</span>
-                        </InteractiveHoverButton>
-                    </Link>
-                </div>
+        <div className="relative min-h-screen py-8">
+            <div className="absolute inset-0 overflow-hidden -z-10">
+                <div className="absolute -top-40 -left-40 w-96 h-96 bg-gradient-to-br from-violet-500/15 to-fuchsia-500/15 rounded-full blur-3xl opacity-60 animate-pulse"></div>
+                <div className="absolute top-1/4 right-1/3 w-80 h-80 bg-gradient-to-tr from-emerald-500/10 to-teal-500/15 rounded-full blur-3xl opacity-60 animate-pulse delay-700"></div>
+                <div className="absolute bottom-1/3 -left-20 w-72 h-72 bg-gradient-to-tr from-blue-500/10 to-cyan-500/15 rounded-full blur-3xl opacity-60 animate-pulse delay-1000"></div>
+                <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-gradient-to-bl from-amber-500/10 to-orange-500/15 rounded-full blur-3xl opacity-60 animate-pulse delay-500"></div>
             </div>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-                <StatCard
-                    id="students"
-                    title="Всего студентов"
-                    value={analytics.totalEnrolledStudents}
-                    icon={Users}
-                    isLoadingCard={isLoading}
-                    color="primary"
-                />
-                <StatCard
-                    id="active"
-                    title="Активных за 30 дней"
-                    value={analytics.activeStudentsLast30Days}
-                    icon={Activity}
-                    isLoadingCard={isLoading}
-                    color="secondary"
-                />
-                <StatCard
-                    id="completion"
-                    title="Среднее завершение"
-                    value={`${analytics.averageCompletionRate.toFixed(1)}%`}
-                    icon={Percent}
-                    isLoadingCard={isLoading}
-                    color="green"
-                />
-                <StatCard
-                    id="rating"
-                    title="Средний рейтинг"
-                    value={analytics.averageRating.toFixed(1)}
-                    icon={Star}
-                    isLoadingCard={isLoading}
-                    color="yellow"
-                />
-                <StatCard
-                    id="reviews"
-                    title="Всего отзывов"
-                    value={analytics.totalReviews}
-                    icon={MessageSquare}
-                    isLoadingCard={isLoading}
-                    color="purple"
-                />
-            </div>
-
-            <Card className="border-border/40 backdrop-blur-sm bg-background/60 overflow-hidden relative group hover:shadow-lg transition-all duration-300">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-primary/5 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute -top-32 -left-32 w-64 h-64 bg-secondary/5 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <CardHeader className="relative z-10">
-                    <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                        Прогресс студентов
-                    </CardTitle>
-                    <CardDescription>Детальный прогресс по каждому студенту курса.</CardDescription>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                    <div className="rounded-md backdrop-blur-sm bg-background/40 overflow-hidden">
-                        <StudentProgressTab courseId={courseId} />
+            <div className="container mx-auto px-4 relative z-10">
+                <motion.div
+                    className="mb-8"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6">
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-3">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 rounded-lg blur opacity-75"></div>
+                                    <div className="relative bg-white/80 backdrop-blur-sm rounded-lg p-3">
+                                        <BarChart3 className="h-8 w-8 text-violet-600" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <h1 className="text-3xl lg:text-4xl font-bold text-slate-800">
+                                        Детальная аналитика
+                                    </h1>
+                                    <p className="text-slate-600">Полная статистика по курсу</p>
+                                </div>
+                            </div>
+                            <div className="mt-4">
+                                <h2 className="text-xl lg:text-2xl font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
+                                    {analytics.courseTitle}
+                                </h2>
+                                <Badge variant="outline" className="mt-2 bg-white/80 backdrop-blur-sm">
+                                    <Eye className="h-3 w-3 mr-1" />
+                                    ID: {analytics.courseId}
+                                </Badge>
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <Link href="/admin/my-analytics">
+                                <Button
+                                    variant="outline"
+                                    className="bg-white/80 backdrop-blur-sm border-white/50 hover:bg-white/90 hover:shadow-lg transition-all duration-300"
+                                >
+                                    <ArrowLeft className="h-4 w-4 mr-2" />
+                                    Назад
+                                </Button>
+                            </Link>
+                            <Link href={`/admin/courses/${analytics.courseId}/edit`}>
+                                <Button className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                                    <BookOpen className="h-4 w-4 mr-2" />
+                                    Редактировать курс
+                                    <Zap className="h-3 w-3 ml-2" />
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
-                </CardContent>
-            </Card>
+                </motion.div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                    <Card className="bg-white/70 backdrop-blur-lg shadow-xl border border-white/50 overflow-hidden relative group py-0">
+                        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 via-transparent to-fuchsia-500/5"></div>
+                        <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-violet-500/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <div className="absolute -top-32 -left-32 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                        <CardHeader className="relative z-10 bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border-b border-white/30 py-6">
+                            <div className="flex items-center gap-3">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 rounded-lg blur opacity-75"></div>
+                                    <div className="relative bg-white/80 backdrop-blur-sm rounded-lg p-2">
+                                        <TrendingUp className="h-5 w-5 text-violet-600" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <CardTitle className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
+                                        Прогресс студентов
+                                    </CardTitle>
+                                    <CardDescription>Детальный анализ успеваемости каждого студента</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="relative z-10 p-6">
+                            <div className="bg-white/50 backdrop-blur-sm rounded-xl border border-white/50 overflow-hidden">
+                                <StudentProgressTab courseId={courseId} />
+                            </div>
+                        </CardContent>
+
+                        {/* Decorative elements */}
+                        <div className="absolute top-4 right-4 opacity-5 group-hover:opacity-10 transition-opacity duration-500">
+                            <Award className="h-20 w-20 text-violet-500 transform rotate-12" />
+                        </div>
+                    </Card>
+                </motion.div>
+            </div>
         </div>
     );
 }
