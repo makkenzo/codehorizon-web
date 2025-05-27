@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Loader2, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePermissions } from '@/hooks/use-permissions';
@@ -15,7 +15,6 @@ import { AdminAchievementDTO } from '@/types/achievementsAdmin';
 import AchievementForm from '../../_components/achievement-form';
 
 const EditAchievementPage = () => {
-    const router = useRouter();
     const params = useParams();
     const achievementId = params.id as string;
     const { hasPermission } = usePermissions();

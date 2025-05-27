@@ -4,29 +4,12 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { isAxiosError } from 'axios';
 import { motion } from 'framer-motion';
-import {
-    Activity,
-    ArrowLeft,
-    Award,
-    BarChart3,
-    BookOpen,
-    Calendar,
-    Eye,
-    Heart,
-    MessageSquare,
-    Percent,
-    Sparkles,
-    Star,
-    TrendingUp,
-    Users,
-    Zap,
-} from 'lucide-react';
+import { ArrowLeft, Award, BarChart3, BookOpen, Eye, TrendingUp, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 
-import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,7 +26,6 @@ export default function CourseDetailedAnalyticsPage() {
 
     const [analytics, setAnalytics] = useState<AuthorCourseAnalytics | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
     const fetchAnalytics = useCallback(async () => {
         if (!courseId) return;
@@ -147,21 +129,6 @@ export default function CourseDetailedAnalyticsPage() {
             </div>
         );
     }
-
-    const container = {
-        hidden: { opacity: 0 },
-        show: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-            },
-        },
-    };
-
-    const item = {
-        hidden: { y: 20, opacity: 0 },
-        show: { y: 0, opacity: 1 },
-    };
 
     return (
         <div className="relative min-h-screen py-8">

@@ -1,9 +1,9 @@
 'use client';
 
-import { ElementType, ForwardRefExoticComponent, RefAttributes, useState } from 'react';
+import { useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { LucideProps, Menu, Package2, X } from 'lucide-react';
+import { Menu, Package2, X } from 'lucide-react';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';

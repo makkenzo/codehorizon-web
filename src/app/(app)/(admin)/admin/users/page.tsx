@@ -16,7 +16,6 @@ import {
     X,
 } from 'lucide-react';
 
-import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
@@ -68,12 +67,6 @@ export default function AdminUsersPage() {
         };
         fetchData();
     }, [currentPage, pageSize]);
-
-    const handlePageChange = (newPage: number) => {
-        const params = new URLSearchParams(searchParams);
-        params.set('page', newPage.toString());
-        router.push(`${pathname}?${params.toString()}`);
-    };
 
     const handleSort = (field: string) => {
         if (sortField === field) {

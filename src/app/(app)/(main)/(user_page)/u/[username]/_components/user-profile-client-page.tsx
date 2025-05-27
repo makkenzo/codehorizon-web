@@ -8,7 +8,7 @@ import CourseCard from '@/components/course/card';
 import PageWrapper from '@/components/reusable/page-wrapper';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UserProfile } from '@/models';
 import { PublicCertificateInfoDTO } from '@/types';
 import { GlobalAchievementDTO } from '@/types/achievements';

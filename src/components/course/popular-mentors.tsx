@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Users } from 'lucide-react';
 
 import type { PopularAuthorDTO } from '@/types';

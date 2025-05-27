@@ -1,7 +1,7 @@
-import React, { ElementType, createElement, isValidElement, useEffect, useMemo, useState } from 'react';
+import React, { ElementType, createElement, useEffect, useMemo, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Award, Bell, Book, ChevronUp, Heart, Home, Menu, Settings, ShieldQuestion, X } from 'lucide-react';
+import { Award, Bell, Book, ChevronUp, Heart, Home, Menu, ShieldQuestion, X } from 'lucide-react';
 import { RiProfileFill, RiProfileLine, RiProgress5Line } from 'react-icons/ri';
 
 import Link from 'next/link';

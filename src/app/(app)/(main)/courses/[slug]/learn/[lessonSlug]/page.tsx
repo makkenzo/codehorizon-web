@@ -15,7 +15,6 @@ import Player from 'next-video/player';
 import 'player.style/minimal';
 import MediaThemeMinimal from 'player.style/minimal/react';
 import { toast } from 'sonner';
-import { shallow } from 'zustand/shallow';
 
 import { useParams, useRouter } from 'next/navigation';
 
@@ -296,7 +295,7 @@ export default function LessonPage() {
                 <>
                     <h2 className="not-prose text-xl font-semibold mt-6 mb-3">Вложения</h2>
                     <div className="not-prose flex flex-wrap gap-3">
-                        {currentLesson.attachments.map((att, index) => (
+                        {currentLesson.attachments.map((att) => (
                             <AttachmentLink key={`${att.url}-${Date.now()}`} attachment={att} />
                         ))}
                     </div>

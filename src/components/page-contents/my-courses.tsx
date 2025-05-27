@@ -3,13 +3,11 @@
 import { useEffect, useReducer } from 'react';
 
 import { motion } from 'framer-motion';
-import { Loader2, SearchX, ShieldAlert } from 'lucide-react';
+import { SearchX, ShieldAlert } from 'lucide-react';
 
 import { useSearchParams } from 'next/navigation';
 
 import CourseCard from '@/components/course/card';
-import MyPagination from '@/components/reusable/my-pagination';
-import PageWrapper from '@/components/reusable/page-wrapper';
 import { Skeleton } from '@/components/ui/skeleton';
 import { initialMyCoursesState, myCoursesReducer, tabMeta } from '@/lib/reducers/my-courses-reducer';
 import CoursesApiClient from '@/server/courses';
@@ -32,8 +30,7 @@ const MyCoursesContent = () => {
         const fetchCourses = async () => {
             dispatch({ type: 'START_LOADING' });
             const meta = tabMeta[currentTab as keyof typeof tabMeta] ?? tabMeta.default;
-            // Устанавливаем метаданные (title, description) в стейт,
-            // но визуальный заголовок страницы будет в layout.tsx
+
             dispatch({ type: 'SET_META', payload: meta });
 
             const page = currentPageParam ? parseInt(currentPageParam, 10) : 1;
@@ -76,7 +73,7 @@ const MyCoursesContent = () => {
         };
     }, [currentTab, currentPageParam]);
 
-    const { isLoading, error, courses, title, description } = state; // title и description теперь больше для метаданных
+    const { isLoading, error, courses } = state;
 
     const renderSkeletons = (count = 8) => (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-8">

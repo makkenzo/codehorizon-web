@@ -10,7 +10,6 @@ import { fadeInVariants } from '@/lib/constants';
 
 import { InteractiveHoverButton } from './magicui/interactive-hover-button';
 import PageWrapper from './reusable/page-wrapper';
-import WrapButton from './ui/wrap-button';
 
 const Hero = () => {
     const features = [

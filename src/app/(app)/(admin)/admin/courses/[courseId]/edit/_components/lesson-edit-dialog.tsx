@@ -191,7 +191,6 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
         fields: taskFields,
         append: appendTask,
         remove: removeTask,
-        update: updateTask,
     } = useFieldArray({
         control: form.control,
         name: 'tasks',
@@ -280,11 +279,6 @@ export default function LessonEditDialog({ courseId, lesson, onOpenChange, onSuc
     const onSubmit = async (values: LessonFormData) => {
         setIsSubmitting(true);
         try {
-            const tasksWithId = values.tasks?.map((task) => ({
-                ...task,
-                id: task.id || `temp-${Date.now()}-${Math.random()}`,
-            }));
-
             const requestData: AdminCreateUpdateLessonRequestDTO = {
                 title: values.title,
                 content: values.content || null,

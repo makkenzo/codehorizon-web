@@ -46,7 +46,6 @@ const AllAchievementsPageContent = () => {
         setFilterCategory,
         setSearchQuery: setStoreSearchQuery,
         fetchAvailableCategories,
-        resetFilters,
     } = useAllAchievementsStore((state) => state);
 
     const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);

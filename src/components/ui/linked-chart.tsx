@@ -6,17 +6,7 @@ import { useMemo, useRef, useState } from 'react';
 import { ColumnDef, ColumnFiltersState } from '@tanstack/react-table';
 import { addDays, addMonths, addQuarters, addYears, format as formatDate, parse } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-    BarChart3,
-    Calendar,
-    ChevronsUpDown,
-    RotateCcw,
-    Settings,
-    Sparkles,
-    Target,
-    TrendingUp,
-    Zap,
-} from 'lucide-react';
+import { BarChart3, Calendar, ChevronsUpDown, Settings, Sparkles, Target, TrendingUp, Zap } from 'lucide-react';
 import { Area, Bar, CartesianGrid, ComposedChart, ReferenceArea, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 import { Button } from '@/components/ui/button';
@@ -419,20 +409,12 @@ export function LinkedChart<TData extends object>({
     const [selectedFormat, setSelectedFormat] = useState<DateFormat>(dateFormat);
     const [selectedChartType, setSelectedChartType] = useState<ChartType>(chartType);
 
-    const {
-        timeRange,
-        refAreaLeft,
-        refAreaRight,
-        handleMouseDown,
-        handleMouseMove,
-        handleMouseUp,
-        handleReset,
-        isSelecting,
-    } = useChartInteraction({
-        dateField: dateField as string,
-        selectedFormat,
-        setColumnFilters,
-    });
+    const { timeRange, refAreaLeft, refAreaRight, handleMouseDown, handleMouseMove, handleMouseUp, isSelecting } =
+        useChartInteraction({
+            dateField: dateField as string,
+            selectedFormat,
+            setColumnFilters,
+        });
 
     if (!isValidDataField<TData>(data, dateField)) {
         throw new Error('Invalid date field');

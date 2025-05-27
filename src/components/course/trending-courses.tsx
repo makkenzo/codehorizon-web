@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, FireExtinguisher, Flame } from 'lucide-react';
+import { ArrowRight, Flame } from 'lucide-react';
 
 import Link from 'next/link';
 

@@ -30,7 +30,6 @@ import { z } from 'zod';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
-import HorizontalTabNav from '@/components/horizontal-tab-nav';
 import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
 import LevelProgress from '@/components/reusable/level-progress';
 import SignatureCanvas from '@/components/reusable/signature-canvas';
@@ -60,15 +59,6 @@ const profileSchema = z.object({
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-
-const formVariants = {
-    hidden: { opacity: 0, y: -10 },
-    visible: (i: number) => ({
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.4, ease: 'easeInOut', delay: i * 0.1 },
-    }),
-};
 
 const fields: Record<
     Exclude<keyof z.infer<typeof profileSchema>, 'avatarUrl' | 'signatureUrl'>,
@@ -394,7 +384,7 @@ const ProfileForm = ({}) => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {Object.entries(fields)
                                             .slice(0, 2)
-                                            .map(([key, { label, placeholder, icon }], index) => (
+                                            .map(([key, { label, placeholder, icon }]) => (
                                                 <FormField
                                                     key={key}
                                                     control={form.control}
@@ -423,7 +413,7 @@ const ProfileForm = ({}) => {
 
                                     {Object.entries(fields)
                                         .slice(2, 4)
-                                        .map(([key, { label, placeholder, icon }], index) => (
+                                        .map(([key, { label, placeholder, icon }]) => (
                                             <FormField
                                                 key={key}
                                                 control={form.control}
@@ -461,7 +451,7 @@ const ProfileForm = ({}) => {
 
                                     {Object.entries(fields)
                                         .slice(4)
-                                        .map(([key, { label, placeholder, icon }], index) => (
+                                        .map(([key, { label, placeholder, icon }]) => (
                                             <FormField
                                                 key={key}
                                                 control={form.control}

@@ -4,13 +4,12 @@ import { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
-import { AlertTriangle, Bell, CheckCircle, Info, Loader2, Lock, Megaphone, Save, Shield } from 'lucide-react';
+import { AlertTriangle, Bell, CheckCircle, Info, Loader2, Megaphone, Save, Shield } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';

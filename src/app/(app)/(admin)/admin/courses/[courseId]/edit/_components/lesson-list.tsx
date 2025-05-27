@@ -3,18 +3,7 @@
 import React, { useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-    BookOpen,
-    CheckCircle,
-    Clock,
-    FileCode,
-    FileText,
-    FileX,
-    MoreVertical,
-    Pencil,
-    Plus,
-    Trash2,
-} from 'lucide-react';
+import { BookOpen, CheckCircle, Clock, FileCode, FileText, MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -76,16 +65,6 @@ export default function LessonList({ lessons, onEditLesson, onDeleteLesson }: Le
             </motion.div>
         );
     }
-
-    const container = {
-        hidden: { opacity: 0 },
-        show: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.05,
-            },
-        },
-    };
 
     const item = {
         hidden: { y: 20, opacity: 0 },

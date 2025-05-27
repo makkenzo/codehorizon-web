@@ -2,7 +2,6 @@
 
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { motion } from 'framer-motion';
 import { Circle } from 'lucide-react';
 
 import Link from 'next/link';
@@ -15,11 +14,6 @@ import { NotificationDTO } from '@/types';
 interface NotificationItemProps {
     notification: NotificationDTO;
 }
-
-const item = {
-    hidden: { opacity: 0, y: 10 },
-    show: { opacity: 1, y: 0 },
-};
 
 const NotificationItem = ({ notification }: NotificationItemProps) => {
     const { markAsRead } = useNotificationsStore((state) => state);

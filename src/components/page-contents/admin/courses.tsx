@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { isAxiosError } from 'axios';
-import { Filter, MoreHorizontal, Pencil, PlusCircle, Search, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Pencil, PlusCircle, Search, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import Image from 'next/image';

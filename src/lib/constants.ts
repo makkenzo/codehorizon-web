@@ -1,7 +1,6 @@
 import {
     Award,
     BadgeCheck,
-    BookOpen,
     CalendarClock,
     CheckCircle2,
     ChevronsUp,

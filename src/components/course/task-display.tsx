@@ -338,7 +338,9 @@ const TaskDisplay: React.FC<TaskDisplayProps> = ({ task, index, lessonKey, cours
             try {
                 const jsonObj = JSON.parse(content);
                 displayContent = JSON.stringify(jsonObj, null, 2);
-            } catch (e) {}
+            } catch (e) {
+                console.error('Failed to parse JSON:', e);
+            }
         }
 
         return (

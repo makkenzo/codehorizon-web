@@ -101,7 +101,7 @@ const CourseButtons = ({ course, currentCourseProgressDetails, className }: Cour
 
         setIsEnrolling(true);
         try {
-            const result = await apiClient.enrollFreeCourse(course.id);
+            await apiClient.enrollFreeCourse(course.id);
 
             toast.success('Вы успешно записаны на курс!');
             setAccess(true);

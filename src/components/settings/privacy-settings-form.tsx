@@ -13,7 +13,6 @@ import { settingsApiClient } from '@/server/settings';
 import { ProfileVisibility, UpdatePrivacySettingsRequest } from '@/types/settings';
 
 import { InteractiveHoverButton } from '../magicui/interactive-hover-button';
-import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';

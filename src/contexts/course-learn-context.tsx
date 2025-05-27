@@ -1,6 +1,6 @@
 import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
-import { Course, CourseProgress, Lesson, UserSpecificCourseProgressDetails } from '@/types';
+import { Course, UserSpecificCourseProgressDetails } from '@/types';
 
 interface CourseLearnContextType {
     course: Course | null;

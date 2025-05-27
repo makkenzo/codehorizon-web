@@ -4,20 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { isAxiosError } from 'axios';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-    Activity,
-    ArrowUpDown,
-    BarChart3,
-    BookOpen,
-    Eye,
-    Heart,
-    Percent,
-    Quote,
-    Star,
-    Target,
-    Users,
-    Zap,
-} from 'lucide-react';
+import { Activity, ArrowUpDown, BarChart3, BookOpen, Eye, Star, Target, Users, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 
 import Image from 'next/image';
@@ -30,7 +17,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { cn } from '@/lib/utils';
 import { adminApiClient } from '@/server/admin-api-client';
 import { PagedResponse } from '@/types';
 import { AuthorCourseListItemAnalytics } from '@/types/admin';

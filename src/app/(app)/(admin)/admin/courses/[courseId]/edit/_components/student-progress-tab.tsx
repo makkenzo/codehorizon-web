@@ -6,18 +6,7 @@ import { ColumnDef, FilterFn, getCoreRowModel, useReactTable } from '@tanstack/r
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { motion } from 'framer-motion';
-import {
-    AlertCircle,
-    ArrowUpDown,
-    Award,
-    BarChart3,
-    Calendar,
-    CheckCircle,
-    Clock,
-    Target,
-    TrendingUp,
-    Users,
-} from 'lucide-react';
+import { AlertCircle, ArrowUpDown, Award, Calendar, CheckCircle, Clock, Target, TrendingUp, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -112,7 +101,7 @@ export const dateRangeFilterFn: FilterFn<StudentProgressDTO> = (
 
     if (filterStartDate && filterEndDate) {
         const startTime = filterStartDate.getTime();
-        let endTime = filterEndDate.getTime();
+        const endTime = filterEndDate.getTime();
 
         if (endTime < startTime) {
             console.warn(

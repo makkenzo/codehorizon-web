@@ -171,7 +171,6 @@ const AdminDashboardPageContent = () => {
         description,
         isLoadingCard,
         color = 'primary',
-        id,
         trend,
     }: {
         title: string;
@@ -180,7 +179,6 @@ const AdminDashboardPageContent = () => {
         description?: string;
         isLoadingCard?: boolean;
         color?: 'primary' | 'secondary' | 'green' | 'purple' | 'blue' | 'rose' | 'amber';
-        id: string;
         trend?: 'up' | 'down' | 'stable';
     }) => {
         const colorMap = {
@@ -382,7 +380,6 @@ const AdminDashboardPageContent = () => {
                 >
                     <motion.div variants={item}>
                         <StatCard
-                            id="users"
                             title="Всего пользователей"
                             value={stats?.totalUsers ?? '-'}
                             icon={Users}
@@ -398,7 +395,6 @@ const AdminDashboardPageContent = () => {
                     </motion.div>
                     <motion.div variants={item}>
                         <StatCard
-                            id="courses"
                             title="Всего курсов"
                             value={stats?.totalCourses ?? '-'}
                             icon={BookOpen}
@@ -410,7 +406,6 @@ const AdminDashboardPageContent = () => {
                     </motion.div>
                     <motion.div variants={item}>
                         <StatCard
-                            id="revenue"
                             title="Всего дохода"
                             value={`$${(stats?.totalRevenue ?? 0).toFixed(2)}`}
                             icon={DollarSign}
@@ -422,7 +417,6 @@ const AdminDashboardPageContent = () => {
                     </motion.div>
                     <motion.div variants={item}>
                         <StatCard
-                            id="completed"
                             title="Завершенных курсов"
                             value={stats?.completedCoursesCount ?? '-'}
                             icon={Award}

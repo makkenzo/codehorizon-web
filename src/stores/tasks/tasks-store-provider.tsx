@@ -1,6 +1,5 @@
 import { type ReactNode, createContext, useContext, useRef } from 'react';
 
-import { useStore } from 'zustand';
 import { useStoreWithEqualityFn } from 'zustand/traditional';
 
 import { createLessonTasksStore } from './tasks-store';
