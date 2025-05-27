@@ -72,7 +72,6 @@ const AdminDashboardPageContent = () => {
     const [chartData, setChartData] = useState<AdminChartDataDTO | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isRetroGrantLoading, setIsRetroGrantLoading] = useState(false);
-    const [hoveredCard, setHoveredCard] = useState<string | null>(null);
     const { hasPermission } = usePermissions();
 
     const [categoryChartConfig, setCategoryChartConfig] = useState<ChartConfig>({});
@@ -250,8 +249,6 @@ const AdminDashboardPageContent = () => {
             },
         };
 
-        const isHovered = hoveredCard === id;
-
         return (
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -261,8 +258,6 @@ const AdminDashboardPageContent = () => {
             >
                 <Card
                     className={`overflow-hidden backdrop-blur-lg bg-gradient-to-br ${colorMap[color].bg} ${colorMap[color].border} relative group hover:${colorMap[color].shadow} hover:shadow-xl transition-all duration-500 cursor-pointer`}
-                    onMouseEnter={() => setHoveredCard(id)}
-                    onMouseLeave={() => setHoveredCard(null)}
                 >
                     <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5"></div>
                     <div
@@ -295,9 +290,7 @@ const AdminDashboardPageContent = () => {
                                 className={`absolute inset-0 ${colorMap[color].glow} blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
                             ></div>
                             <div
-                                className={`relative ${colorMap[color].iconBg} rounded-xl p-3 transition-all duration-300 ${
-                                    isHovered ? 'scale-110 shadow-lg' : ''
-                                }`}
+                                className={`relative ${colorMap[color].iconBg} rounded-xl p-3 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg`}
                             >
                                 <Icon className={`h-5 w-5 ${colorMap[color].icon} transition-colors duration-300`} />
                             </div>
