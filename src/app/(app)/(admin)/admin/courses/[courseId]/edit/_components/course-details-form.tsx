@@ -785,7 +785,7 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
                                             </div>
                                         </div>
                                         <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                                            Секция "Ключевые темы"
+                                            Секция &quot;Ключевые темы&quot;
                                         </span>
                                     </div>
                                 </AccordionTrigger>
@@ -896,7 +896,7 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
                                             </div>
                                         </div>
                                         <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                                            Секция "Преимущества"
+                                            Секция &quot;Преимущества&quot;
                                         </span>
                                     </div>
                                 </AccordionTrigger>
@@ -958,7 +958,7 @@ export default function CourseDetailsForm({ course, onSuccess, forcedAuthorId }:
                                             </div>
                                         </div>
                                         <span className="bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
-                                            Секция "Отзыв"
+                                            Секция &quot;Отзыв&quot;
                                         </span>
                                     </div>
                                 </AccordionTrigger>
