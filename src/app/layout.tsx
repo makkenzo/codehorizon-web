@@ -1,5 +1,6 @@
-import { Analytics } from '@vercel/analytics/react';
 import type { Metadata } from 'next';
+
+import Script from 'next/script';
 
 import { createMetadata } from '@/lib/metadata';
 
@@ -29,10 +30,9 @@ export default function RootLayout({
                 <meta property="og:image:width" content="<generated>" />
                 <meta property="og:image:height" content="<generated>" />
                 <meta name="apple-mobile-web-app-title" content="CodeHorizon" />
+                <Script src="https://tracking.makkenzo.com/api/script.js" data-site-id="1" defer />
             </head>
-            <body className={`antialiased`}>
-                {children} <Analytics />
-            </body>
+            <body className={`antialiased`}>{children}</body>
         </html>
     );
 }
