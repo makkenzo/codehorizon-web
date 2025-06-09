@@ -1,4 +1,3 @@
-import { useSwetrix } from '@swetrix/nextjs';
 import type { Metadata } from 'next';
 
 import { createMetadata } from '@/lib/metadata';
@@ -21,8 +20,6 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    useSwetrix('yb0k2wtASU3K');
-
     return (
         <html lang="ru" suppressHydrationWarning>
             <head>
