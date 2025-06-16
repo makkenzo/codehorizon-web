@@ -159,6 +159,8 @@ export interface AuthorCourseListItemAnalytics {
 
 export enum ProgrammingLanguage {
     PYTHON = 'PYTHON',
+    JAVASCRIPT = 'JAVASCRIPT',
+    JAVA = 'JAVA',
 }
 
 export interface AdminTestCaseDTO {

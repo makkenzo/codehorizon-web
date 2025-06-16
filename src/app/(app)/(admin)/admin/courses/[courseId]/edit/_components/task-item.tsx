@@ -1,3 +1,4 @@
+import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { PlusCircle, Trash2 } from 'lucide-react';
@@ -180,6 +181,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ control, index, removeTask, isSubmi
 
     const getLanguageExtension = () => {
         if (taskLanguage === ProgrammingLanguage.PYTHON) return python();
+        if (taskLanguage === ProgrammingLanguage.JAVASCRIPT) return javascript();
         return [];
     };
 
